@@ -14,6 +14,8 @@ namespace CraftMagicItems {
         public int SizeCategoryChange;
 
         public void OnEventAboutToTrigger(RuleCalculateWeaponStats evt) {
+            if (evt.Weapon != this.Owner)
+                return;
             if (SizeCategoryChange > 0)
                 evt.IncreaseWeaponSize();
             else if (SizeCategoryChange < 0)
