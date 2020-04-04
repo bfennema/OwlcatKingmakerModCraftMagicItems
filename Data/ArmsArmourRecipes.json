@@ -698,5 +698,19 @@
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Weapon", "Shield"]
+  },
+  {
+    "Name": "WeaponMageblade",
+    "NameId": "4925071c-fa06-4f86-98c1-bcd12d761607",
+    "Enchantments": [
+      "eb130f652be2dc14b9a5f63608672021"
+    ],
+    "CasterLevelStart": 5,
+    "CasterLevelMultiplier": 0,
+    "CostType": "EnhancementLevelSquared",
+    "PrerequisiteSpells": [],
+    "CostFactor": 1,
+    "OnlyForSlots": ["Weapon"],
+    "Restrictions": ["WeaponMelee", "WeaponOneHanded", "WeaponNotOversized"]
   }
 ]

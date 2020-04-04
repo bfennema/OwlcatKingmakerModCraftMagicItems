@@ -61,7 +61,7 @@
     ],
     "CasterLevelStart": 7,
     "CasterLevelMultiplier": 0,
-    "PrerequisiteSpells": ["de7a025d48ad5da4991e7d3c682cf69d"],
+    "PrerequisiteSpells": ["f1100650705a69c4384d3edd88ba0f52", "de7a025d48ad5da4991e7d3c682cf69d"],
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Neck"]

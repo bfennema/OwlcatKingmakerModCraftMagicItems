@@ -93,6 +93,7 @@ namespace CraftMagicItems {
 
         private static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
         private const string MasterworkGuid = "6b38844e2bffbac48b63036b66e735be";
+        private const string OversizedGuid = "d8e1ebc1062d8cc42abff78783856b0d";
         private const string AlchemistProgressionGuid = "efd55ff9be2fda34981f5b9c83afe4f1";
         private const string AlchemistGrenadierArchetypeGuid = "6af888a7800b3e949a40f558ff204aae";
         private const string ScrollSavantArchetypeGuid = "f43c78692a4e10d43a38bd6aedf53c1b";
@@ -838,6 +839,10 @@ namespace CraftMagicItems {
             return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == MasterworkGuid);
         }
 
+        private static bool IsOversized(BlueprintItem blueprint) {
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == OversizedGuid);
+        }
+
         // Use instead of UIUtility.IsMagicItem.
         private static bool IsEnchanted(BlueprintItem blueprint, RecipeData recipe = null) {
             if (blueprint == null) {
@@ -906,6 +911,10 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponMetal when weapon == null || !weapon.Category.HasSubCategory(WeaponSubCategory.Metal):
                         case ItemRestrictions.WeaponUseAmmunition when weapon == null || !AmmunitionWeaponCategories.Contains(weapon.Category):
                         case ItemRestrictions.WeaponNotUseAmmunition when weapon == null || AmmunitionWeaponCategories.Contains(weapon.Category):
+                        case ItemRestrictions.WeaponTwoHanded when weapon == null || !(weapon.IsTwoHanded || weapon.IsOneHandedWhichCanBeUsedWithTwoHands):
+                        case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded:
+                        case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
+                        case ItemRestrictions.WeaponNotOversized when weapon == null || IsOversized(weapon):
                         case ItemRestrictions.ArmourMetal when armour == null || !IsMetalArmour(armour.Type):
                         case ItemRestrictions.ArmourNotMetal when armour == null || IsMetalArmour(armour.Type):
                         case ItemRestrictions.ArmourLight when armour == null || armour.Type.ProficiencyGroup != ArmorProficiencyGroup.Light:

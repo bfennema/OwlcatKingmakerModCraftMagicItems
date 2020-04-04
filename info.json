@@ -2,9 +2,9 @@
   "Id": "CraftMagicItems",
   "DisplayName": "Craft Magic Items",
   "Author": "RobRendell",
-  "Version": "1.10.2",
+  "Version": "1.10.3",
   "ManagerVersion": "0.14.1",
   "EntryMethod": "CraftMagicItems.Main.Load",
   "HomePage": "https://www.nexusmods.com/pathfinderkingmaker/mods/54",
-  "Repository": "https://raw.githubusercontent.com/RobRendell/OwlcatKingmakerModCraftMagicItems/master/Repository.json"
+  "Repository": "https://raw.githubusercontent.com/bfennema/OwlcatKingmakerModCraftMagicItems/master/Repository.json"
 }
