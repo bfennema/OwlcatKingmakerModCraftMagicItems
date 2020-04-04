@@ -32,11 +32,11 @@
     "Value": "You can create a wide variety of magic wondrous items, such as amulets, belts, boots, cloaks, gloves and headbands, but not rings."
   },
   {
-    "Key": "craftMagicItems-feat-arms-armour-displayName",
+    "Key": "craftMagicItems-feat-arms-armor-displayName",
     "Value": "Crafting (Arms and Armor)"
   },
   {
-    "Key": "craftMagicItems-feat-arms-armour-description",
+    "Key": "craftMagicItems-feat-arms-armor-description",
     "Value": "You can upgrade weapons, armor, or shields with magical enhancements. Weapons to be enchanted must be at least masterwork quality."
   },
   {
@@ -60,7 +60,7 @@
     "Value": "Wondrous Item"
   },
   {
-    "Key": "craftMagicItems-itemType-arms-armour",
+    "Key": "craftMagicItems-itemType-arms-armor",
     "Value": "Arms and Armor"
   },
   {

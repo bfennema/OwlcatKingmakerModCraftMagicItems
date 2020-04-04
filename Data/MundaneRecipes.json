@@ -24,7 +24,7 @@
     "CanApplyToMundaneItem": true
   },
   {
-    "Name": "MithralLightArmour",
+    "Name": "MithralLightArmor",
     "NameId": "36eda69a-8d5b-4096-85f9-187552ca3220",
     "Enchantments": [
       "7b95a819181574a4799d93939aa99aff"
@@ -34,14 +34,14 @@
     "CostFactor": 1000,
     "MundaneDC": 7,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourLight"],
+    "Restrictions": ["ArmorMetal", "ArmorLight"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "c65f6fc979d5556489b20e478189cbdd:ab96348a993683c41b1e9fce187fb034"
     ]
   },
   {
-    "Name": "MithralMediumArmour",
+    "Name": "MithralMediumArmor",
     "NameId": "36eda69a-8d5b-4096-85f9-187552ca3220",
     "Enchantments": [
       "7b95a819181574a4799d93939aa99aff"
@@ -51,14 +51,14 @@
     "CostFactor": 4000,
     "MundaneDC": 7,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourMedium"],
+    "Restrictions": ["ArmorMetal", "ArmorMedium"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "9809987cc12d94545a64ff20e6fdb216:b28af61add4b90f4db51e9ae9280150d"
     ]
   },
   {
-    "Name": "MithralHeavyArmour",
+    "Name": "MithralHeavyArmor",
     "NameId": "36eda69a-8d5b-4096-85f9-187552ca3220",
     "Enchantments": [
       "7b95a819181574a4799d93939aa99aff"
@@ -68,7 +68,7 @@
     "CostFactor": 9000,
     "MundaneDC": 7,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourHeavy"],
+    "Restrictions": ["ArmorMetal", "ArmorHeavy"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "559b0b6f194656c428c403a000ceee78:feb844f3ace1aec4ba4f27e5b7172e4f"
@@ -94,7 +94,7 @@
     ]
   },
   {
-    "Name": "AdamantineLightArmour",
+    "Name": "AdamantineLightArmor",
     "NameId": "6eb38cc4-f3ff-4ac2-844e-a3714214a55d",
     "Enchantments": [
       "5faa3aaee432ac444b101de2b7b0faf7"
@@ -104,11 +104,11 @@
     "CostFactor": 5000,
     "MundaneDC": 10,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourLight"],
+    "Restrictions": ["ArmorMetal", "ArmorLight"],
     "CanApplyToMundaneItem": true
   },
   {
-    "Name": "AdamantineMediumArmour",
+    "Name": "AdamantineMediumArmor",
     "NameId": "6eb38cc4-f3ff-4ac2-844e-a3714214a55d",
     "Enchantments": [
       "aa25531ab5bb58941945662aa47b73e7"
@@ -118,11 +118,11 @@
     "CostFactor": 10000,
     "MundaneDC": 10,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourMedium"],
+    "Restrictions": ["ArmorMetal", "ArmorMedium"],
     "CanApplyToMundaneItem": true
   },
   {
-    "Name": "AdamantineHeavyArmour",
+    "Name": "AdamantineHeavyArmor",
     "NameId": "6eb38cc4-f3ff-4ac2-844e-a3714214a55d",
     "Enchantments": [
       "933456ff83c454146a8bf434e39b1f93"
@@ -132,7 +132,7 @@
     "CostFactor": 15000,
     "MundaneDC": 10,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "ArmourHeavy"],
+    "Restrictions": ["ArmorMetal", "ArmorHeavy"],
     "CanApplyToMundaneItem": true
   },
   {

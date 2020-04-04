@@ -54,7 +54,7 @@ namespace CraftMagicItems {
         private const string OldBlueprintPrefix = "#ScribeScroll";
         public const string BlueprintPrefix = "#CraftMagicItems";
 
-        private const string MithralArmourEnchantmentGuid = "7b95a819181574a4799d93939aa99aff";
+        private const string MithralArmorEnchantmentGuid = "7b95a819181574a4799d93939aa99aff";
 
         public readonly Dictionary<PhysicalDamageMaterial, string> PhysicalDamageMaterialEnchantments = new Dictionary<PhysicalDamageMaterial, string>() {
             {PhysicalDamageMaterial.Adamantite, "ab39e7d59dd12f4429ffef5dca88dc7b"},
@@ -68,7 +68,9 @@ namespace CraftMagicItems {
             this.accessors = accessors;
             CustomBlueprintBuilder.Initialise(ApplyBlueprintPatch, modEnabled,
                 "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
-                "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponBaseSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)");
+                "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponBaseSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
+                "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armour)",
+                "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armor)");
         }
 
         public string BuildCustomSpellItemGuid(string originalGuid, int casterLevel, int spellLevel = -1, string spellId = null) {
@@ -259,8 +261,8 @@ namespace CraftMagicItems {
 
         private bool DoesBlueprintShowEnchantments(BlueprintItemEquipment blueprint) {
             // Special handling of Robes :(
-            if (blueprint is BlueprintItemArmor armour) {
-                return armour.IsArmor;
+            if (blueprint is BlueprintItemArmor armor) {
+                return armor.IsArmor;
             }
             return SlotsWhichShowEnchantments.Contains(blueprint.ItemType);
         }
@@ -268,9 +270,9 @@ namespace CraftMagicItems {
         private string ApplyRecipeItemBlueprintPatch(BlueprintItemEquipment blueprint, Match match) {
             var priceDelta = blueprint.Cost - Main.RulesRecipeItemCost(blueprint);
             if (blueprint is BlueprintItemShield shield) {
-                var armourComponentClone = Object.Instantiate(shield.ArmorComponent);
-                ApplyRecipeItemBlueprintPatch(armourComponentClone, match);
-                accessors.SetBlueprintItemShieldArmorComponent(shield, armourComponentClone);
+                var armorComponentClone = Object.Instantiate(shield.ArmorComponent);
+                ApplyRecipeItemBlueprintPatch(armorComponentClone, match);
+                accessors.SetBlueprintItemShieldArmorComponent(shield, armorComponentClone);
                 if (shield.WeaponComponent) {
                     var weaponComponentClone = Object.Instantiate(shield.WeaponComponent);
                     ApplyRecipeItemBlueprintPatch(weaponComponentClone, match);
@@ -332,7 +334,7 @@ namespace CraftMagicItems {
                     }
 
                     enchantmentsForDescription.Add(enchantment);
-                    if (guid == MithralArmourEnchantmentGuid) {
+                    if (guid == MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
                         accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
                     }
@@ -368,8 +370,8 @@ namespace CraftMagicItems {
                 accessors.SetBlueprintItemIcon(blueprint, iconSprite);
                 if (blueprint is BlueprintItemEquipmentHand && copyFromBlueprint is BlueprintItemEquipmentHand equipmentHand) {
                     accessors.SetBlueprintItemEquipmentHandVisualParameters(equipmentHand, equipmentHand.VisualParameters);
-                } else if (blueprint is BlueprintItemArmor && copyFromBlueprint is BlueprintItemArmor armour) {
-                    accessors.SetBlueprintItemArmorVisualParameters(armour, armour.VisualParameters);
+                } else if (blueprint is BlueprintItemArmor && copyFromBlueprint is BlueprintItemArmor armor) {
+                    accessors.SetBlueprintItemArmorVisualParameters(armor, armor.VisualParameters);
                 }
             }
 

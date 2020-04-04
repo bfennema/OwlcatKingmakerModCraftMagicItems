@@ -79,7 +79,7 @@
     "CostFactor": 44000
   },
   {
-    "Name": "ArmourBonus",
+    "Name": "ArmorBonus",
     "NameId": "99d4ca00-bf3d-4d42-bf9c-aac1f4a407d6",
     "BonusToId": "3133f24d-1720-45cc-93cc-bbfb714942e4",
     "Enchantments": [

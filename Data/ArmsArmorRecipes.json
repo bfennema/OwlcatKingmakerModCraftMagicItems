@@ -1,6 +1,6 @@
 [
   {
-    "Name": "ArmourEnhancementBonus",
+    "Name": "ArmorEnhancementBonus",
     "NameId": "6620ac4a-61b1-43fa-b6d9-69ed34009422",
     "Enchantments": [
       "a9ea95c5e02f9b7468447bc1010fe152",
@@ -18,7 +18,7 @@
     "CanApplyToMundaneItem": true
   },
   {
-    "Name": "ArmourShieldResistanceAcid",
+    "Name": "ArmorShieldResistanceAcid",
     "NameId": "44a3d9ea-b381-4947-b7fc-d0b105c83440",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
@@ -34,7 +34,7 @@
     "OnlyForSlots": ["Armor", "Shield"]
   },
   {
-    "Name": "ArmourShieldResistanceCold",
+    "Name": "ArmorShieldResistanceCold",
     "NameId": "04cfed03-5a15-4aa0-80a1-835bd4b3a4e3",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
@@ -50,7 +50,7 @@
     "OnlyForSlots": ["Armor", "Shield"]
   },
   {
-    "Name": "ArmourShieldResistanceElectricity",
+    "Name": "ArmorShieldResistanceElectricity",
     "NameId": "7e911471-ddb8-47c7-9266-5277a2beb7c7",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
@@ -66,7 +66,7 @@
     "OnlyForSlots": ["Armor", "Shield"]
   },
   {
-    "Name": "ArmourShieldResistanceFire",
+    "Name": "ArmorShieldResistanceFire",
     "NameId": "20b623d7-1685-4612-b280-5e38cd59614f",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
@@ -82,7 +82,7 @@
     "OnlyForSlots": ["Armor", "Shield"]
   },
   {
-    "Name": "ArmourShieldResistanceSonic",
+    "Name": "ArmorShieldResistanceSonic",
     "NameId": "6f88299b-7090-4980-822f-d78ecf6a79eb/ 10//10//",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
@@ -98,7 +98,7 @@
     "OnlyForSlots": ["Armor", "Shield"]
   },
   {
-    "Name": "ArmourCelestial",
+    "Name": "ArmorCelestial",
     "NameId": "45af0f94-877c-4830-99df-04976721ad37",
     "Enchantments": [
       "5ca7e021b4d379846b1eee042a3c7c55"
@@ -110,7 +110,7 @@
     "CostType": "Flat",
     "CostFactor": 13100,
     "OnlyForSlots": ["Armor"],
-    "Restrictions": ["ArmourMetal", "EnhancmentBonus3"]
+    "Restrictions": ["ArmorMetal", "EnhancmentBonus3"]
   },
   {
     "Name": "Wild",

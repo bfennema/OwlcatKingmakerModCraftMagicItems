@@ -81,7 +81,7 @@ namespace CraftMagicItems {
         private const int AdventuringProgressPenalty = 4;
         private const int MasterworkCost = 300;
         private const int WeaponPlusCost = 2000;
-        private const int ArmourPlusCost = 1000;
+        private const int ArmorPlusCost = 1000;
         private const int UnarmedPlusCost = 4000;
         private const string BondedItemRitual = "bondedItemRitual";
 
@@ -679,7 +679,7 @@ namespace CraftMagicItems {
                 case ItemsFilter.ItemType.Shield:
                     return "dfa95469-ed91-4fc6-b5ef-89a466c50d71";
                 case ItemsFilter.ItemType.Armor:
-                    return (restrictions != null && restrictions.Contains(SlotRestrictionEnum.ArmourOnlyRobes)) ?
+                    return (restrictions != null && restrictions.Contains(SlotRestrictionEnum.ArmorOnlyRobes)) ?
                         "craftMagicItems-item-category-name-robe" : "b43922c2-5435-45eb-bdf9-6e33e6bef0ae";
                 case ItemsFilter.ItemType.Ring:
                     return "04d0daf3-ba89-44d5-8b6e-84b544e6748d";
@@ -706,7 +706,7 @@ namespace CraftMagicItems {
 
         private static IEnumerable<BlueprintItemEnchantment> GetEnchantments(BlueprintItem blueprint, RecipeData sourceRecipe = null) {
             if (blueprint is BlueprintItemShield shield) {
-                // A shield can be treated as armour or as a weapon... assume armour unless being used by a recipe which applies to weapons.
+                // A shield can be treated as armor or as a weapon... assume armor unless being used by a recipe which applies to weapons.
                 var weaponRecipe = sourceRecipe?.OnlyForSlots?.Contains(ItemsFilter.ItemType.Weapon) ?? false;
                 return weaponRecipe
                     ? shield.WeaponComponent != null ? shield.WeaponComponent.Enchantments : Enumerable.Empty<BlueprintItemEnchantment>()
@@ -717,7 +717,7 @@ namespace CraftMagicItems {
         }
 
         public static ItemsFilter.ItemType GetItemType(BlueprintItem blueprint) {
-            return (blueprint is BlueprintItemArmor armour && armour.IsShield
+            return (blueprint is BlueprintItemArmor armor && armor.IsShield
                     || blueprint is BlueprintItemWeapon weapon && (
                         weapon.Category == WeaponCategory.WeaponLightShield
                         || weapon.Category == WeaponCategory.WeaponHeavyShield
@@ -787,9 +787,9 @@ namespace CraftMagicItems {
             }
 
             if (upgradeItem != null) {
-                // If upgradeItem is armour or a shield or a weapon, item is not a match if it's not the same type of armour/shield/weapon
+                // If upgradeItem is armor or a shield or a weapon, item is not a match if it's not the same type of armor/shield/weapon
                 switch (upgradeItem) {
-                    case BlueprintItemArmor upgradeItemArmour when !(blueprint is BlueprintItemArmor itemArmour) || itemArmour.Type != upgradeItemArmour.Type:
+                    case BlueprintItemArmor upgradeItemArmor when !(blueprint is BlueprintItemArmor itemArmor) || itemArmor.Type != upgradeItemArmor.Type:
                     case BlueprintItemShield upgradeItemShield when !(blueprint is BlueprintItemShield itemShield) || itemShield.Type != upgradeItemShield.Type:
                     case BlueprintItemWeapon upgradeItemWeapon when !(blueprint is BlueprintItemWeapon itemWeapon) || itemWeapon.Type != upgradeItemWeapon.Type
                                                                                                                    || itemWeapon.DamageType.Physical.Material !=
@@ -868,7 +868,7 @@ namespace CraftMagicItems {
         }
 
         private static bool CanEnchant(ItemEntity item) {
-            // The game has no masterwork armour or shields, so I guess you can enchant any of them.
+            // The game has no masterwork armor or shields, so I guess you can enchant any of them.
             return IsEnchanted(item.Blueprint)
                    || item.Blueprint is BlueprintItemArmor
                    || item.Blueprint is BlueprintItemShield
@@ -883,17 +883,17 @@ namespace CraftMagicItems {
                    && !blueprint.AssetGuid.Contains("fb379e61500421143b52c739823b4082");
         }
 
-        private static bool IsMetalArmour(BlueprintArmorType armourType) {
-            // Rely on the fact that the only light armour that is metal is a Chain Shirt, and the only medium armour that is not metal is Hide.
-            return armourType.ProficiencyGroup == ArmorProficiencyGroup.Light && armourType.AssetGuid == "7467b0ab8641d8f43af7fc46f2108a1a"
-                   || armourType.ProficiencyGroup == ArmorProficiencyGroup.Medium && armourType.AssetGuid != "7a01292cef39bf2408f7fae7a9f47594"
-                   || armourType.ProficiencyGroup == ArmorProficiencyGroup.Heavy;
+        private static bool IsMetalArmor(BlueprintArmorType armorType) {
+            // Rely on the fact that the only light armor that is metal is a Chain Shirt, and the only medium armor that is not metal is Hide.
+            return armorType.ProficiencyGroup == ArmorProficiencyGroup.Light && armorType.AssetGuid == "7467b0ab8641d8f43af7fc46f2108a1a"
+                   || armorType.ProficiencyGroup == ArmorProficiencyGroup.Medium && armorType.AssetGuid != "7a01292cef39bf2408f7fae7a9f47594"
+                   || armorType.ProficiencyGroup == ArmorProficiencyGroup.Heavy;
         }
 
         private static bool ItemMatchesRestrictions(BlueprintItem blueprint, IEnumerable<ItemRestrictions> restrictions) {
             if (restrictions != null) {
                 var weapon = blueprint as BlueprintItemWeapon;
-                var armour = blueprint as BlueprintItemArmor;
+                var armor = blueprint as BlueprintItemArmor;
                 foreach (var restriction in restrictions) {
                     switch (restriction) {
                         case ItemRestrictions.WeaponMelee when weapon == null || weapon.AttackType != AttackType.Melee:
@@ -915,11 +915,11 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded:
                         case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
                         case ItemRestrictions.WeaponNotOversized when weapon == null || IsOversized(weapon):
-                        case ItemRestrictions.ArmourMetal when armour == null || !IsMetalArmour(armour.Type):
-                        case ItemRestrictions.ArmourNotMetal when armour == null || IsMetalArmour(armour.Type):
-                        case ItemRestrictions.ArmourLight when armour == null || armour.Type.ProficiencyGroup != ArmorProficiencyGroup.Light:
-                        case ItemRestrictions.ArmourMedium when armour == null || armour.Type.ProficiencyGroup != ArmorProficiencyGroup.Medium:
-                        case ItemRestrictions.ArmourHeavy when armour == null || armour.Type.ProficiencyGroup != ArmorProficiencyGroup.Heavy:
+                        case ItemRestrictions.ArmorMetal when armor == null || !IsMetalArmor(armor.Type):
+                        case ItemRestrictions.ArmorNotMetal when armor == null || IsMetalArmor(armor.Type):
+                        case ItemRestrictions.ArmorLight when armor == null || armor.Type.ProficiencyGroup != ArmorProficiencyGroup.Light:
+                        case ItemRestrictions.ArmorMedium when armor == null || armor.Type.ProficiencyGroup != ArmorProficiencyGroup.Medium:
+                        case ItemRestrictions.ArmorHeavy when armor == null || armor.Type.ProficiencyGroup != ArmorProficiencyGroup.Heavy:
                         case ItemRestrictions.EnhancmentBonus2 when ItemPlus(blueprint) < 2:
                         case ItemRestrictions.EnhancmentBonus3 when ItemPlus(blueprint) < 3:
                         case ItemRestrictions.EnhancmentBonus4 when ItemPlus(blueprint) < 4:
@@ -939,7 +939,7 @@ namespace CraftMagicItems {
                    && ItemMatchesRestrictions(blueprint, recipe.Restrictions)
                    // Weapons with special materials can't apply recipes which apply different special materials
                    && (!(blueprint is BlueprintItemWeapon weapon) || recipe.Material == 0 || weapon.DamageType.Physical.Material == 0 || recipe.Material == weapon.DamageType.Physical.Material)
-                   // Shields make this complicated.  A shield's armour component can match a recipe which is for shields but not weapons. 
+                   // Shields make this complicated.  A shield's armor component can match a recipe which is for shields but not weapons. 
                    && (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(blueprint.ItemType)
                                                    || blueprint is BlueprintItemArmor armor && armor.IsShield
                                                                                             && recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Shield)
@@ -976,11 +976,11 @@ namespace CraftMagicItems {
             if (restrictions != null) {
                 foreach (var restriction in restrictions) {
                     switch (restriction) {
-                        case SlotRestrictionEnum.ArmourOnlyRobes:
-                        case SlotRestrictionEnum.ArmourExceptRobes:
+                        case SlotRestrictionEnum.ArmorOnlyRobes:
+                        case SlotRestrictionEnum.ArmorExceptRobes:
                             if (slot == ItemsFilter.ItemType.Armor
-                                && blueprint is BlueprintItemArmor armour
-                                && armour.IsArmor == (restriction == SlotRestrictionEnum.ArmourOnlyRobes)) {
+                                && blueprint is BlueprintItemArmor armor
+                                && armor.IsArmor == (restriction == SlotRestrictionEnum.ArmorOnlyRobes)) {
                                 return false;
                             }
                             break;
@@ -2361,11 +2361,11 @@ namespace CraftMagicItems {
                     }
 
                     break;
-                case BlueprintItemArmor armour:
-                    foreach (var enchantment in armour.Enchantments) {
-                        var armourBonus = enchantment.GetComponent<ArmorEnhancementBonus>();
-                        if (armourBonus != null) {
-                            return armourBonus.EnhancementValue;
+                case BlueprintItemArmor armor:
+                    foreach (var enchantment in armor.Enchantments) {
+                        var armorBonus = enchantment.GetComponent<ArmorEnhancementBonus>();
+                        if (armorBonus != null) {
+                            return armorBonus.EnhancementValue;
                         }
                     }
 
@@ -2457,7 +2457,7 @@ namespace CraftMagicItems {
                     return (baseWeapon == null ? 0 : baseWeapon.Cost) +
                            (enhancementLevel > 0 ? WeaponPlusCost + MasterworkCost : IsMasterwork(weapon) ? MasterworkCost : 0);
                 case PhysicalDamageMaterial.Silver:
-                    // PhysicalDamageMaterial.Silver is really Mithral.  Non-armour Mithral items cost 500 gp per pound of the original, non-Mithral item, which
+                    // PhysicalDamageMaterial.Silver is really Mithral.  Non-armor Mithral items cost 500 gp per pound of the original, non-Mithral item, which
                     // translates to 1000 gp per pound of Mithral.  See https://paizo.com/paizo/faq/v5748nruor1fm#v5748eaic9r9u
                     return (int) (1000 * weapon.Weight) - MasterworkCost; // Cost of masterwork is subsumed by the cost of mithral
                 default:
@@ -2501,7 +2501,7 @@ namespace CraftMagicItems {
                 }
 
                 var enhancementLevel = ItemPlusEquivalent(blueprint);
-                var factor = blueprint is BlueprintItemWeapon ? WeaponPlusCost : ArmourPlusCost;
+                var factor = blueprint is BlueprintItemWeapon ? WeaponPlusCost : ArmorPlusCost;
                 cost += enhancementLevel * enhancementLevel * factor;
                 if (blueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
                     return cost + RulesRecipeItemCost(doubleWeapon.SecondWeapon);

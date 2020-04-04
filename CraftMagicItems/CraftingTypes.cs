@@ -18,8 +18,8 @@ namespace CraftMagicItems {
     }
 
     public enum SlotRestrictionEnum {
-        ArmourExceptRobes,
-        ArmourOnlyRobes
+        ArmorExceptRobes,
+        ArmorOnlyRobes
     }
 
     public interface ICraftingData {
@@ -93,11 +93,11 @@ namespace CraftMagicItems {
         WeaponTwoHanded,
         WeaponOversized,
         WeaponNotOversized,
-        ArmourMetal,
-        ArmourNotMetal,
-        ArmourLight,
-        ArmourMedium,
-        ArmourHeavy,
+        ArmorMetal,
+        ArmorNotMetal,
+        ArmorLight,
+        ArmorMedium,
+        ArmorHeavy,
         EnhancmentBonus2,
         EnhancmentBonus3,
         EnhancmentBonus4,

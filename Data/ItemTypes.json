@@ -108,18 +108,18 @@
     ],
     "RecipeFileNames": ["CommonRecipes.json", "WondrousRecipes.json"],
     "Slots": ["Armor", "Belt", "Feet", "Gloves", "Head", "Neck", "Shoulders", "Wrist", "Usable"],
-    "SlotRestrictions": ["ArmourOnlyRobes"]
+    "SlotRestrictions": ["ArmorOnlyRobes"]
   },
   {
     "DataType": "RecipeBased",
-    "Name": "ArmsAndArmour",
-    "NameId": "craftMagicItems-itemType-arms-armour",
-    "FeatGuid": "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armour)",
+    "Name": "ArmsAndArmor",
+    "NameId": "craftMagicItems-itemType-arms-armor",
+    "FeatGuid": "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armor)",
     "MinimumCasterLevel": 5,
     "PrerequisitesMandatory": false,
-    "RecipeFileNames": ["ArmsArmourRecipes.json"],
+    "RecipeFileNames": ["ArmsArmorRecipes.json"],
     "Slots": ["Armor", "Shield", "Weapon"],
-    "SlotRestrictions": ["ArmourExceptRobes"]
+    "SlotRestrictions": ["ArmorExceptRobes"]
   },
   {
     "DataType": "RecipeBased",
@@ -141,7 +141,7 @@
   },
   {
     "DataType": "RecipeBased",
-    "Name": "CraftMundaneArmour",
+    "Name": "CraftMundaneArmor",
     "NameId": "99d4ca00-bf3d-4d42-bf9c-aac1f4a407d6",
     "NewItemBaseIDs": [
       "1638fa11f5af1814191cf6c05cdcf2b6",
