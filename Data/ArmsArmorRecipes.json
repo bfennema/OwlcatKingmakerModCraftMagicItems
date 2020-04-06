@@ -320,20 +320,6 @@
     "OnlyForSlots": ["Weapon", "Shield"]
   },
   {
-    "Name": "WeaponBaneLongshank",
-    "NameId": "d63800ed-2ba2-4405-890f-9dbb6fb42418",
-    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
-    "Enchantments": [
-      "92a1f5db1a03c5b468828c25dd375806"
-    ],
-    "CasterLevelStart": 8,
-    "CasterLevelMultiplier": 0,
-    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
-    "CostType": "EnhancementLevelSquared",
-    "CostFactor": 1,
-    "OnlyForSlots": ["Weapon", "Shield"]
-  },
-  {
     "Name": "WeaponBaneLycanthrope",
     "NameId": "858d53e1-0cfe-4f71-a140-1c7844bc9a11",
     "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
@@ -502,7 +488,7 @@
   },
   {
     "Name": "WeaponCorrosive",
-    "NameId": "3d381057-f38e-4eaf-b6c2-1d62c4f56fd6",
+    "NameId": "6965fa7a-5dc4-4515-ae92-f0f2ae16dcae",
     "Enchantments": [
       "633b38ff1d11de64a91d490c683ab1c8",
       "3f032a3cd54e57649a0cdad0434bf221#CraftMagicItems(Component[0].Element=Acid,nameId=craftMagicItems-enchantment-corrosive-burst-name,descriptionId=craftMagicItems-enchantment-corrosive-burst-description)"

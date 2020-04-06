@@ -10,6 +10,7 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Blueprints.Classes.Spells;
+using Kingmaker.Blueprints.Facts;
 using Kingmaker.Blueprints.Items;
 using Kingmaker.Blueprints.Items.Armors;
 using Kingmaker.Blueprints.Items.Ecnchantments;
@@ -21,7 +22,9 @@ using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Controllers.Rest;
 using Kingmaker.Designers.Mechanics.Facts;
+using Kingmaker.Designers.Mechanics.WeaponEnchants;
 using Kingmaker.Designers.TempMapCode.Capital;
+using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
@@ -34,6 +37,7 @@ using Kingmaker.PubSubSystem;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.RuleSystem.Rules.Abilities;
+using Kingmaker.RuleSystem.Rules.Damage;
 using Kingmaker.UI;
 using Kingmaker.UI.ActionBar;
 using Kingmaker.UI.Common;
@@ -46,6 +50,9 @@ using Kingmaker.UnitLogic.Alignments;
 using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
+using Kingmaker.UnitLogic.Mechanics;
+using Kingmaker.UnitLogic.Mechanics.Components;
+using Kingmaker.UnitLogic.Mechanics.ContextData;
 using Kingmaker.UnitLogic.Parts;
 using Kingmaker.Utility;
 using Newtonsoft.Json;
@@ -112,7 +119,93 @@ namespace CraftMagicItems {
             "7d9616b3807840c47ba3b2ab380c55a0", // Tors of Levenies village
             "653811192a3fcd148816384a9492bd08", // Secluded Lodge
             "fd1b6fa9f788ca24e86bd922a10da080", // Tenebrous Depths start hub
-            "c49315fe499f0e5468af6f19242499a2" // Tenebrous Depths start hub (Roguelike)
+            "c49315fe499f0e5468af6f19242499a2", // Tenebrous Depths start hub (Roguelike)
+        };
+
+        private static readonly string[] EnergyDamageGuids = {
+            "30f90becaaac51f41bf56641966c4121", // Flaming
+            "421e54078b7719d40915ce0672511d0b", // Frost
+            "633b38ff1d11de64a91d490c683ab1c8", // Corrosive
+            "7bda5277d36ad114f9f9fd21d0dab658", // Shock
+            "690e762f7704e1f4aa1ac69ef0ce6a96", // Thundering
+        };
+
+        private static readonly string[] EnergyBurstGuids = {
+            "3f032a3cd54e57649a0cdad0434bf221", // Flaming
+            "564a6924b246d254c920a7c44bf2a58b", // Frost
+            "3f032a3cd54e57649a0cdad0434bf221#CraftMagicItems(Component[0].Element=Acid,nameId=craftMagicItems-enchantment-corrosive-burst-name,descriptionId=craftMagicItems-enchantment-corrosive-burst-description)", // Corrosive
+            "914d7ee77fb09d846924ca08bccee0ff", // Shock
+            "3f032a3cd54e57649a0cdad0434bf221#CraftMagicItems(Component[0].Element=Sonic,nameId=craftMagicItems-enchantment-thundering-burst-name,descriptionId=craftMagicItems-enchantment-thundering-burst-description)", // Thundering
+        };
+
+        private static readonly string[] ExtraAttackGuids = {
+            "f1c0c50108025d546b2554674ea1c006", // Speed
+        };
+
+        private static readonly string[] DamageAgainstAlignmentGuids = {
+            "57315bc1e1f62a741be0efde688087e9", // Anarchic
+            "0ca43051edefcad4b9b2240aa36dc8d4", // Axiomatic
+            "28a9964d81fedae44bae3ca45710c140", // Holy
+            "d05753b8df780fc4bb55b318f06af453", // Unholy
+        };
+
+        private static readonly string[] ConditionalEnhancementBonusGuids = {
+            "ee71cc8848219c24b8418a628cc3e2fa", // Bane Aberration
+            "78cf9fabe95d3934688ea898c154d904", // Bane Animal
+            "73d30862f33cc754bb5a5f3240162ae6", // Bane Construct
+            "e5cb46a0a658b0a41854447bea32d2ee", // Bane Dragon
+            "b6948040cdb601242884744a543050d4", // Bane Fey
+            "dcecb5f2ffacfd44ead0ed4f8846445d", // Bane Giant
+            "c4b9cce255d1d6641a6105a255934e2e", // Bane Reptilian
+            "188efcfcd9938d44e9561c87794d17a8", // Bane Lycanthrope
+            "97d477424832c5144a9413c64d818659", // Bane Magical Beast
+            "c5f84a79ad154c84e8d2e9fe0dd49350", // Bane Monstrous Humanoid
+            "234177d5807909f44b8c91ed3c9bf7ac", // Bane Outsider (Chaotic)
+            "20ba9055c6ae1e44ca270c03feacc53b", // Bane Outsider (Evil)
+            "a876de94b916b7249a77d090cb9be4f3", // Bane Outsider (Good)
+            "3a6f564c8ea2d1941a45b19fa16e59f5", // Bane Outsider (Lawful)
+            "4e30e79c500e5af4b86a205cc20436f2", // Bane Outsider (Neutral)
+            "0b761b6ed6375114d8d01525d44be5a9", // Bane Plant
+            "eebb4d3f20b8caa43af1fed8f2773328", // Bane Undead
+            "c3428441c00354c4fabe27629c6c64dd", // Bane Vermin
+            "b606a3f5daa76cc40add055613970d2a", // Furious
+        };
+
+        private static readonly string[] ConditionalDamageDiceGuids = {
+            "ee71cc8848219c24b8418a628cc3e2fa", // Bane Aberration
+            "78cf9fabe95d3934688ea898c154d904", // Bane Animal
+            "73d30862f33cc754bb5a5f3240162ae6", // Bane Construct
+            "e5cb46a0a658b0a41854447bea32d2ee", // Bane Dragon
+            "b6948040cdb601242884744a543050d4", // Bane Fey
+            "dcecb5f2ffacfd44ead0ed4f8846445d", // Bane Giant
+            "c4b9cce255d1d6641a6105a255934e2e", // Bane Reptilian
+            "188efcfcd9938d44e9561c87794d17a8", // Bane Lycanthrope
+            "97d477424832c5144a9413c64d818659", // Bane Magical Beast
+            "c5f84a79ad154c84e8d2e9fe0dd49350", // Bane Monstrous Humanoid
+            "234177d5807909f44b8c91ed3c9bf7ac", // Bane Outsider (Chaotic)
+            "20ba9055c6ae1e44ca270c03feacc53b", // Bane Outsider (Evil)
+            "a876de94b916b7249a77d090cb9be4f3", // Bane Outsider (Good)
+            "3a6f564c8ea2d1941a45b19fa16e59f5", // Bane Outsider (Lawful)
+            "4e30e79c500e5af4b86a205cc20436f2", // Bane Outsider (Neutral)
+            "0b761b6ed6375114d8d01525d44be5a9", // Bane Plant
+            "eebb4d3f20b8caa43af1fed8f2773328", // Bane Undead
+            "c3428441c00354c4fabe27629c6c64dd", // Bane Vermin
+        };
+
+        private static readonly string[] BrilliantEnergyGuids = {
+            "66e9e299c9002ea4bb65b6f300e43770", // Brilliant Energy
+        };
+
+        private static readonly string[] MissAgainstFactOwnerGuids = {
+            "66e9e299c9002ea4bb65b6f300e43770", // Brilliant Energy
+        };
+
+        private static readonly string[] RealityGuids = {
+            "47857e1a5a3ec1a46adf6491b1423b4f", // Ghost Touch
+        };
+
+        private static readonly string[] AddInitiatorAttackRollTriggerGuids = {
+            "a1455a289da208144981e4b1ef92cc56", // Vicious
         };
 
         private const string CustomPriceLabel = "Crafting Cost: ";
@@ -939,7 +1032,7 @@ namespace CraftMagicItems {
                    && ItemMatchesRestrictions(blueprint, recipe.Restrictions)
                    // Weapons with special materials can't apply recipes which apply different special materials
                    && (!(blueprint is BlueprintItemWeapon weapon) || recipe.Material == 0 || weapon.DamageType.Physical.Material == 0 || recipe.Material == weapon.DamageType.Physical.Material)
-                   // Shields make this complicated.  A shield's armor component can match a recipe which is for shields but not weapons. 
+                   // Shields make this complicated.  A shield's armor component can match a recipe which is for shields but not weapons.
                    && (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(blueprint.ItemType)
                                                    || blueprint is BlueprintItemArmor armor && armor.IsShield
                                                                                             && recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Shield)
@@ -985,7 +1078,7 @@ namespace CraftMagicItems {
                             }
                             break;
                     }
-                }    
+                }
             }
             return true;
         }
@@ -1227,7 +1320,13 @@ namespace CraftMagicItems {
                 var baseBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(selectedBaseGuid);
                 RenderCustomNameField($"{new L10NString(selectedRecipe.NameId)} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint, selectedRecipe).Select(enchantment => enchantment.AssetGuid).ToArray();
-                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseGuid, new List<string> {selectedEnchantment.AssetGuid}, enchantmentsToRemove,
+                IEnumerable<string> enchantments;
+                if (selectedRecipe.EnchantmentsCumulative) {
+                    enchantments = availableEnchantments.Take(selectedEnchantmentIndex + 1).Select(enchantment => enchantment.AssetGuid);
+                } else {
+                    enchantments = new List<string> { selectedEnchantment.AssetGuid };
+                }
+                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseGuid, enchantments, enchantmentsToRemove,
                     selectedCustomName ?? "[custom item]", "null", "null");
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
             }
@@ -2703,10 +2802,446 @@ namespace CraftMagicItems {
                 }
             }
 
+            private static bool EquipmentEnchantmentValid(ItemEntityWeapon weapon, ItemEntity owner) {
+                if ((weapon == owner) ||
+                    (weapon != null && (weapon.Blueprint.IsNatural || weapon.Blueprint.IsUnarmed))) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            [ComponentName("Equipment Energy Dice Bonus")]
+            public class EquipmentEnergyDamageDice : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleCalculateWeaponStats>
+            {
+                public DiceFormula EnergyDamageDice;
+                public DamageEnergyType Element;
+
+                public void OnEventAboutToTrigger(RuleCalculateWeaponStats evt) {
+                    if (EquipmentEnchantmentValid(evt.Weapon, base.Owner)) {
+                        DamageDescription item = new DamageDescription
+                        {
+                            TypeDescription = new DamageTypeDescription
+                            {
+                                Type = DamageType.Energy,
+                                Energy = this.Element
+                            },
+                            Dice = this.EnergyDamageDice
+                        };
+                        evt.DamageDescription.Add(item);
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleCalculateWeaponStats evt) {
+                }
+            }
+
+            [ComponentName("Equipment Energy Dice Bonus")]
+            public class EquipmentEnergyBurst : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleDealDamage>
+            {
+                public DamageEnergyType Element;
+                public DiceType Dice = DiceType.D8;
+
+                public void OnEventAboutToTrigger(RuleDealDamage evt) {
+                    if (base.Owner == null || evt.AttackRoll == null || !evt.AttackRoll.IsCriticalConfirmed || evt.AttackRoll.FortificationNegatesCriticalHit) {
+                        return;
+                    }
+                    if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, base.Owner)) {
+                        RuleCalculateWeaponStats ruleCalculateWeaponStats = Rulebook.Trigger<RuleCalculateWeaponStats>(new RuleCalculateWeaponStats(Game.Instance.DefaultUnit, evt.DamageBundle.Weapon, null));
+                        DiceFormula dice = new DiceFormula(Math.Max(ruleCalculateWeaponStats.CriticalMultiplier - 1, 1), this.Dice);
+                        evt.DamageBundle.Add(new EnergyDamage(dice, this.Element));
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleDealDamage evt) {
+                }
+            }
+
+            [ComponentName("Extra attack with this equipment")]
+            public class EquipmentExtraAttack : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleCalculateAttacksCount>
+            {
+                public int Number = 1;
+                public bool Haste;
+
+                public void OnEventAboutToTrigger(RuleCalculateAttacksCount evt) {
+                    if (base.Owner is ItemEntityWeapon) {
+                        evt.AddExtraAttacks(this.Number, this.Haste, base.Owner);
+                    } else if (evt.Initiator.GetFirstWeapon() != null &&
+                        (evt.Initiator.GetFirstWeapon().Blueprint.IsNatural || evt.Initiator.GetFirstWeapon().Blueprint.IsUnarmed)) {
+                        evt.AddExtraAttacks(this.Number, this.Haste);
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleCalculateAttacksCount evt) {
+                }
+            }
+
+            public class EquipmentDamageAgainstAlignment : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RulePrepareDamage>
+            {
+                public AlignmentComponent EnemyAlignment;
+                public DamageAlignment WeaponAlignment;
+                public ContextDiceValue Value;
+                public DamageEnergyType DamageType;
+
+                public void OnEventAboutToTrigger(RulePrepareDamage evt) {
+                    BaseDamage weaponDamage = evt.DamageBundle.WeaponDamage;
+                    if (weaponDamage != null) {
+                        weaponDamage.AddAlignment(this.WeaponAlignment);
+                    }
+                    if (evt.Target.Descriptor.Alignment.Value.HasComponent(this.EnemyAlignment) && EquipmentEnchantmentValid(evt.DamageBundle.Weapon, base.Owner)) {
+                        int rollsCount = this.Value.DiceCountValue.Calculate(base.Context);
+                        int bonusDamage = this.Value.BonusValue.Calculate(base.Context);
+                        EnergyDamage energyDamage = new EnergyDamage(new DiceFormula(rollsCount, this.Value.DiceType), this.DamageType);
+                        energyDamage.AddBonusTargetRelated(bonusDamage);
+                        evt.DamageBundle.Add(energyDamage);
+                    }
+                }
+
+                public void OnEventDidTrigger(RulePrepareDamage evt) {
+                }
+            }
+
+            [ComponentName("Equipment Conditional Enhancement Bonus")]
+            [AllowMultipleComponents]
+            public class EquipmentConditionalEnhancementBonus : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleCalculateWeaponStats>, IInitiatorRulebookHandler<RuleCalculateAttackBonus>
+            {
+                public int EnhancementBonus;
+                public bool CheckWielder;
+                public bool IsBane;
+                public ConditionsChecker Conditions;
+
+                public void OnEventAboutToTrigger(RuleCalculateWeaponStats evt) {
+                    if (this.IsBane) {
+                        if (base.Owner.Enchantments.Any((ItemEnchantment e) => e.Get<SuppressBane>())) {
+                            return;
+                        }
+                    }
+                    if (this.CheckWielder) {
+                        using (base.Enchantment.Context.GetDataScope(evt.Initiator)) {
+                            if (EquipmentEnchantmentValid(evt.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                evt.AddBonusDamage(this.EnhancementBonus);
+                                evt.Enhancement += this.EnhancementBonus;
+                                evt.EnhancementTotal += this.EnhancementBonus;
+                            }
+                        }
+                    } else if (evt.AttackWithWeapon != null) {
+                        using (base.Enchantment.Context.GetDataScope(evt.AttackWithWeapon.Target)) {
+                            if (EquipmentEnchantmentValid(evt.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                evt.AddBonusDamage(this.EnhancementBonus);
+                                evt.Enhancement += this.EnhancementBonus;
+                                evt.EnhancementTotal += this.EnhancementBonus;
+                            }
+                        }
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleCalculateWeaponStats evt) {
+                }
+
+                public void OnEventAboutToTrigger(RuleCalculateAttackBonus evt) {
+                    if (this.IsBane) {
+                        if (base.Owner.Enchantments.Any((ItemEnchantment e) => e.Get<SuppressBane>())) {
+                            return;
+                        }
+                    }
+                    if (this.CheckWielder) {
+                        using (base.Enchantment.Context.GetDataScope(evt.Initiator)) {
+                            if (EquipmentEnchantmentValid(evt.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                evt.AddBonus(this.EnhancementBonus, base.Fact);
+                            }
+                        }
+                    } else {
+                        using (base.Enchantment.Context.GetDataScope(evt.Target)) {
+                            if (EquipmentEnchantmentValid(evt.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                evt.AddBonus(this.EnhancementBonus, base.Fact);
+                            }
+                        }
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleCalculateAttackBonus evt) {
+                }
+            }
+
+            [ComponentName("Equipment Bonus Damage Conditional")]
+            public class EquipmentConditionalDamageDice : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RulePrepareDamage>
+            {
+                public DamageDescription Damage;
+                public bool CheckWielder;
+                public bool IsBane;
+                public ConditionsChecker Conditions;
+
+                public void OnEventAboutToTrigger(RulePrepareDamage evt) {
+                    if (this.IsBane) {
+                        if (base.Owner.Enchantments.Any((ItemEnchantment e) => e.Get<SuppressBane>())) {
+                            return;
+                        }
+                    }
+                    if (this.CheckWielder) {
+                        using (base.Enchantment.Context.GetDataScope(base.Owner.Wielder.Unit)) {
+                            if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                BaseDamage damage = this.Damage.CreateDamage();
+                                evt.DamageBundle.Add(damage);
+                            }
+                        }
+                    } else {
+                        using (base.Enchantment.Context.GetDataScope(evt.Target)) {
+                            if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, base.Owner) && this.Conditions.Check(null)) {
+                                BaseDamage damage2 = this.Damage.CreateDamage();
+                                evt.DamageBundle.Add(damage2);
+                            }
+                        }
+                    }
+                }
+
+                public void OnEventDidTrigger(RulePrepareDamage evt) {
+                }
+            }
+
+            [ComponentName("Attacks ignore armor and shields")]
+            public class EquipmentBrilliantEnergy : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleCalculateAC>
+            {
+                public void OnEventAboutToTrigger(RuleCalculateAC evt) {
+                    if (evt.Reason.Item is ItemEntityWeapon weapon && EquipmentEnchantmentValid(weapon, base.Owner)) {
+                        evt.BrilliantEnergy = base.Fact;
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleCalculateAC evt) {
+                }
+            }
+
+            [ComponentName("Attacks ignore fact owners")]
+            public class EquipmentMissAgainstFactOwner : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RuleAttackRoll>
+            {
+                public BlueprintUnitFact[] Facts;
+
+                public void OnEventAboutToTrigger(RuleAttackRoll evt) {
+                    if (EquipmentEnchantmentValid(evt.Weapon, base.Owner)) {
+                        foreach (BlueprintUnitFact blueprint in this.Facts) {
+                            if (evt.Target.Descriptor.HasFact(blueprint)) {
+                                evt.AutoMiss = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                public void OnEventDidTrigger(RuleAttackRoll evt) {
+                }
+            }
+
+            public class EquipmentReality : EquipmentEnchantmentLogic, IInitiatorRulebookHandler<RulePrepareDamage>
+            {
+                public DamageRealityType Reality;
+
+                public void OnEventAboutToTrigger(RulePrepareDamage evt) {
+                    if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, base.Owner) && evt.DamageBundle.WeaponDamage != null) {
+                        evt.DamageBundle.WeaponDamage.Reality |= this.Reality;
+                    }
+                }
+
+                public void OnEventDidTrigger(RulePrepareDamage evt) {
+                }
+            }
+
+            [AllowMultipleComponents]
+            public class EquipmentAddInitiatorAttackRollTrigger : GameLogicComponent, IInitiatorRulebookHandler<RuleAttackRoll>
+            {
+                [HideIf("CriticalHit")]
+                public bool OnlyHit = true;
+
+                public bool CriticalHit;
+                public bool SneakAttack;
+                public bool OnOwner;
+                public bool CheckWeapon;
+
+                [ShowIf("CheckWeapon")]
+                public WeaponCategory WeaponCategory;
+
+                public bool AffectFriendlyTouchSpells;
+                public ActionList Action;
+
+                public void OnEventAboutToTrigger(RuleAttackRoll evt) {
+                }
+
+                public void OnEventDidTrigger(RuleAttackRoll evt) {
+                    if (this.CheckConditions(evt)) {
+                        using (new ContextAttackData(evt, null)) {
+                            if (this.OnOwner) {
+                                OwnedFact<UnitDescriptor> ownedFact = base.Fact as OwnedFact<UnitDescriptor>;
+                                UnitDescriptor unitDescriptor;
+                                if ((unitDescriptor = ((ownedFact != null) ? ownedFact.Owner : null)) == null) {
+                                    ItemEnchantment itemEnchantment = base.Fact as ItemEnchantment;
+                                    unitDescriptor = ((itemEnchantment != null) ? itemEnchantment.Owner.Wielder : null);
+                                }
+                                UnitDescriptor unitDescriptor2 = unitDescriptor;
+                                if (unitDescriptor2 != null) {
+                                    IFactContextOwner factContextOwner = base.Fact as IFactContextOwner;
+                                    if (factContextOwner != null) {
+                                        factContextOwner.RunActionInContext(this.Action, unitDescriptor2.Unit);
+                                    }
+                                } else {
+                                    UberDebug.LogError(string.Format("Fact has no owner: {0}", base.Fact), Array.Empty<object>());
+                                }
+                            } else {
+                                IFactContextOwner factContextOwner2 = base.Fact as IFactContextOwner;
+                                if (factContextOwner2 != null) {
+                                    factContextOwner2.RunActionInContext(this.Action, evt.Target);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                private bool CheckConditions(RuleAttackRoll evt) {
+                    ItemEnchantment itemEnchantment = base.Fact as ItemEnchantment;
+                    ItemEntity itemEntity = (itemEnchantment != null) ? itemEnchantment.Owner : null;
+                    RuleAttackWithWeapon ruleAttackWithWeapon = evt.Reason.Rule as RuleAttackWithWeapon;
+                    ItemEntityWeapon itemEntityWeapon = (ruleAttackWithWeapon != null) ? ruleAttackWithWeapon.Weapon : null;
+                    return (itemEntity == null || itemEntity == itemEntityWeapon || evt.Weapon.Blueprint.IsNatural || evt.Weapon.Blueprint.IsUnarmed) &&
+                           (!this.CheckWeapon || (itemEntityWeapon != null && this.WeaponCategory == itemEntityWeapon.Blueprint.Category)) &&
+                           (!this.OnlyHit || evt.IsHit) && (!this.CriticalHit || (evt.IsCriticalConfirmed && !evt.FortificationNegatesCriticalHit)) &&
+                           (!this.SneakAttack || (evt.IsSneakAttack && !evt.FortificationNegatesSneakAttack)) &&
+                           (this.AffectFriendlyTouchSpells || evt.Initiator.IsEnemy(evt.Target) || evt.Weapon.Blueprint.Type.AttackType != AttackType.Touch);
+                }
+            }
+
+            private static void ModifyBlueprints() {
+                foreach (var guid in EnergyDamageGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponEnergyDamageDice component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentEnergyDamageDice>();
+                            logic.EnergyDamageDice = component.EnergyDamageDice;
+                            logic.Element = component.Element;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in EnergyBurstGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponEnergyBurst component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentEnergyBurst>();
+                            logic.Element = component.Element;
+                            logic.Dice = component.Dice;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in ExtraAttackGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponExtraAttack component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentExtraAttack>();
+                            logic.Number = component.Number;
+                            logic.Haste = component.Haste;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in DamageAgainstAlignmentGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponDamageAgainstAlignment component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentDamageAgainstAlignment>();
+                            logic.EnemyAlignment = component.EnemyAlignment;
+                            logic.WeaponAlignment = component.WeaponAlignment;
+                            logic.Value = component.Value;
+                            logic.DamageType = component.DamageType;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in ConditionalEnhancementBonusGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponConditionalEnhancementBonus component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentConditionalEnhancementBonus>();
+                            logic.EnhancementBonus = component.EnhancementBonus;
+                            logic.CheckWielder = component.CheckWielder;
+                            logic.IsBane = component.IsBane;
+                            logic.Conditions = component.Conditions;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in ConditionalDamageDiceGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponConditionalDamageDice component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentConditionalDamageDice>();
+                            logic.Damage = component.Damage;
+                            logic.CheckWielder = component.CheckWielder;
+                            logic.IsBane = component.IsBane;
+                            logic.Conditions = component.Conditions;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in BrilliantEnergyGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is BrilliantEnergy component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentBrilliantEnergy>();
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in MissAgainstFactOwnerGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is MissAgainstFactOwner component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentMissAgainstFactOwner>();
+                            logic.Facts = component.Facts;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in RealityGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is WeaponReality component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentReality>();
+                            logic.Reality = component.Reality;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+
+                foreach (var guid in AddInitiatorAttackRollTriggerGuids) {
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(guid);
+                    for (int i = 0; i < enchantment.ComponentsArray.Length; i++) {
+                        if (enchantment.ComponentsArray[i] is AddInitiatorAttackRollTrigger component) {
+                            var logic = ScriptableObject.CreateInstance<EquipmentAddInitiatorAttackRollTrigger>();
+                            logic.OnlyHit = component.OnlyHit;
+                            logic.CriticalHit = component.CriticalHit;
+                            logic.SneakAttack = component.SneakAttack;
+                            logic.OnOwner = component.OnOwner;
+                            logic.CheckWeapon = component.CheckWeapon;
+                            logic.WeaponCategory = component.WeaponCategory;
+                            logic.AffectFriendlyTouchSpells = component.AffectFriendlyTouchSpells;
+                            logic.Action = component.Action;
+                            enchantment.ComponentsArray[i] = logic;
+                        }
+                    }
+                }
+            }
+
             private static void InitialiseMod() {
                 if (modEnabled) {
                     InitialiseCraftingData();
                     AddAllCraftingFeats();
+                    ModifyBlueprints();
                 }
             }
 
@@ -2800,7 +3335,7 @@ namespace CraftMagicItems {
             }
         }
 
-        // Owlcat's code doesn't correctly detect that a variant spell is in a spellList when its parent spell is. 
+        // Owlcat's code doesn't correctly detect that a variant spell is in a spellList when its parent spell is.
         [Harmony12.HarmonyPatch(typeof(BlueprintAbility), "IsInSpellList")]
         // ReSharper disable once UnusedMember.Global
         public static class BlueprintAbilityIsInSpellListPatch {
@@ -3403,6 +3938,8 @@ namespace CraftMagicItems {
                 defaultWeaponStats.DoNotScaleDamage = false;
                 // Apparently need to reset bonus damage manually, if I'm going to re-run trigger.
                 defaultWeaponStats.AddBonusDamage(-defaultWeaponStats.BonusDamage);
+                defaultWeaponStats.DamageDescription.Clear();
+                defaultWeaponStats.DamageDescription.Add(null);
                 defaultWeaponStats.OnTrigger(null);
             }
         }

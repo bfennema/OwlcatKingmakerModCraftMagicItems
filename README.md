@@ -36,12 +36,7 @@ For details, see the mod page here: https://www.nexusmods.com/pathfinderkingmake
 * Metamagic effects on spells
 * Dragonhide is called "dragonscale".  Ironwood?
 * Request for https://www.d20pfsrd.com/magic-items/wondrous-items/m-p/page-of-spell-knowledge/
-
-* Mighty Fists enchantment is stacking - looks like a bug in Owlcat's code (require Mighty Fists to only be on Amulet)
-* Tabletop Amulet of Mighty Fists actually allows all relevant weapon enhancements (such as Flaming or Agile)... not
-        sure if the engine can even do that. (Added Agile. Seems to be the only supported enhancement)
 * Mundane crafting - craft shields with shield spikes?  Tricky, the base spiked shield blueprints are weapons...
-* Craft Rod?
 * In-game GUI
 * Bracers of archery (lesser/greater) - requires both Craft Wondrous Items and Craft Arms and Armor
 * Craft Construct?  Either a build-your-own-pet, Eidolon style, or a Golem-in-a-bottle like arrangement.
