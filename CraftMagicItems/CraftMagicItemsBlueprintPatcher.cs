@@ -11,6 +11,7 @@ using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Items.Shields;
 using Kingmaker.Blueprints.Items.Weapons;
+using Kingmaker.ElementsSystem;
 using Kingmaker.Enums.Damage;
 using Kingmaker.Localization;
 using Kingmaker.ResourceLinks;
@@ -541,9 +542,18 @@ namespace CraftMagicItems {
 
                     // TODO if I use fieldAccess.GetValue<object[]>().ToArray() to make this universally applicable, the SetValue fails saying it can't
                     // convert object[] to e.g. BlueprintComponent[].  Hard-code to only support BlueprintComponent for array for now.
-                    var arrayClone = fieldAccess.GetValue<BlueprintComponent[]>().ToArray();
-                    arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
-                    fieldAccess.SetValue(arrayClone);
+                    if (fieldAccess.GetValueType() == typeof(BlueprintComponent[])) {
+                        var arrayClone = fieldAccess.GetValue<BlueprintComponent[]>().ToArray();
+                        arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
+                        fieldAccess.SetValue(arrayClone);
+                    } else if (fieldAccess.GetValueType() == typeof(Condition[])) {
+                        var arrayClone = fieldAccess.GetValue<Condition[]>().ToArray();
+                        arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
+                        fieldAccess.SetValue(arrayClone);
+                    } else {
+                        throw new Exception(
+                            $"Field {thisField} is of unsupported array type {fieldAccess.GetValueType().FullName} ({field})");
+                    }
                 }
             }
 

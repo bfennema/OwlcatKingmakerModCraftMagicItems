@@ -212,6 +212,118 @@
     "OnlyForSlots": ["Neck"]
   },
   {
+    "Name": "UnarmedBaneOutsiderNative",
+    "NameId": "craftMagicItems-enchantment-bane-outsider-native-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "0391d8eae25f39a48bcc6c2fc8bf4e12#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=b7f02ba92b363064fb873963bec275ee,Component[0].Conditions.Conditions[1].Fact=5c4e42124dc2b4647af6e36cf2590500,Component[1].Conditions.Conditions[0].Fact=b7f02ba92b363064fb873963bec275ee,Component[1].Conditions.Conditions[1].Fact=5c4e42124dc2b4647af6e36cf2590500,nameId=craftMagicItems-enchantment-bane-outsider-native-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneDwarf",
+    "NameId": "craftMagicItems-enchantment-bane-dwarf-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "92a1f5db1a03c5b468828c25dd375806#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=c4faf439f0e70bd40b5e36ee80d06be7,Component[0].Conditions.Conditions[1].Fact=cd40ff5a556bcf3419bf7479616cd2ad,Component[0].Conditions.Conditions[2].Fact=315a604df7e8cb34098ed2a3b7e3d068,Component[0].Conditions.Conditions[3].Fact=315a604df7e8cb34098ed2a3b7e3d068,Component[0].Conditions.Conditions[4].Fact=315a604df7e8cb34098ed2a3b7e3d068,Component[1].Conditions.Conditions[0].Fact=c4faf439f0e70bd40b5e36ee80d06be7,Component[1].Conditions.Conditions[1].Fact=cd40ff5a556bcf3419bf7479616cd2ad,Component[1].Conditions.Conditions[2].Fact=315a604df7e8cb34098ed2a3b7e3d068,Component[1].Conditions.Conditions[3].Fact=315a604df7e8cb34098ed2a3b7e3d068,Component[1].Conditions.Conditions[4].Fact=315a604df7e8cb34098ed2a3b7e3d068,nameId=craftMagicItems-enchantment-bane-dwarf-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneElf",
+    "NameId": "craftMagicItems-enchantment-bane-elf-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "0391d8eae25f39a48bcc6c2fc8bf4e12#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=25a5878d125338244896ebd3238226c8,Component[0].Conditions.Conditions[1].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[1].Conditions.Conditions[0].Fact=25a5878d125338244896ebd3238226c8,Component[1].Conditions.Conditions[1].Fact=b3646842ffbd01643ab4dac7479b20b0,nameId=craftMagicItems-enchantment-bane-elf-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneGoblin",
+    "NameId": "craftMagicItems-enchantment-bane-goblin-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "ee71cc8848219c24b8418a628cc3e2fa#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=9d168ca7100e9314385ce66852385451,Component[1].Conditions.Conditions[0].Fact=9d168ca7100e9314385ce66852385451,nameId=craftMagicItems-enchantment-bane-goblin-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneGnome",
+    "NameId": "craftMagicItems-enchantment-bane-gnome-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "ee71cc8848219c24b8418a628cc3e2fa#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=ef35a22c9a27da345a4528f0d5889157,Component[1].Conditions.Conditions[0].Fact=ef35a22c9a27da345a4528f0d5889157,nameId=craftMagicItems-enchantment-bane-gnome-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneHalfling",
+    "NameId": "craftMagicItems-enchantment-bane-halfling-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "ee71cc8848219c24b8418a628cc3e2fa#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=b0c3ef2729c498f47970bb50fa1acd30,Component[1].Conditions.Conditions[0].Fact=b0c3ef2729c498f47970bb50fa1acd30,nameId=craftMagicItems-enchantment-bane-halfling-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneOrc",
+    "NameId": "craftMagicItems-enchantment-bane-orc-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "ee71cc8848219c24b8418a628cc3e2fa#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=1dc20e195581a804890ddc74218bfd8e,Component[1].Conditions.Conditions[0].Fact=1dc20e195581a804890ddc74218bfd8e,nameId=craftMagicItems-enchantment-bane-orc-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
+    "Name": "UnarmedBaneHuman",
+    "NameId": "craftMagicItems-enchantment-bane-human-name",
+    "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",
+    "Enchantments": [
+      "92a1f5db1a03c5b468828c25dd375806#CraftMagicItems(Component[0].Conditions.Conditions[0].Fact=0a5d473ead98b0646b94495af250fdc4,Component[0].Conditions.Conditions[1].Fact=1dc20e195581a804890ddc74218bfd8e,Component[0].Conditions.Conditions[2].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[0].Conditions.Conditions[3].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[0].Conditions.Conditions[4].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[1].Conditions.Conditions[0].Fact=0a5d473ead98b0646b94495af250fdc4,Component[1].Conditions.Conditions[1].Fact=1dc20e195581a804890ddc74218bfd8e,Component[1].Conditions.Conditions[2].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[1].Conditions.Conditions[3].Fact=b3646842ffbd01643ab4dac7479b20b0,Component[1].Conditions.Conditions[4].Fact=b3646842ffbd01643ab4dac7479b20b0,nameId=craftMagicItems-enchantment-bane-human-name,descriptionId=dca4a8cc-efd1-4568-845b-185347c5b00c)"
+    ],
+    "CasterLevelStart": 8,
+    "CasterLevelMultiplier": 0,
+    "PrerequisiteSpells": ["8fd74eddd9b6c224693d9ab241f25e84"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Neck"]
+  },
+  {
     "Name": "UnarmedBaneAberration",
     "NameId": "01f677ed-a814-4e69-b44c-ecd9bb2f2302",
     "ParentNameId": "d6a44a6b-2948-4075-8792-0530d23930ef",

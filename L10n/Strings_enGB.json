@@ -356,6 +356,38 @@
     "Value": "This suit of armor or shield produces a magical force that protects vital areas of the wearer more effectively. When a critical hit or sneak attack is scored on the wearer, there is a 75% chance that the critical hit or sneak attack is negated and damage is instead rolled normally."
   },
   {
+    "Key": "craftMagicItems-enchantment-bane-outsider-native-name",
+    "Value": "Native Outsider Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-dwarf-name",
+    "Value": "Dwarf Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-elf-name",
+    "Value": "Elf Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-goblin-name",
+    "Value": "Goblin Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-gnome-name",
+    "Value": "Gnome Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-halfling-name",
+    "Value": "Halfling Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-orc-name",
+    "Value": "Orc Bane"
+  },
+  {
+    "Key": "craftMagicItems-enchantment-bane-human-name",
+    "Value": "Human Bane"
+  },
+  {
     "Key": "craftMagicItems-item-ring-of-regeneration-name",
     "Value": "Ring of Regeneration"
   },
