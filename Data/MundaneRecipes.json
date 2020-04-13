@@ -187,7 +187,7 @@
     "PrerequisiteSpells": [],
     "CostType": "Flat",
     "CostFactor": 100,
-    "MundaneDC": 10,
+    "MundaneDC": 3,
     "OnlyForSlots": ["Weapon"],
     "CanApplyToMundaneItem": true
   }
