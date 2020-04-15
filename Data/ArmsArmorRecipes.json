@@ -159,7 +159,7 @@
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Shield"],
-    "Restrictions": ["Armor"],
+    "Restrictions": ["ShieldArmor"],
     "CanApplyToMundaneItem": true
   },
   {
@@ -178,6 +178,7 @@
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Weapon", "Shield"],
+    "Restrictions": ["ShieldWeapon"],
     "CanApplyToMundaneItem": true
   },
   {
@@ -191,7 +192,7 @@
     "PrerequisiteSpells": ["de7a025d48ad5da4991e7d3c682cf69d"],
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
-    "OnlyForSlots": ["Weapon"],
+    "OnlyForSlots": ["Weapon", "Shield"],
     "Restrictions": ["WeaponFinessable", "WeaponNotOversized"]
   },
   {
@@ -597,7 +598,7 @@
     "PrerequisiteSpells": ["5ab0d42fb68c9e34abae4921822b9d63", "ebade19998e1f8542a1b55bd4da766b3"],
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 4,
-    "OnlyForSlots": ["Weapon"]
+    "OnlyForSlots": ["Weapon", "Shield"]
   },
   {
     "Name": "WeaponCorrosive",
@@ -724,7 +725,7 @@
     "PrerequisiteSpells": ["486eaff58293f6441a5c2759c4872f98"],
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
-    "OnlyForSlots": ["Weapon"],
+    "OnlyForSlots": ["Weapon", "Shield"],
     "Restrictions": ["WeaponMelee", "WeaponNotBludgeoning"]
   },
   {

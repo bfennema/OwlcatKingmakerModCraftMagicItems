@@ -312,6 +312,110 @@
     "Value": "Mithral Breastplate"
   },
   {
+    "Key": "craftMagicItems-mundane-spiked-light-mithral-shield-name",
+    "Value": "Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-spiked-heavy-mithral-shield-name",
+    "Value": "Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-spiked-light-shield-name",
+    "Value": "Masterwork Spiked Light Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-spiked-heavy-shield-name",
+    "Value": "Masterwork Spiked Heavy Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-cold-iron-spiked-light-shield-name",
+    "Value": "Cold Iron Spiked Light Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-cold-iron-spiked-heavy-shield-name",
+    "Value": "Cold Iron Spiked Heavy Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-cold-iron-spiked-light-shield-name",
+    "Value": "Masterwork Cold Iron Spiked Light Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-cold-iron-spiked-heavy-shield-name",
+    "Value": "Masterwork Cold Iron Spiked Heavy Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-spiked-light-mithral-shield-name",
+    "Value": "Masterwork Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-spiked-heavy-mithral-shield-name",
+    "Value": "Masterwork Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-cold-iron-spiked-light-mithral-shield-name",
+    "Value": "Cold Iron Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-cold-iron-spiked-heavy-mithral-shield-name",
+    "Value": "Cold Iron Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-cold-iron-spiked-light-mithral-shield-name",
+    "Value": "Masterwork Cold Iron Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-cold-iron-spiked-heavy-mithral-shield-name",
+    "Value": "Masterwork Cold Iron Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-mithral-spiked-light-shield-name",
+    "Value": "Mithral Spiked Light Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-mithral-spiked-heavy-shield-name",
+    "Value": "Mithral Spiked Heavy Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-mithral-spiked-light-mithral-shield-name",
+    "Value": "Mithral Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-mithral-spiked-heavy-mithral-shield-name",
+    "Value": "Mithral Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantine-spiked-light-shield-name",
+    "Value": "Adamantine Spiked Light Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantine-spiked-heavy-shield-name",
+    "Value": "Adamantine Spiked Heavy Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantine-spiked-light-mithral-shield-name",
+    "Value": "Adamantine Spiked Light Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantine-spiked-heavy-mithral-shield-name",
+    "Value": "Adamantine Spiked Heavy Mithral Shield"
+  },
+  {
+    "Key": "craftMagicItems-mundane-masterwork-shield-spikes-name",
+    "Value": "Masterwork Spikes"
+  },
+  {
+    "Key": "craftMagicItems-mundane-cold-iron-shield-spikes-name",
+    "Value": "Cold Iron Spikes"
+  },
+  {
+    "Key": "craftMagicItems-mundane-mithral-shield-spikes-name",
+    "Value": "Mithral Spikes"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantine-shield-spikes-name",
+    "Value": "Adamantine Spikes"
+  },
+  {
     "Key": "craftMagicItems-enchantment-sustenance-name",
     "Value": "Sustenance"
   },

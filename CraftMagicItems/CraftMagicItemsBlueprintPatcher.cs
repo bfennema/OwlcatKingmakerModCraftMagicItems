@@ -22,6 +22,7 @@ using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.View.Animation;
+using Kingmaker.Utility;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -58,8 +59,6 @@ namespace CraftMagicItems {
         // TODO remove the ScribeScroll prefix eventually
         private const string OldBlueprintPrefix = "#ScribeScroll";
         public const string BlueprintPrefix = "#CraftMagicItems";
-
-        private const string MithralArmorEnchantmentGuid = "7b95a819181574a4799d93939aa99aff";
 
         public readonly Dictionary<PhysicalDamageMaterial, string> PhysicalDamageMaterialEnchantments = new Dictionary<PhysicalDamageMaterial, string>() {
             {PhysicalDamageMaterial.Adamantite, "ab39e7d59dd12f4429ffef5dca88dc7b"},
@@ -284,15 +283,66 @@ namespace CraftMagicItems {
 
         private string ApplyRecipeItemBlueprintPatch(BlueprintItemEquipment blueprint, Match match) {
             var priceDelta = blueprint.Cost - Main.RulesRecipeItemCost(blueprint);
+            string secondEndGuid = null;
+
+            var removedIds = new List<string>();
+            if (match.Groups["remove"].Success) {
+                removedIds = match.Groups["remove"].Value.Split(';').ToList();
+            }
+
+            var enchantmentsValue = match.Groups["enchantments"].Value;
+            var enchantmentIds = enchantmentsValue.Split(';').ToList();
+
             if (blueprint is BlueprintItemShield shield) {
                 var armorComponentClone = Object.Instantiate(shield.ArmorComponent);
                 ApplyRecipeItemBlueprintPatch(armorComponentClone, match);
-                accessors.SetBlueprintItemShieldArmorComponent(shield, armorComponentClone);
-                if (shield.WeaponComponent) {
-                    var weaponComponentClone = Object.Instantiate(shield.WeaponComponent);
-                    ApplyRecipeItemBlueprintPatch(weaponComponentClone, match);
-                    accessors.SetBlueprintItemShieldWeaponComponent(shield, weaponComponentClone);
+                if (match.Groups["secondEnd"].Success) {
+                    secondEndGuid = match.Groups["secondEnd"].Value;
+                } else if (shield.WeaponComponent != null) {
+                    var weaponEnchantmentIds = enchantmentIds;
+                    if (weaponEnchantmentIds.Count > 0) {
+                        enchantmentIds = new List<string>();
+                        var armorEnchantments = armorComponentClone.Enchantments;
+                        foreach (var enchantment in armorEnchantments) {
+                            if (weaponEnchantmentIds.Contains(enchantment.AssetGuid)) {
+                                weaponEnchantmentIds.Remove(enchantment.AssetGuid);
+                                enchantmentIds.Add(enchantment.AssetGuid);
+                            }
+                        }
+                    }
+
+                    var weaponRemovedIds = removedIds;
+                    if (weaponRemovedIds.Count > 0) {
+                        removedIds = new List<string>();
+                        var armorEnchantments = shield.ArmorComponent.Enchantments;
+                        foreach (var enchantment in armorEnchantments) {
+                            if (weaponRemovedIds.Contains(enchantment.AssetGuid)) {
+                                weaponRemovedIds.Remove(enchantment.AssetGuid);
+                                removedIds.Add(enchantment.AssetGuid);
+                            }
+                        }
+                    }
+
+                    if (weaponEnchantmentIds.Count > 0 || weaponRemovedIds.Count > 0) {
+                        PhysicalDamageMaterial weaponMaterial = 0;
+                        if (match.Groups["material"].Success) {
+                            Enum.TryParse(match.Groups["material"].Value, out weaponMaterial);
+                        }
+                        secondEndGuid = BuildCustomRecipeItemGuid(shield.WeaponComponent.AssetGuid, weaponEnchantmentIds,
+                            weaponRemovedIds.Count > 0 ? weaponRemovedIds.ToArray() : null, material: weaponMaterial);
+                    }
                 }
+                if (secondEndGuid != null) {
+                    var weaponComponent = ResourcesLibrary.TryGetBlueprint<BlueprintItemWeapon>(secondEndGuid);
+                    if ((weaponComponent.DamageType.Physical.Form & PhysicalDamageForm.Piercing) != 0) {
+                        accessors.SetBlueprintItemWeight(weaponComponent, 5.0f);
+                    } else {
+                        accessors.SetBlueprintItemWeight(weaponComponent, 0.0f);
+                    }
+                    accessors.SetBlueprintItemShieldWeaponComponent(shield, weaponComponent);
+                    accessors.SetBlueprintItemWeight(armorComponentClone, armorComponentClone.Weight + weaponComponent.Weight);
+                }
+                accessors.SetBlueprintItemShieldArmorComponent(shield, armorComponentClone);
             }
 
             var initiallyMundane = blueprint.Enchantments.Count == 0 && blueprint.Ability == null && blueprint.ActivatableAbility == null;
@@ -300,12 +350,12 @@ namespace CraftMagicItems {
 
             // Copy Enchantments so we leave base blueprint alone
             var enchantmentsCopy = blueprint.Enchantments.ToList();
-            accessors.SetBlueprintItemCachedEnchantments(blueprint, enchantmentsCopy);
+            if (!(blueprint is BlueprintItemShield)) {
+                accessors.SetBlueprintItemCachedEnchantments(blueprint, enchantmentsCopy);
+            }
             // Remove enchantments first, to see if we end up with an item with no abilities.
-            string[] removedIds = null;
             var removed = new List<BlueprintItemEnchantment>();
             if (match.Groups["remove"].Success) {
-                removedIds = match.Groups["remove"].Value.Split(';');
                 foreach (var guid in removedIds) {
                     var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(guid);
                     if (!enchantment) {
@@ -349,8 +399,6 @@ namespace CraftMagicItems {
                 priceDelta = 0;
             }
 
-            var enchantmentsValue = match.Groups["enchantments"].Value;
-            var enchantmentIds = enchantmentsValue.Split(';');
             var skipped = new List<BlueprintItemEnchantment>();
             var enchantmentsForDescription = new List<BlueprintItemEnchantment>();
             int sizeCategoryChange = 0;
@@ -367,7 +415,7 @@ namespace CraftMagicItems {
                         skipped.Add(enchantment);
                     }
                     enchantmentsForDescription.Add(enchantment);
-                    if (blueprint is BlueprintItemArmor && guid == MithralArmorEnchantmentGuid) {
+                    if (blueprint is BlueprintItemArmor && guid == Main.MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
                         accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
                     }
@@ -391,23 +439,24 @@ namespace CraftMagicItems {
             }
 
             PhysicalDamageMaterial material = 0;
-            if (match.Groups["material"].Success && blueprint is BlueprintItemWeapon weapon) {
+            if (match.Groups["material"].Success) {
                 Enum.TryParse(match.Groups["material"].Value, out material);
-                accessors.SetBlueprintItemWeaponDamageType(weapon, TraverseCloneAndSetField(weapon.DamageType, "Physical.Material", material.ToString()));
-                accessors.SetBlueprintItemWeaponOverrideDamageType(weapon, true);
-                var materialGuid = PhysicalDamageMaterialEnchantments[material];
-                var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(materialGuid);
-                enchantmentsCopy.Add(enchantment);
-                skipped.Add(enchantment);
-                enchantmentsForDescription.Add(enchantment);
-                if (material == PhysicalDamageMaterial.Silver) {
-                    // PhysicalDamageMaterial.Silver is really Mithral, and Mithral equipment has half weight
-                    accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
+                if (blueprint is BlueprintItemWeapon weapon) {
+                    accessors.SetBlueprintItemWeaponDamageType(weapon, TraverseCloneAndSetField(weapon.DamageType, "Physical.Material", material.ToString()));
+                    accessors.SetBlueprintItemWeaponOverrideDamageType(weapon, true);
+                    var materialGuid = PhysicalDamageMaterialEnchantments[material];
+                    var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(materialGuid);
+                    enchantmentsCopy.Add(enchantment);
+                    skipped.Add(enchantment);
+                    enchantmentsForDescription.Add(enchantment);
+                    if (material == PhysicalDamageMaterial.Silver) {
+                        // PhysicalDamageMaterial.Silver is really Mithral, and Mithral equipment has half weight
+                        accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
+                    }
                 }
             }
 
             var equipmentHand = blueprint as BlueprintItemEquipmentHand;
-
             string visual = null;
             if (match.Groups["visual"].Success) {
                 visual = match.Groups["visual"].Value;
@@ -479,7 +528,6 @@ namespace CraftMagicItems {
                 }
             }
 
-            string secondEndGuid = null;
             if (match.Groups["secondEnd"].Success && blueprint is BlueprintItemWeapon doubleWeapon) {
                 secondEndGuid = match.Groups["secondEnd"].Value;
                 doubleWeapon.SecondWeapon = ResourcesLibrary.TryGetBlueprint<BlueprintItemWeapon>(secondEndGuid);
@@ -499,8 +547,8 @@ namespace CraftMagicItems {
             }
 
             accessors.SetBlueprintItemCost(blueprint, Main.RulesRecipeItemCost(blueprint) + priceDelta);
-            return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds, name, ability, activatableAbility, material, visual, animation,
-                casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);
+            return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds.Count > 0 ? removedIds.ToArray() : null, name, ability,
+                activatableAbility, material, visual, animation, casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);
         }
 
         private T CloneObject<T>(T originalObject) {

@@ -168,9 +168,12 @@
       "78aef04821150bd479314bc974ea73e2",
       "a85d51d0fb905f940b951eec60388bac",
       "f4cef3ba1a15b0f4fa7fd66b602ff32b",
-      "6a1a429f023e5134fb16a4962cb79257"
+      "6a1a429f023e5134fb16a4962cb79257",
+      "a85d51d0fb905f940b951eec60388bac#CraftMagicItems(enchantments=(),visual=5f7e85634b80177428370151feb2116b,nameId=7aa87bff-84b7-4337-9ad2-c1f6268fae0e,secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems(enchantments=()))",
+      "f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems(enchantments=(),visual=05d8f2e20b09a3d43871d76424c195c6,nameId=3fa879e0-17e0-4d65-90b5-05c44e28a09c,secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems(enchantments=()))"
     ],
     "MundaneBaseDC": 10,
+    "MundaneEnhancementsStackable": true,
     "RecipeFileNames": ["MundaneRecipes.json"],
     "Slots": ["Shield"]
   },

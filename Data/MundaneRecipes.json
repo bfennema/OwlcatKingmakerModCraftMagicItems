@@ -7,7 +7,7 @@
     "CostType": "Flat",
     "CostFactor": 0,
     "MundaneDC": 0,
-    "OnlyForSlots": ["Armor", "Shield"],
+    "OnlyForSlots": ["Armor"],
     "CanApplyToMundaneItem": true
   },
   {
@@ -85,14 +85,115 @@
     "CostFactor": 1000,
     "MundaneDC": 7,
     "OnlyForSlots": ["Shield"],
-    "Restrictions" : ["Armor"],
+    "Restrictions": ["ShieldArmor"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
+      "a85d51d0fb905f940b951eec60388bac#CraftMagicItems:5f7e85634b80177428370151feb2116b",
+      "f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems:05d8f2e20b09a3d43871d76424c195c6",
       "78aef04821150bd479314bc974ea73e2:null",
       "a85d51d0fb905f940b951eec60388bac:2a298726445c2184bbeab9f34ece55eb",
       "f4cef3ba1a15b0f4fa7fd66b602ff32b:7ab0c34a329421045b61d2f15f91b6b1",
       "6a1a429f023e5134fb16a4962cb79257:294e15227b2c1d245ab1ff99922f339f"
+    ],
+    "NameMappings": [
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems.*6b38844e2bffbac48b63036b66e735be.*material=ColdIron:craftMagicItems-mundane-masterwork-cold-iron-spiked-light-mithral-shield-name"
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems.*6b38844e2bffbac48b63036b66e735be.*material=ColdIron:craftMagicItems-mundane-masterwork-cold-iron-spiked-heavy-mithral-shield-name"
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems.*material=ColdIron:craftMagicItems-mundane-cold-iron-spiked-light-mithral-shield-name"
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems.*material=ColdIron:craftMagicItems-mundane-cold-iron-spiked-heavy-mithral-shield-name"
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems.*material=Silver:craftMagicItems-mundane-mithral-spiked-light-mithral-shield-name"
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems.*material=Silver:craftMagicItems-mundane-mithral-spiked-heavy-mithral-shield-name"
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems.*material=Adamantite:craftMagicItems-mundane-adamantine-spiked-light-mithral-shield-name"
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems.*material=Adamantite:craftMagicItems-mundane-adamantine-spiked-heavy-mithral-shield-name"
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems.*6b38844e2bffbac48b63036b66e735be:craftMagicItems-mundane-masterwork-spiked-light-mithral-shield-name"
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems.*6b38844e2bffbac48b63036b66e735be:craftMagicItems-mundane-masterwork-spiked-heavy-mithral-shield-name"
+      "secondEnd=b12650bdb547d7e499cdc29e913088cb#CraftMagicItems:craftMagicItems-mundane-spiked-light-mithral-shield-name",
+      "secondEnd=7c8f6712c444cf446a4bd3b8b717cb5c#CraftMagicItems:craftMagicItems-mundane-spiked-heavy-mithral-shield-name",
+	]
+  },
+  {
+    "Name": "MasterworkShieldSpikes",
+    "NameId": "craftMagicItems-mundane-masterwork-shield-spikes-name",
+    "Enchantments": [
+      "6b38844e2bffbac48b63036b66e735be"
+    ],
+    "PrerequisiteSpells": [],
+    "CostType": "Flat",
+    "CostFactor": 300,
+    "MundaneDC": 5,
+    "OnlyForSlots": ["Shield"],
+    "Restrictions": ["ShieldWeapon","WeaponPiercing"],
+    "CanApplyToMundaneItem": true,
+    "NameMappings": [
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff.*material=ColdIron:craftMagicItems-mundane-masterwork-cold-iron-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff.*material=ColdIron:craftMagicItems-mundane-masterwork-cold-iron-spiked-heavy-mithral-shield-name"
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-masterwork-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-masterwork-spiked-heavy-mithral-shield-name",
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems:craftMagicItems-mundane-masterwork-spiked-light-shield-name",
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems:craftMagicItems-mundane-masterwork-spiked-heavy-shield-name",
     ]
+  },
+  {
+    "Name": "ColdIronShieldSpikes",
+    "NameId": "craftMagicItems-mundane-cold-iron-shield-spikes-name",
+    "Enchantments": [],
+    "Material": "ColdIron",
+    "PrerequisiteSpells": [],
+    "CostType": "Flat",
+    "CostFactor": 0,
+    "MundaneDC": 5,
+    "OnlyForSlots": ["Shield"],
+    "Restrictions": ["ShieldWeapon","WeaponPiercing"],
+    "CanApplyToMundaneItem": true,
+    "NameMappings": [
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff.*6b38844e2bffbac48b63036b66e735be:craftMagicItems-mundane-masterwork-cold-iron-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff.*6b38844e2bffbac48b63036b66e735be:craftMagicItems-mundane-masterwork-cold-iron-spiked-heavy-mithral-shield-name"
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-cold-iron-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-cold-iron-spiked-heavy-mithral-shield-name",
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems:craftMagicItems-mundane-cold-iron-spiked-light-shield-name",
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems:craftMagicItems-mundane-cold-iron-spiked-heavy-shield-name",
+	]
+  },
+  {
+    "Name": "MithralShieldSpikes",
+    "NameId": "craftMagicItems-mundane-mithral-shield-spikes-name",
+    "Enchantments": [
+      "6b38844e2bffbac48b63036b66e735be"
+    ],
+    "Material": "Silver",
+    "PrerequisiteSpells": [],
+    "CostType": "Flat",
+    "CostFactor": 0,
+    "MundaneDC": 5,
+    "OnlyForSlots": ["Shield"],
+    "Restrictions": ["ShieldWeapon","WeaponPiercing"],
+    "CanApplyToMundaneItem": true,
+    "NameMappings": [
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-mithral-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-mithral-spiked-heavy-mithral-shield-name",
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems:craftMagicItems-mundane-mithral-spiked-light-shield-name",
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems:craftMagicItems-mundane-mithral-spiked-heavy-shield-name",
+	]
+  },
+  {
+    "Name": "AdamantineShieldSpikes",
+    "NameId": "craftMagicItems-mundane-adamantine-shield-spikes-name",
+    "Enchantments": [
+      "6b38844e2bffbac48b63036b66e735be"
+    ],
+    "Material": "Adamantite",
+    "PrerequisiteSpells": [],
+    "CostType": "Flat",
+    "CostFactor": 0,
+    "MundaneDC": 10,
+    "OnlyForSlots": ["Shield"],
+    "Restrictions": ["ShieldWeapon","WeaponPiercing"],
+    "CanApplyToMundaneItem": true,
+    "NameMappings": [
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-adamantine-spiked-light-mithral-shield-name"
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems.*7b95a819181574a4799d93939aa99aff:craftMagicItems-mundane-adamantine-spiked-heavy-mithral-shield-name",
+      "^a85d51d0fb905f940b951eec60388bac#CraftMagicItems:craftMagicItems-mundane-adamantine-spiked-light-shield-name",
+      "^f4cef3ba1a15b0f4fa7fd66b602ff32b#CraftMagicItems:craftMagicItems-mundane-adamantine-spiked-heavy-shield-name",
+	]
   },
   {
     "Name": "AdamantineLightArmor",

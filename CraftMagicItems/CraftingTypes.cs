@@ -101,6 +101,8 @@ namespace CraftMagicItems {
         ArmorLight,
         ArmorMedium,
         ArmorHeavy,
+        ShieldArmor,
+        ShieldWeapon,
         EnhancmentBonus2,
         EnhancmentBonus3,
         EnhancmentBonus4,
@@ -155,6 +157,7 @@ namespace CraftMagicItems {
 
         [JsonProperty] public string[] VisualMappings;
         [JsonProperty] public string[] AnimationMappings;
+        [JsonProperty] public string[] NameMappings;
     }
 
     public class CraftingTypeConverter : CustomCreationConverter<ICraftingData> {
