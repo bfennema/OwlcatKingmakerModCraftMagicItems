@@ -3455,6 +3455,8 @@ namespace CraftMagicItems {
                 defaultWeaponStats.AddBonusDamage(-defaultWeaponStats.BonusDamage);
                 defaultWeaponStats.DamageDescription.Clear();
                 defaultWeaponStats.DamageDescription.Add(null);
+                defaultWeaponStats.AdditionalCriticalMultiplier = 0;
+                defaultWeaponStats.CriticalEdgeBonus = 0;
                 defaultWeaponStats.OnTrigger(null);
             }
         }
