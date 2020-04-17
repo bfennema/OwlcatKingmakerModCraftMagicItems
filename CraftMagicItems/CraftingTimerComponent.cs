@@ -54,7 +54,7 @@ namespace CraftMagicItems {
             GoldSpent = goldSpent;
             CasterLevel = casterLevel;
             ResultItem = resultItem;
-            ItemType = itemType;
+            ItemType = itemType.Contains("Armour") ? itemType.Replace("Armour", "Armor") : itemType;
             RecipeName = recipeName;
             Prerequisites = prerequisites;
             AnyPrerequisite = anyPrerequisite;
