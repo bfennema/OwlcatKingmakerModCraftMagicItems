@@ -21,6 +21,7 @@ using Kingmaker.Blueprints.Loot;
 using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Controllers.Rest;
+using Kingmaker.Designers;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Designers.Mechanics.WeaponEnchants;
 using Kingmaker.Designers.TempMapCode.Capital;
@@ -106,6 +107,9 @@ namespace CraftMagicItems {
         private const string ScrollSavantArchetypeGuid = "f43c78692a4e10d43a38bd6aedf53c1b";
         private const string MartialWeaponProficiencies = "203992ef5b35c864390b4e4a1e200629";
         private const string ChannelEnergyFeatureGuid = "a79013ff4bcd4864cb669622a29ddafb";
+        private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
+        private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
+        private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
 
         private static readonly string[] SafeBlueprintAreaGuids = {
             "141f6999dada5a842a46bb3f029c287a", // Dire Narlmarches village
@@ -121,8 +125,6 @@ namespace CraftMagicItems {
             "fd1b6fa9f788ca24e86bd922a10da080", // Tenebrous Depths start hub
             "c49315fe499f0e5468af6f19242499a2", // Tenebrous Depths start hub (Roguelike)
         };
-
-        private static readonly string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
 
         private const string CustomPriceLabel = "Crafting Cost: ";
         private static readonly LocalizedString CasterLevelLocalized = new L10NString("dfb34498-61df-49b1-af18-0a84ce47fc98");
@@ -2738,9 +2740,111 @@ namespace CraftMagicItems {
                 }
             }
 
+            [AllowMultipleComponents]
+            public class TwoWeaponFightingAttackPenaltyPatch : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleAttackWithWeapon>
+            {
+                public BlueprintFeature shieldMaster;
+                private int penalty = 0;
+
+                public override void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt) {
+                    penalty = 0;
+                    ItemEntityWeapon maybeWeapon = evt.Initiator.Body.PrimaryHand.MaybeWeapon;
+                    ItemEntityWeapon maybeWeapon2 = evt.Initiator.Body.SecondaryHand.MaybeWeapon;
+                    bool flag = maybeWeapon2 != null && evt.Weapon == maybeWeapon2 && maybeWeapon2.IsShield && base.Owner.Progression.Features.HasFact(shieldMaster);
+                    if (evt.Weapon == null || maybeWeapon == null || maybeWeapon2 == null || maybeWeapon.Blueprint.IsNatural || maybeWeapon2.Blueprint.IsNatural ||
+                        maybeWeapon == evt.Initiator.Body.EmptyHandWeapon || maybeWeapon2 == evt.Initiator.Body.EmptyHandWeapon ||
+                        (maybeWeapon != evt.Weapon && maybeWeapon2 != evt.Weapon) || flag) {
+                        return;
+                    }
+                    int rank = base.Fact.GetRank();
+                    int num = (rank <= 1) ? -4 : -2;
+                    int num2 = (rank <= 1) ? -8 : -2;
+                    penalty = (evt.Weapon != maybeWeapon) ? num2 : num;
+                    UnitPartWeaponTraining unitPartWeaponTraining = base.Owner.Get<UnitPartWeaponTraining>();
+                    bool flag2 = base.Owner.State.Features.EffortlessDualWielding && unitPartWeaponTraining != null && unitPartWeaponTraining.IsSuitableWeapon(maybeWeapon2);
+                    if (!maybeWeapon2.Blueprint.IsLight && !maybeWeapon.Blueprint.Double && !flag2) {
+                        penalty += -2;
+                    }
+                    evt.AddBonus(penalty, base.Fact);
+                }
+                public override void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt) { }
+
+                public void OnEventAboutToTrigger(RuleAttackWithWeapon evt) {
+                    if (!evt.IsFullAttack && penalty != 0) {
+                        evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(-penalty, this, ModifierDescriptor.UntypedStackable));
+                    }
+                }
+                public void OnEventDidTrigger(RuleAttackWithWeapon evt) { }
+            }
+
+            [AllowMultipleComponents]
+            public class ShieldMasterPatch : GameLogicComponent, IInitiatorRulebookHandler<RuleCalculateDamage>, IInitiatorRulebookHandler<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleCalculateWeaponStats>
+            {
+                public void OnEventAboutToTrigger(RuleCalculateDamage evt) {
+                    if (!evt.Initiator.Body.SecondaryHand.HasShield || evt.DamageBundle.Weapon == null || !evt.DamageBundle.Weapon.IsShield) {
+                        return;
+                    }
+                    var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
+                    var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
+                    var itemEnhancementBonus = armorEnhancementBonus - weaponEnhancementBonus;
+                    PhysicalDamage physicalDamage = evt.DamageBundle.WeaponDamage as PhysicalDamage;
+                    if (physicalDamage != null && itemEnhancementBonus > 0) {
+                        physicalDamage.Enchantment += itemEnhancementBonus;
+                        physicalDamage.EnchantmentTotal += itemEnhancementBonus;
+                    }
+                }
+                public void OnEventDidTrigger(RuleCalculateWeaponStats evt) { }
+
+                public void OnEventAboutToTrigger(RuleCalculateWeaponStats evt) {
+                    if (!evt.Initiator.Body.SecondaryHand.HasShield || evt.Weapon == null || !evt.Weapon.IsShield) {
+                        return;
+                    }
+                    var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
+                    var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
+                    var itemEnhancementBonus = armorEnhancementBonus - weaponEnhancementBonus;
+                    if (itemEnhancementBonus > 0) {
+                        evt.AddBonusDamage(itemEnhancementBonus);
+                    }
+                }
+                public void OnEventDidTrigger(RuleCalculateDamage evt) { }
+
+                public void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt) {
+                    if (!evt.Initiator.Body.SecondaryHand.HasShield || evt.Weapon == null || !evt.Weapon.IsShield) {
+                        return;
+                    }
+                    var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
+                    var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
+                    var num = armorEnhancementBonus - weaponEnhancementBonus;
+                    if (num > 0) {
+                        evt.AddBonus(num, base.Fact);
+                    }
+                }
+                public void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt) { }
+            }
+
             private static void PatchBlueprints() {
-                var longshank = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(LongshankBaneGuid);
-                if (longshank.ComponentsArray[1] is WeaponConditionalDamageDice conditional) {
+                var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ShieldMasterGuid);
+                var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
+                for (int i = 0; i<twoWeaponFighting.ComponentsArray.Length; i++) {
+                    if (twoWeaponFighting.ComponentsArray[i] is TwoWeaponFightingAttackPenalty component) {
+                        twoWeaponFighting.ComponentsArray[i] = CraftMagicItems.Accessors.Create<TwoWeaponFightingAttackPenaltyPatch>(a => {
+                            a.name = component.name.Replace("TwoWeaponFightingAttackPenalty", "TwoWeaponFightingAttackPenaltyPatch");
+                            a.shieldMaster = shieldMaster;
+                        });
+                    }
+                    Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
+                }
+
+                for (int i = 0; i<shieldMaster.ComponentsArray.Length; i++) {
+                    if (shieldMaster.ComponentsArray[i] is ShieldMaster component) {
+                        shieldMaster.ComponentsArray[i] = CraftMagicItems.Accessors.Create<ShieldMasterPatch>(a => {
+                            a.name = component.name.Replace("ShieldMaster", "ShieldMasterPatch");
+                        });
+                    }
+                }
+
+                var longshankBane = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(LongshankBaneGuid);
+                if (longshankBane.ComponentsArray.Length >= 2 && longshankBane.ComponentsArray[1] is WeaponConditionalDamageDice conditional) {
                     for (int i = 0; i < conditional.Conditions.Conditions.Length; i++) {
                         if (conditional.Conditions.Conditions[i] is Kingmaker.Designers.EventConditionActionSystem.Conditions.HasFact condition) {
                             var replace = ScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
@@ -3748,7 +3852,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(AddInitiatorAttackRollTrigger), "CheckConditions")]
         // ReSharper disable once UnusedMember.Local
-        private static class AddInitiatorAttackRollTriggerCheckConditions {
+        private static class AddInitiatorAttackRollTriggerCheckConditionsPatch {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix(AddInitiatorAttackRollTrigger __instance, RuleAttackRoll evt, ref bool __result) {
                 if (__instance is GameLogicComponent logic) {

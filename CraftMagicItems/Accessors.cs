@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace CraftMagicItems {
     public delegate object FastGetter(object source);
@@ -194,6 +195,12 @@ namespace CraftMagicItems {
             var args = new[] {typeof(T1), typeof(T2), typeof(T3)};
             var invoker = CreateStaticInvoker(classType, name, resultType, args);
             return (arg1, arg2, arg3) => (TResult) invoker.Invoke(arg1, arg2, arg3);
+        }
+
+        public static T Create<T>(Action<T> init = null) where T : ScriptableObject {
+            var result = ScriptableObject.CreateInstance<T>();
+            init?.Invoke(result);
+            return result;
         }
     }
 }
