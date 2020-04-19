@@ -32,7 +32,8 @@
     "CasterLevelMultiplier": 3,
     "PrerequisiteSpells": ["5b77d7cc65b8ab74688e74a37fc2f553"],
     "CostType": "LevelSquared",
-    "CostFactor": 2000
+    "CostFactor": 2000,
+    "OnlyForSlots": ["Belt", "Feet", "Gloves", "Head", "Neck", "Shoulders", "Wrist", "Usable"]
   },
   {
     "Name": "UnarmedAttacks",
@@ -657,7 +658,8 @@
     "CasterLevelMultiplier": 2,
     "PrerequisiteSpells": ["9e1ad5d6f87d19e4d8883d63a6e35568"],
     "CostType": "LevelSquared",
-    "CostFactor": 1000
+    "CostFactor": 1000,
+    "OnlyForSlots": ["Armor", "Belt", "Feet", "Gloves", "Head", "Shoulders", "Wrist", "Usable"]
   },
   {
     "Name": "Movement",

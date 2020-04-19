@@ -22,10 +22,10 @@ using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Controllers.Rest;
 using Kingmaker.Designers;
+using Kingmaker.Designers.Mechanics.EquipmentEnchants;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Designers.Mechanics.WeaponEnchants;
 using Kingmaker.Designers.TempMapCode.Capital;
-using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
@@ -124,6 +124,15 @@ namespace CraftMagicItems {
             "653811192a3fcd148816384a9492bd08", // Secluded Lodge
             "fd1b6fa9f788ca24e86bd922a10da080", // Tenebrous Depths start hub
             "c49315fe499f0e5468af6f19242499a2", // Tenebrous Depths start hub (Roguelike)
+        };
+
+        private static readonly string[] ItemEnchantmentGuids = {
+            "d42fc23b92c640846ac137dc26e000d4", "da7d830b3f75749458c2e51524805560", // Enchantment +1
+            "eb2faccc4c9487d43b3575d7e77ff3f5", "49f9befa0e77cd5428ca3b28fd66a54e", // Enchantment +2
+            "80bb8a737579e35498177e1e3c75899b", "bae627dfb77c2b048900f154719ca07b", // Enchantment +3
+            "783d7d496da6ac44f9511011fc5f1979", "a4016a5d78384a94581497d0d135d98b", // Enchantment +4
+            "bdba267e951851449af552aa9f9e3992", "c3ad7f708c573b24082dde91b081ca5f", // Enchantment +5
+            "a36ad92c51789b44fa8a1c5c116a1328", "90316f5801dbe4748a66816a7c00380c", // Agile
         };
 
         private const string CustomPriceLabel = "Crafting Cost: ";
@@ -1261,17 +1270,60 @@ namespace CraftMagicItems {
             }
         }
 
+        private static void GetStatBonusName(AddStatBonusEquipment component, List<string> list) {
+            string stat;
+            switch (component.Stat) {
+                case StatType.AC:
+                    switch (component.Descriptor) {
+                        case ModifierDescriptor.ArmorEnhancement: return;
+                        case ModifierDescriptor.ShieldEnhancement: return;
+                        case ModifierDescriptor.NaturalArmorEnhancement: stat = new L10NString("64f7fae4-a525-45ce-948d-338277b6a18e"); break;
+                        default: stat = component.Descriptor.ToString(); break;
+                    }
+                    break;
+                case StatType.SkillAthletics: stat = new L10NString("55b798bb-0bb9-4c55-8b2d-a02ed17bfd38"); break;
+                case StatType.SkillKnowledgeArcana: stat = new L10NString("75941008-1ec4-4085-ab6d-17c18d15b662"); break;
+                case StatType.SkillKnowledgeWorld: stat = new L10NString("c9a55fe4-eed1-47d7-9125-0687fec69a60"); break;
+                case StatType.SkillLoreNature: stat = new L10NString("7eacb9bc-dc59-4f03-81dd-43ba4c0bf394"); break;
+                case StatType.SkillLoreReligion: stat = new L10NString("379c76c7-7af4-4c0b-af9f-dfdcc99ba30b"); break;
+                case StatType.SkillMobility: stat = new L10NString("afa39917-011f-4e09-b44c-d8451d923687"); break;
+                case StatType.SkillPerception: stat = new L10NString("7cb007fe-69de-4ac7-939d-3c5514687bc4"); break;
+                case StatType.SkillPersuasion: stat = new L10NString("2041dca2-e9bb-482f-b9ae-81712542f2ef"); break;
+                case StatType.SkillStealth: stat = new L10NString("27537f23-85d7-4dad-a53b-f9e92cd43ff5"); break;
+                case StatType.SkillThievery: stat = new L10NString("bc26493d-da03-4c9f-b674-00971706474c"); break;
+                case StatType.SkillUseMagicDevice: stat = new L10NString("e9652d12-9c96-4e6e-b088-3b3709241896"); break;
+                default: stat = component.Stat.ToString(); break;
+            }
+            list.Add($"{stat} {UIUtility.AddSign(component.Value)}");
+        }
+
         private static string GetEnchantmentNames(BlueprintItem blueprint) {
             return blueprint.Enchantments
-                .Where(enchantment => !string.IsNullOrEmpty(enchantment.Name))
-                .Select(enchantment => enchantment.Name)
-                .OrderBy(name => name)
-                .Join();
+                .Where(enchantment => {
+                    var keep = true;
+                    if (string.IsNullOrEmpty(enchantment.Name)) {
+                        keep = false;
+                        enchantment.CallComponents<AddStatBonusEquipment>(c => {
+                            if (c.Descriptor != ModifierDescriptor.ArmorEnhancement && c.Descriptor != ModifierDescriptor.ShieldEnhancement) {
+                                keep = true;
+                            }
+                        });
+                    }
+                    return keep;
+                }).Select(enchantment => {
+                    var list = new List<string>();
+                    if (string.IsNullOrEmpty(enchantment.Name)) {
+                        enchantment.CallComponents<AddStatBonusEquipment>(c => GetStatBonusName(c, list));
+                        return list;
+                    } else {
+                        return new List<string> { enchantment.Name };
+                    }
+                }).SelectMany(l => l).ToList().OrderBy(name => name).Join();
         }
 
         private static string BuildItemDescription(ItemEntity item) {
             var description = item.Description;
-            if (CraftMagicItemsBlueprintPatcher.SlotsWhichShowEnchantments.Contains(item.Blueprint.ItemType)) {
+            if (CraftMagicItemsBlueprintPatcher.DoesBlueprintShowEnchantments(item.Blueprint)) {
                 string qualities;
                 if (item.Blueprint is BlueprintItemShield shield) {
                     qualities = GetEnchantmentNames(shield.ArmorComponent);
@@ -2272,7 +2324,7 @@ namespace CraftMagicItems {
                 }
 
                 if (itemBlueprint is BlueprintItemWeapon weapon && weapon.DamageType.Physical.Material != 0) {
-                    recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, false);   
+                    recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, false);
                 }
 
                 if (itemBlueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
@@ -2338,43 +2390,66 @@ namespace CraftMagicItems {
             }
         }
 
-        public static LocalizedString BuildCustomRecipeItemDescription(BlueprintItem blueprint, IEnumerable<BlueprintItemEnchantment> enchantments,
-            IList<BlueprintItemEnchantment> removed, string ability, int casterLevel, int perDay) {
-            var allKnown = blueprint.Enchantments.All(enchantment => EnchantmentIdToRecipe.ContainsKey(enchantment.AssetGuid));
-            var description = allKnown
-                ? new L10NString("craftMagicItems-custom-description-start")
-                : blueprint.Description + new L10NString("craftMagicItems-custom-description-additional");
-            description += (allKnown ? blueprint.Enchantments : enchantments)
+        public static LocalizedString BuildCustomRecipeItemDescription(BlueprintItem blueprint, IList<BlueprintItemEnchantment> enchantments,
+            IList<BlueprintItemEnchantment> skipped, IList<BlueprintItemEnchantment> removed, bool replaceAbility, string ability, int casterLevel, int perDay) {
+            var extraDescription = enchantments
                 .Select(enchantment => {
-                    if (!string.IsNullOrEmpty(enchantment.Name)) {
-                        return enchantment.Name;
-                    }
                     var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
                     if (recipe.Enchantments.Length <= 1) {
-                        return new L10NString(recipe.NameId);
+                        if (skipped.Contains(enchantment)) {
+                            return new L10NString("");
+                        } else {
+                            if (!string.IsNullOrEmpty(enchantment.Name)) {
+                                return enchantment.Name;
+                            } else {
+                                return new L10NString(recipe.NameId);
+                            }
+                        }
                     }
-                    var bonusString = GetBonusString(recipe.Enchantments.IndexOf(enchantment) + 1, recipe);
+                    var newBonus = recipe.Enchantments.IndexOf(enchantment) + 1;
+                    var bonusString = GetBonusString(newBonus, recipe);
                     var bonusDescription = recipe.BonusTypeId != null
                         ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), new L10NString(recipe.NameId))
                         : recipe.BonusToId != null
                             ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.NameId), new L10NString(recipe.BonusToId))
                             : L10NFormat("craftMagicItems-custom-description-bonus", new L10NString(recipe.NameId));
-                    var upgradeFrom = allKnown ? null : removed.FirstOrDefault(remove => FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
-                    if (upgradeFrom == null) {
-                        return L10NFormat("craftMagicItems-custom-description-enchantment-template", bonusString, bonusDescription);
+                    var upgradeFrom = removed.FirstOrDefault(remove => FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
+                    var oldBonus = int.MaxValue;
+                    if (upgradeFrom != null) {
+                        oldBonus = recipe.Enchantments.IndexOf(upgradeFrom) + 1;
                     }
-                    var oldBonus = recipe.Enchantments.IndexOf(upgradeFrom) + 1;
+                    if (oldBonus > newBonus) {
+                        if (skipped.Contains(enchantment)) {
+                            return new L10NString("");
+                        } else {
+                            return L10NFormat("craftMagicItems-custom-description-enchantment-template", bonusString, bonusDescription);
+                        }
+                    } else {
+                        removed.Remove(upgradeFrom);
+                    }
                     return L10NFormat("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription, oldBonus,
                         bonusString);
                 })
                 .OrderBy(enchantmentDescription => enchantmentDescription)
-                .Select(enchantmentDescription => "\n * " + enchantmentDescription)
+                .Select(enchantmentDescription => string.IsNullOrEmpty(enchantmentDescription) ? "" : "\n* " + enchantmentDescription)
                 .Join("");
 
             if (blueprint is BlueprintItemEquipment equipment && (ability != null && ability != "null" || casterLevel > -1 || perDay > -1)) {
                 GameLogContext.Count = equipment.Charges;
-                description += "\n * " + L10NFormat("craftMagicItems-label-cast-spell-n-times-details", equipment.Ability.Name, equipment.CasterLevel);
+                extraDescription += "\n* " + L10NFormat("craftMagicItems-label-cast-spell-n-times-details", equipment.Ability.Name, equipment.CasterLevel);
                 GameLogContext.Clear();
+            }
+
+            string description;
+            if (removed.Count == 0 && !replaceAbility) {
+                description = blueprint.Description;
+                if (extraDescription.Length > 0) {
+                    description += new L10NString("craftMagicItems-custom-description-additional") + extraDescription;
+                }
+            } else if (extraDescription.Length > 0) {
+                description = new L10NString("craftMagicItems-custom-description-start") + extraDescription;
+            } else {
+                description = "";
             }
 
             return new FakeL10NString(description);
@@ -2414,7 +2489,7 @@ namespace CraftMagicItems {
             }
         }
 
-        private static int ItemPlusEquivalent(BlueprintItem blueprint) {
+        public static int ItemPlusEquivalent(BlueprintItem blueprint) {
             if (blueprint == null || blueprint.Enchantments == null) {
                 return 0;
             }
@@ -2841,6 +2916,13 @@ namespace CraftMagicItems {
                             a.name = component.name.Replace("ShieldMaster", "ShieldMasterPatch");
                         });
                     }
+                }
+
+                for (int i = 0; i < ItemEnchantmentGuids.Length; i += 2) {
+                    var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i]);
+                    var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i + 1]);
+                    Accessors.SetBlueprintItemEnchantmentEnchantName(dest, Accessors.GetBlueprintItemEnchantmentEnchantName(source));
+                    Accessors.SetBlueprintItemEnchantmentDescription(dest, Accessors.GetBlueprintItemEnchantmentDescription(source));
                 }
 
                 var longshankBane = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(LongshankBaneGuid);
@@ -3531,8 +3613,11 @@ namespace CraftMagicItems {
 
                 // Remove trailing commas while we're here.
                 __result = __result.Trim();
-                if (!string.IsNullOrEmpty(__result) && __result.LastIndexOf(',') == __result.Length - 1) {
-                    __result = __result.Substring(0, __result.Length - 1);
+                if (!string.IsNullOrEmpty(__result)) {
+                    __result = __result.Replace(" ,", ",");
+                    if (__result.LastIndexOf(',') == __result.Length - 1) {
+                        __result = __result.Substring(0, __result.Length - 1);
+                    }
                 }
             }
         }
@@ -3541,9 +3626,46 @@ namespace CraftMagicItems {
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillShieldEnchantmentsPatch {
             // ReSharper disable once UnusedMember.Local
-            private static void Postfix(ItemEntityShield shield, ref string __result) {
+            private static void Postfix(ref TooltipData data, ItemEntityShield shield, ref string __result) {
                 if (shield.IsIdentified && shield.WeaponComponent != null) {
-                    __result = Accessors.CallUIUtilityItemFillWeaponQualities(new TooltipData(), shield.WeaponComponent, __result);
+                    if (!data.Texts.ContainsKey(TooltipElement.Qualities)) {
+                        data.Texts[TooltipElement.Qualities] = Accessors.CallUIUtilityItemGetQualities(shield);
+                    }
+                    foreach (ItemEnchantment itemEnchantment in shield.Enchantments) {
+                        if (itemEnchantment.Owner is ItemEntityWeapon) {
+                            if (!string.IsNullOrEmpty(itemEnchantment.Blueprint.Description)) {
+                                __result += string.Format("<b><align=\"center\">{0}</align></b>\n", itemEnchantment.Blueprint.Name);
+                                __result += itemEnchantment.Blueprint.Description + "\n\n";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
+        // ReSharper disable once UnusedMember.Local
+        private static class UIUtilityItemFillArmorEnchantmentsPatch
+        {
+            // ReSharper disable once UnusedMember.Local
+            private static void Postfix(TooltipData data, ItemEntityShield armor) {
+                if (armor.IsIdentified) {
+                    foreach (var itemEnchantment in armor.Enchantments) {
+                        itemEnchantment.Blueprint.CallComponents<AddStatBonusEquipment>(c => {
+                            if (c.Descriptor != ModifierDescriptor.ArmorEnhancement && c.Descriptor != ModifierDescriptor.ShieldEnhancement && !data.StatBonus.ContainsKey(c.Stat)) {
+                                data.StatBonus.Add(c.Stat, UIUtility.AddSign(c.Value));
+                            }
+                        });
+                        var component = itemEnchantment.Blueprint.GetComponent<AllSavesBonusEquipment>();
+                        if (component != null) {
+                            StatType[] saves = { StatType.SaveReflex, StatType.SaveWill, StatType.SaveFortitude };
+                            foreach (var save in saves) {
+                                if (!data.StatBonus.ContainsKey(save)) {
+                                    data.StatBonus.Add(save, UIUtility.AddSign(component.Value));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -3562,6 +3684,64 @@ namespace CraftMagicItems {
                 defaultWeaponStats.AdditionalCriticalMultiplier = 0;
                 defaultWeaponStats.CriticalEdgeBonus = 0;
                 defaultWeaponStats.OnTrigger(null);
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillEnchantmentDescription")]
+        // ReSharper disable once UnusedMember.Local
+        private static class UIUtilityItemFillEnchantmentDescriptionPatch {
+            // ReSharper disable once UnusedMember.Local
+            private static bool Prefix(ItemEntity item, TooltipData data, ref string __result) {
+                string text = string.Empty;
+                if (item.Blueprint.ItemType == ItemsFilter.ItemType.Neck && ItemPlusEquivalent(item.Blueprint) > 0) {
+                    if (item.IsIdentified) {
+                        foreach (ItemEnchantment itemEnchantment in item.Enchantments) {
+                            itemEnchantment.Blueprint.CallComponents<AddStatBonusEquipment>(c => {
+                                if (!data.StatBonus.ContainsKey(c.Stat)) {
+                                    data.StatBonus.Add(c.Stat, UIUtility.AddSign(c.Value));
+                                }
+                            });
+                            if (!data.Texts.ContainsKey(TooltipElement.Qualities)) {
+                                data.Texts[TooltipElement.Qualities] = Accessors.CallUIUtilityItemGetQualities(item);
+                            }
+                            if (!string.IsNullOrEmpty(itemEnchantment.Blueprint.Description)) {
+                                text += string.Format("<b><align=\"center\">{0}</align></b>\n", itemEnchantment.Blueprint.Name);
+                                text = text + itemEnchantment.Blueprint.Description + "\n\n";
+                            }
+                        }
+                        if (item.Enchantments.Any<ItemEnchantment>() && !data.Texts.ContainsKey(TooltipElement.Qualities)) {
+                            data.Texts[TooltipElement.Enhancement] = GetEnhancementBonus(item);
+                        }
+                        if (GetItemEnhancementBonus(item) > 0) {
+                            data.Texts[TooltipElement.Enhancement] = GetEnhancementBonus(item);
+                        }
+                    }
+                    __result = text;
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            private static string GetEnhancementBonus(ItemEntity item) {
+                if (!item.IsIdentified) {
+                    return string.Empty;
+                }
+                int itemEnhancementBonus = GetItemEnhancementBonus(item);
+                return (itemEnhancementBonus == 0) ? string.Empty : UIUtility.AddSign(itemEnhancementBonus);
+            }
+            public static int GetItemEnhancementBonus(ItemEntity item) {
+                return item.Enchantments.SelectMany((ItemEnchantment f) => f.SelectComponents<EquipmentWeaponTypeEnhancement>()).Aggregate(0, (int s, EquipmentWeaponTypeEnhancement e) => s + e.Enhancement);
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(UIUtility), "IsMagicItem")]
+        // ReSharper disable once UnusedMember.Local
+        private static class UIUtilityIsMagicItem {
+            // ReSharper disable once UnusedMember.Local
+            private static void Postfix(ItemEntity item, ref bool __result) {
+                if (__result == false && item != null && item.IsIdentified && item is ItemEntityShield shield && shield.WeaponComponent != null) {
+                    __result = ItemPlusEquivalent(shield.WeaponComponent.Blueprint) > 0;
+                }
             }
         }
 

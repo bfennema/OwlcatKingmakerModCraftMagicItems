@@ -11,7 +11,9 @@ using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Items.Shields;
 using Kingmaker.Blueprints.Items.Weapons;
+using Kingmaker.Designers.Mechanics.EquipmentEnchants;
 using Kingmaker.ElementsSystem;
+using Kingmaker.Enums;
 using Kingmaker.Enums.Damage;
 using Kingmaker.Localization;
 using Kingmaker.ResourceLinks;
@@ -45,7 +47,7 @@ namespace CraftMagicItems {
                       + @"(,descriptionId=(?<descriptionId>[^,)]+))?)"
                       + @")\)");
 
-        public static readonly ItemsFilter.ItemType[] SlotsWhichShowEnchantments = {
+        private static readonly ItemsFilter.ItemType[] SlotsWhichShowEnchantments = {
             ItemsFilter.ItemType.Weapon,
             ItemsFilter.ItemType.Armor,
             ItemsFilter.ItemType.Shield
@@ -260,10 +262,9 @@ namespace CraftMagicItems {
             return BuildCustomSpellItemGuid(blueprint.AssetGuid, casterLevel, spellLevel, spellId);
         }
 
-        private bool DoesBlueprintShowEnchantments(BlueprintItemEquipment blueprint) {
-            // Special handling of Robes :(
-            if (blueprint is BlueprintItemArmor armor) {
-                return armor.IsArmor;
+        public static bool DoesBlueprintShowEnchantments(BlueprintItem blueprint) {
+            if (blueprint.ItemType == ItemsFilter.ItemType.Neck && Main.ItemPlusEquivalent(blueprint) > 0) {
+                return true;
             }
             return SlotsWhichShowEnchantments.Contains(blueprint.ItemType);
         }
@@ -282,6 +283,7 @@ namespace CraftMagicItems {
             }
 
             var initiallyMundane = blueprint.Enchantments.Count == 0 && blueprint.Ability == null && blueprint.ActivatableAbility == null;
+            var replaceAbility = false;
 
             // Copy Enchantments so we leave base blueprint alone
             var enchantmentsCopy = blueprint.Enchantments.ToList();
@@ -305,6 +307,9 @@ namespace CraftMagicItems {
             string ability = null;
             if (match.Groups["ability"].Success) {
                 ability = match.Groups["ability"].Value;
+                if (blueprint.Ability != null) {
+                    replaceAbility = true;
+                }
                 blueprint.Ability = ability == "null" ? null : ResourcesLibrary.TryGetBlueprint<BlueprintAbility>(ability);
                 blueprint.SpendCharges = true;
                 blueprint.RestoreChargesOnRest = true;
@@ -313,6 +318,9 @@ namespace CraftMagicItems {
             string activatableAbility = null;
             if (match.Groups["activatableAbility"].Success) {
                 activatableAbility = match.Groups["activatableAbility"].Value;
+                if (blueprint.ActivatableAbility != null) {
+                    replaceAbility = true;
+                }
                 blueprint.ActivatableAbility = activatableAbility == "null"
                     ? null
                     : ResourcesLibrary.TryGetBlueprint<BlueprintActivatableAbility>(activatableAbility);
@@ -326,6 +334,7 @@ namespace CraftMagicItems {
 
             var enchantmentsValue = match.Groups["enchantments"].Value;
             var enchantmentIds = enchantmentsValue.Split(';');
+            var skipped = new List<BlueprintItemEnchantment>();
             var enchantmentsForDescription = new List<BlueprintItemEnchantment>();
             if (!string.IsNullOrEmpty(enchantmentsValue)) {
                 foreach (var guid in enchantmentIds) {
@@ -334,6 +343,11 @@ namespace CraftMagicItems {
                         throw new Exception($"Failed to load enchantment {guid}");
                     }
 
+                    var component = enchantment.GetComponent<AddStatBonusEquipment>();
+                    if (!string.IsNullOrEmpty(enchantment.Name) ||
+                        (component && component.Descriptor != ModifierDescriptor.ArmorEnhancement && component.Descriptor != ModifierDescriptor.ShieldEnhancement)) {
+                        skipped.Add(enchantment);
+                    }
                     enchantmentsForDescription.Add(enchantment);
                     if (guid == MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
@@ -355,6 +369,7 @@ namespace CraftMagicItems {
                 var materialGuid = PhysicalDamageMaterialEnchantments[material];
                 var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(materialGuid);
                 enchantmentsCopy.Add(enchantment);
+                skipped.Add(enchantment);
                 enchantmentsForDescription.Add(enchantment);
                 if (material == PhysicalDamageMaterial.Silver) {
                     // PhysicalDamageMaterial.Silver is really Mithral, and Mithral equipment has half weight
@@ -429,13 +444,14 @@ namespace CraftMagicItems {
             }
 
             if (!DoesBlueprintShowEnchantments(blueprint)) {
-                accessors.SetBlueprintItemDescriptionText(blueprint,
-                    descriptionId != null
-                        ? new L10NString(descriptionId)
-                        : Main.BuildCustomRecipeItemDescription(blueprint, enchantmentsForDescription, removed, ability, casterLevel, perDay));
-                accessors.SetBlueprintItemFlavorText(blueprint, new L10NString(""));
-            } else if (descriptionId != null) {
+                skipped.Clear();
+            }
+            if (descriptionId != null) {
                 accessors.SetBlueprintItemDescriptionText(blueprint, new L10NString(descriptionId));
+                accessors.SetBlueprintItemFlavorText(blueprint, new L10NString(""));
+            } else if (!DoesBlueprintShowEnchantments(blueprint) || enchantmentsForDescription.Count != skipped.Count || removed.Count > 0) {
+                accessors.SetBlueprintItemDescriptionText(blueprint,
+                    Main.BuildCustomRecipeItemDescription(blueprint, enchantmentsForDescription, skipped, removed, replaceAbility, ability, casterLevel, perDay));
                 accessors.SetBlueprintItemFlavorText(blueprint, new L10NString(""));
             }
 

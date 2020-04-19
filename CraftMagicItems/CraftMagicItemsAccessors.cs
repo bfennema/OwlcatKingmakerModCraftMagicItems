@@ -91,8 +91,14 @@ namespace CraftMagicItems {
 
         public readonly FastSetter<BlueprintItem, int> SetBlueprintItemCost = Accessors.CreateSetter<BlueprintItem, int>("m_Cost");
 
+        public readonly FastGetter<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentEnchantName =
+            Accessors.CreateGetter<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
+
         public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentEnchantName =
             Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
+
+        public readonly FastGetter<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentDescription =
+            Accessors.CreateGetter<BlueprintItemEnchantment, LocalizedString>("m_Description");
 
         public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentDescription =
             Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_Description");
@@ -120,8 +126,8 @@ namespace CraftMagicItems {
 
         public readonly FastSetter<BlueprintItem, float> SetBlueprintItemWeight = Accessors.CreateSetter<BlueprintItem, float>("m_Weight");
 
-        public readonly FastStaticInvoker<ItemEntityWeapon, string> CallUIUtilityItemGetQualities =
-            Accessors.CreateStaticInvoker<ItemEntityWeapon, string>(typeof(UIUtilityItem), "GetQualities");
+        public readonly FastStaticInvoker<ItemEntity, string> CallUIUtilityItemGetQualities =
+            Accessors.CreateStaticInvoker<ItemEntity, string>(typeof(UIUtilityItem), "GetQualities");
 
         public readonly FastStaticInvoker<TooltipData, ItemEntityWeapon, string, string> CallUIUtilityItemFillWeaponQualities =
             Accessors.CreateStaticInvoker<TooltipData, ItemEntityWeapon, string, string>(typeof(UIUtilityItem), "FillWeaponQualities");
