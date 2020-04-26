@@ -12,6 +12,7 @@ using Kingmaker.Blueprints.Loot;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Items;
 using Kingmaker.Localization;
+using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules.Damage;
 using Kingmaker.UI.ActionBar;
 using Kingmaker.UI.Common;
@@ -69,6 +70,9 @@ namespace CraftMagicItems {
 
         public readonly FastSetter<BlueprintItemWeapon, bool> SetBlueprintItemWeaponOverrideDamageType =
             Accessors.CreateSetter<BlueprintItemWeapon, bool>("m_OverrideDamageType");
+
+        public readonly FastSetter<BlueprintWeaponType, DiceFormula> SetBlueprintItemBaseDamage =
+            Accessors.CreateSetter<BlueprintWeaponType, DiceFormula>("m_BaseDamage");
 
         public readonly FastSetter<BlueprintItem, Sprite> SetBlueprintItemIcon = Accessors.CreateSetter<BlueprintItem, Sprite>("m_Icon");
 
@@ -128,6 +132,9 @@ namespace CraftMagicItems {
 
         public readonly FastStaticInvoker<ItemEntity, string> CallUIUtilityItemGetQualities =
             Accessors.CreateStaticInvoker<ItemEntity, string>(typeof(UIUtilityItem), "GetQualities");
+
+        public readonly FastStaticInvoker<ItemEntity, TooltipData, string> CallUIUtilityItemFillEnchantmentDescription =
+            Accessors.CreateStaticInvoker<ItemEntity, TooltipData, string>(typeof(UIUtilityItem), "FillEnchantmentDescription");
 
         public readonly FastStaticInvoker<TooltipData, ItemEntityWeapon, string, string> CallUIUtilityItemFillWeaponQualities =
             Accessors.CreateStaticInvoker<TooltipData, ItemEntityWeapon, string, string>(typeof(UIUtilityItem), "FillWeaponQualities");

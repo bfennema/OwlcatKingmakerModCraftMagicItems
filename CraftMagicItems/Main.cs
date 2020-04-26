@@ -32,6 +32,7 @@ using Kingmaker.Enums;
 using Kingmaker.Enums.Damage;
 using Kingmaker.GameModes;
 using Kingmaker.Items;
+using Kingmaker.Items.Slots;
 using Kingmaker.Kingdom;
 using Kingmaker.Localization;
 using Kingmaker.PubSubSystem;
@@ -110,6 +111,8 @@ namespace CraftMagicItems {
         private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
         private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
+        private const string WeaponLightShieldGuid = "1fd965e522502fe479fdd423cca07684";
+        private const string WeaponHeavyShieldGuid = "be9b6408e6101cb4997a8996484baf19";
 
         private static readonly string[] SafeBlueprintAreaGuids = {
             "141f6999dada5a842a46bb3f029c287a", // Dire Narlmarches village
@@ -912,10 +915,11 @@ namespace CraftMagicItems {
 
         private static bool ItemMatchesRestrictions(BlueprintItem blueprint, IEnumerable<ItemRestrictions> restrictions) {
             if (restrictions != null) {
-                var weapon = blueprint as BlueprintItemWeapon;
-                var armor = blueprint as BlueprintItemArmor;
+                var weapon = (blueprint as BlueprintItemShield)?.WeaponComponent ?? blueprint as BlueprintItemWeapon;
+                var armor = (blueprint as BlueprintItemShield)?.ArmorComponent ?? blueprint as BlueprintItemArmor;
                 foreach (var restriction in restrictions) {
                     switch (restriction) {
+                        case ItemRestrictions.Weapon when weapon == null:
                         case ItemRestrictions.WeaponMelee when weapon == null || weapon.AttackType != AttackType.Melee:
                         case ItemRestrictions.WeaponRanged when weapon == null || weapon.AttackType != AttackType.Ranged:
                         case ItemRestrictions.WeaponBludgeoning when weapon == null || (weapon.DamageType.Physical.Form & PhysicalDamageForm.Bludgeoning) == 0:
@@ -932,9 +936,10 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponUseAmmunition when weapon == null || !AmmunitionWeaponCategories.Contains(weapon.Category):
                         case ItemRestrictions.WeaponNotUseAmmunition when weapon == null || AmmunitionWeaponCategories.Contains(weapon.Category):
                         case ItemRestrictions.WeaponTwoHanded when weapon == null || !(weapon.IsTwoHanded || weapon.IsOneHandedWhichCanBeUsedWithTwoHands):
-                        case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded:
+                        case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded || weapon.Double:
                         case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
                         case ItemRestrictions.WeaponNotOversized when weapon == null || IsOversized(weapon):
+                        case ItemRestrictions.Armor when armor == null:
                         case ItemRestrictions.ArmorMetal when armor == null || !IsMetalArmor(armor.Type):
                         case ItemRestrictions.ArmorNotMetal when armor == null || IsMetalArmor(armor.Type):
                         case ItemRestrictions.ArmorLight when armor == null || armor.Type.ProficiencyGroup != ArmorProficiencyGroup.Light:
@@ -961,9 +966,12 @@ namespace CraftMagicItems {
                    && (!(blueprint is BlueprintItemWeapon weapon) || recipe.Material == 0 || weapon.DamageType.Physical.Material == 0 || (!skipMaterialCheck && recipe.Material == weapon.DamageType.Physical.Material))
                    // Shields make this complicated.  A shield's armor component can match a recipe which is for shields but not weapons.
                    && (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(blueprint.ItemType)
-                                                   || blueprint is BlueprintItemArmor armor && armor.IsShield
-                                                                                            && recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Shield)
-                                                                                            && !recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Weapon))
+                                                   || (blueprint is BlueprintItemArmor  && GetItemType(blueprint) == ItemsFilter.ItemType.Shield
+                                                                                        && recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Shield)
+                                                                                        && !recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Weapon))
+                                                   || (blueprint is BlueprintItemWeapon && GetItemType(blueprint) == ItemsFilter.ItemType.Shield
+                                                                                        && recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Shield)
+                                                                                        && !recipe.OnlyForSlots.Contains(ItemsFilter.ItemType.Armor)))
                    // ... also, a top-level shield object should not match a weapon recipe if it has no weapon component.
                    && !(recipe.OnlyForSlots != null && blueprint is BlueprintItemShield shield
                                                     && shield.WeaponComponent == null
@@ -2928,6 +2936,11 @@ namespace CraftMagicItems {
                     }
                 }
 
+                var lightShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponLightShieldGuid);
+                Accessors.SetBlueprintItemBaseDamage(lightShield, new DiceFormula(1, DiceType.D3));
+                var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponHeavyShieldGuid);
+                Accessors.SetBlueprintItemBaseDamage(heavyShield, new DiceFormula(1, DiceType.D4));
+
                 for (int i = 0; i < ItemEnchantmentGuids.Length; i += 2) {
                     var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i]);
                     var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i + 1]);
@@ -3592,67 +3605,6 @@ namespace CraftMagicItems {
             }
         }
 
-
-        // Reverse the explicit code to hide weapon enchantments on shields - sorry, Owlcat.
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
-        // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemGetQualitiesPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Prefix(ItemEntity item) {
-                if (item is ItemEntityShield shield && shield.IsIdentified) {
-                    // It appears that shields are not properly identified when found.
-                    shield.ArmorComponent.Identify();
-                    shield.WeaponComponent?.Identify();
-                }
-            }
-
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(ItemEntity item, ref string __result) {
-                if (!item.IsIdentified) {
-                    return;
-                }
-
-                if (item is ItemEntityShield shield && shield.WeaponComponent != null) {
-                    var weaponQualities = Accessors.CallUIUtilityItemGetQualities(shield.WeaponComponent);
-                    if (!string.IsNullOrEmpty(weaponQualities)) {
-                        __result = string.IsNullOrEmpty(__result)
-                            ? $"{ShieldBashLocalized}: {weaponQualities}"
-                            : $"{__result}{(__result.LastIndexOf(',') < __result.Length - 2 ? ", " : "")} {ShieldBashLocalized}: {weaponQualities}";
-                    }
-                }
-
-                // Remove trailing commas while we're here.
-                __result = __result.Trim();
-                if (!string.IsNullOrEmpty(__result)) {
-                    __result = __result.Replace(" ,", ",");
-                    if (__result.LastIndexOf(',') == __result.Length - 1) {
-                        __result = __result.Substring(0, __result.Length - 1);
-                    }
-                }
-            }
-        }
-
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillShieldEnchantments")]
-        // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemFillShieldEnchantmentsPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(ref TooltipData data, ItemEntityShield shield, ref string __result) {
-                if (shield.IsIdentified && shield.WeaponComponent != null) {
-                    if (!data.Texts.ContainsKey(TooltipElement.Qualities)) {
-                        data.Texts[TooltipElement.Qualities] = Accessors.CallUIUtilityItemGetQualities(shield);
-                    }
-                    foreach (ItemEnchantment itemEnchantment in shield.Enchantments) {
-                        if (itemEnchantment.Owner is ItemEntityWeapon) {
-                            if (!string.IsNullOrEmpty(itemEnchantment.Blueprint.Description)) {
-                                __result += string.Format("<b><align=\"center\">{0}</align></b>\n", itemEnchantment.Blueprint.Name);
-                                __result += itemEnchantment.Blueprint.Description + "\n\n";
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillArmorEnchantmentsPatch
@@ -3680,7 +3632,6 @@ namespace CraftMagicItems {
             }
         }
 
-        // Owlcat's code explicitly sets DoNotScaleDamage true for the default weapon, which means it doesn't show its size-based damage dice.  Reverse that.
         [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillWeaponDamage")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillWeaponDamagePatch {
@@ -3703,7 +3654,12 @@ namespace CraftMagicItems {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix(ItemEntity item, TooltipData data, ref string __result) {
                 string text = string.Empty;
-                if (item.Blueprint.ItemType == ItemsFilter.ItemType.Neck && ItemPlusEquivalent(item.Blueprint) > 0) {
+                if (item is ItemEntityShield shield && shield.IsIdentified) {
+                    // It appears that shields are not properly identified when found.
+                    shield.ArmorComponent.Identify();
+                    shield.WeaponComponent?.Identify();
+                    return true;
+                } else if (item.Blueprint.ItemType == ItemsFilter.ItemType.Neck && ItemPlusEquivalent(item.Blueprint) > 0) {
                     if (item.IsIdentified) {
                         foreach (ItemEnchantment itemEnchantment in item.Enchantments) {
                             itemEnchantment.Blueprint.CallComponents<AddStatBonusEquipment>(c => {
@@ -3720,7 +3676,7 @@ namespace CraftMagicItems {
                             }
                         }
                         if (item.Enchantments.Any<ItemEnchantment>() && !data.Texts.ContainsKey(TooltipElement.Qualities)) {
-                            data.Texts[TooltipElement.Enhancement] = GetEnhancementBonus(item);
+                            data.Texts[TooltipElement.Qualities] = GetEnhancementBonus(item);
                         }
                         if (GetItemEnhancementBonus(item) > 0) {
                             data.Texts[TooltipElement.Enhancement] = GetEnhancementBonus(item);
@@ -3741,6 +3697,53 @@ namespace CraftMagicItems {
             }
             public static int GetItemEnhancementBonus(ItemEntity item) {
                 return item.Enchantments.SelectMany((ItemEnchantment f) => f.SelectComponents<EquipmentWeaponTypeEnhancement>()).Aggregate(0, (int s, EquipmentWeaponTypeEnhancement e) => s + e.Enhancement);
+            }
+
+            private static void Postfix(ItemEntity item, TooltipData data, ref string __result) {
+                if (item is ItemEntityShield shield) {
+                    if (shield.WeaponComponent != null) {
+                        TooltipData tmp = new TooltipData();
+                        string result = Accessors.CallUIUtilityItemFillEnchantmentDescription(shield.WeaponComponent, tmp);
+                        if (!string.IsNullOrEmpty(result)) {
+                            __result += $"<b><align=\"center\">{ShieldBashLocalized}</align></b>\n";
+                            __result += result;
+                        }
+                        data.Texts[TooltipElement.AttackType] = tmp.Texts[TooltipElement.AttackType];
+                        data.Texts[TooltipElement.ProficiencyGroup] = tmp.Texts[TooltipElement.ProficiencyGroup];
+                        if (tmp.Texts.ContainsKey(TooltipElement.Qualities) && !string.IsNullOrEmpty(tmp.Texts[TooltipElement.Qualities])) {
+                            if (data.Texts.ContainsKey(TooltipElement.Qualities)) {
+                                data.Texts[TooltipElement.Qualities] += $",  {ShieldBashLocalized}:  {tmp.Texts[TooltipElement.Qualities]}";
+                            } else {
+                                data.Texts[TooltipElement.Qualities] = $"{ShieldBashLocalized}:  {tmp.Texts[TooltipElement.Qualities]}";
+                            }
+                        }
+                        data.Texts[TooltipElement.Damage] = tmp.Texts[TooltipElement.Damage];
+                        if (tmp.Texts.ContainsKey(TooltipElement.EquipDamage)) {
+                            data.Texts[TooltipElement.EquipDamage] = tmp.Texts[TooltipElement.EquipDamage];
+                        }
+                        if (tmp.Texts.ContainsKey(TooltipElement.PhysicalDamage)) {
+                            data.Texts[TooltipElement.PhysicalDamage] = tmp.Texts[TooltipElement.PhysicalDamage];
+                            data.PhysicalDamage = tmp.PhysicalDamage;
+                        }
+                        data.Energy = tmp.Energy;
+                        data.OtherDamage = tmp.OtherDamage;
+                        data.Texts[TooltipElement.Range] = tmp.Texts[TooltipElement.Range];
+                        data.Texts[TooltipElement.CriticalHit] = tmp.Texts[TooltipElement.CriticalHit];
+                        if (tmp.Texts.ContainsKey(TooltipElement.Enhancement)) {
+                            data.Texts[TooltipElement.Enhancement] = tmp.Texts[TooltipElement.Enhancement];
+                        }
+                    }
+                    if (GameHelper.GetItemEnhancementBonus(shield.ArmorComponent) > 0) {
+                        if (data.Texts.ContainsKey(TooltipElement.Damage)) {
+                            data.Texts[Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1] = UIUtility.AddSign(GameHelper.GetItemEnhancementBonus(shield.ArmorComponent));
+                        } else {
+                            data.Texts[TooltipElement.Enhancement] = UIUtility.AddSign(GameHelper.GetItemEnhancementBonus(shield.ArmorComponent));
+                        }
+                    }
+                }
+                if (data.Texts.ContainsKey(TooltipElement.Qualities)) {
+                    data.Texts[TooltipElement.Qualities] = data.Texts[TooltipElement.Qualities].Replace(" ,", ",");
+                }
             }
         }
 
@@ -4059,6 +4062,75 @@ namespace CraftMagicItems {
                 } else {
                     return true;
                 }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(RuleCalculateAttacksCount), "OnTrigger")]
+        private static class RuleCalculateAttacksCountOnTriggerPatch {
+            private static void Postfix(RuleCalculateAttacksCount __instance) {
+                int num = __instance.Initiator.Stats.BaseAttackBonus;
+                int val = Math.Min(Math.Max(0, num / 5 - ((num % 5 != 0) ? 0 : 1)), 3);
+                HandSlot primaryHand = __instance.Initiator.Body.PrimaryHand;
+                HandSlot secondaryHand = __instance.Initiator.Body.SecondaryHand;
+                ItemEntityWeapon maybeWeapon = primaryHand.MaybeWeapon;
+                BlueprintItemWeapon blueprintItemWeapon = (maybeWeapon != null) ? maybeWeapon.Blueprint : null;
+                BlueprintItemWeapon blueprintItemWeapon2;
+                if (secondaryHand.MaybeShield != null) {
+                    if (__instance.Initiator.Descriptor.State.Features.ShieldBash) {
+                        ItemEntityWeapon weaponComponent = secondaryHand.MaybeShield.WeaponComponent;
+                        blueprintItemWeapon2 = ((weaponComponent != null) ? weaponComponent.Blueprint : null);
+                    } else {
+                        blueprintItemWeapon2 = null;
+                    }
+                } else {
+                    ItemEntityWeapon maybeWeapon2 = secondaryHand.MaybeWeapon;
+                    blueprintItemWeapon2 = ((maybeWeapon2 != null) ? maybeWeapon2.Blueprint : null);
+                }
+                if ((primaryHand.MaybeWeapon == null || !primaryHand.MaybeWeapon.HoldInTwoHands) && (blueprintItemWeapon == null || blueprintItemWeapon.IsUnarmed) && blueprintItemWeapon2 && !blueprintItemWeapon2.IsUnarmed) {
+                    __instance.SecondaryHand.PenalizedAttacks += Math.Max(0, val);
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(ItemEntityWeapon), "HoldInTwoHands", Harmony12.MethodType.Getter)]
+        private static class ItemEntityWeaponHoldInTwoHandsPatch {
+            private static void Postfix(ItemEntityWeapon __instance, ref bool __result) {
+                if (!__result) {
+                    if (__instance.IsShield && __instance.Blueprint.IsOneHandedWhichCanBeUsedWithTwoHands && __instance.Wielder != null) {
+                        HandSlot handSlot = __instance.Wielder.Body.PrimaryHand;
+                        __result = handSlot != null && !handSlot.HasItem;
+                    }
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
+        private static class DescriptionTemplatesItemItemEnergyPatch {
+            private static void Postfix(TooltipData data, bool __result) {
+                if (__result) {
+                    if (data.Energy.Count > 0) {
+                        data.Energy.Clear();
+                    }
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnhancement")]
+        private static class DescriptionTemplatesItemItemEnhancementPatch {
+            private static void Postfix(TooltipData data) {
+                if (data.Texts.ContainsKey(Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1)) {
+                    data.Texts[TooltipElement.Enhancement] = data.Texts[Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1];
+                } else if (data.Texts.ContainsKey(TooltipElement.Enhancement)) {
+                    data.Texts.Remove(TooltipElement.Enhancement);
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergyResisit")]
+        private static class DescriptionTemplatesItemItemEnergyResisitPatch {
+            private static bool Prefix(ref bool __result) {
+                __result = false;
+                return false;
             }
         }
     }

@@ -159,6 +159,7 @@
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Shield"],
+    "Restrictions": ["Armor"],
     "CanApplyToMundaneItem": true
   },
   {

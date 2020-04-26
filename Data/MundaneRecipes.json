@@ -85,6 +85,7 @@
     "CostFactor": 1000,
     "MundaneDC": 7,
     "OnlyForSlots": ["Shield"],
+    "Restrictions" : ["Armor"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "78aef04821150bd479314bc974ea73e2:null",

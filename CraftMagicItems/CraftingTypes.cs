@@ -75,6 +75,7 @@ namespace CraftMagicItems {
     }
 
     public enum ItemRestrictions {
+        Weapon,
         WeaponMelee,
         WeaponRanged,
         WeaponBludgeoning,
@@ -93,6 +94,7 @@ namespace CraftMagicItems {
         WeaponTwoHanded,
         WeaponOversized,
         WeaponNotOversized,
+        Armor,
         ArmorMetal,
         ArmorNotMetal,
         ArmorLight,
