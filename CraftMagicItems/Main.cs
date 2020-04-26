@@ -1147,16 +1147,26 @@ namespace CraftMagicItems {
                     }
                 }
 
-                if (availableEnchantments.Length > 0 && selectedRecipe.Enchantments.Length > 1) {
+                var component = selectedRecipe.Enchantments[0].GetComponent<AddStatBonusEquipment>();
+                if (availableEnchantments.Length == 0 || (component != null && upgradeItem != null && upgradeItem.Blueprint.Enchantments.Any(enchantment => {
+                    if (!selectedRecipe.Enchantments.Contains(enchantment)) {
+                        var component2 = enchantment.GetComponent<AddStatBonusEquipment>();
+
+                        if (component2 && component.Stat == component2.Stat) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }))) {
+                    RenderLabel("This item cannot be further upgraded with this enchantment.");
+                    return;
+                } else if (availableEnchantments.Length > 0 && selectedRecipe.Enchantments.Length > 1) {
                     var counter = selectedRecipe.Enchantments.Length - availableEnchantments.Length;
                     var enchantmentNames = availableEnchantments.Select(enchantment => {
                         counter++;
                         return enchantment.Name.Empty() ? GetBonusString(counter, selectedRecipe) : enchantment.Name;
                     });
                     selectedEnchantmentIndex = RenderSelection("", enchantmentNames.ToArray(), 6);
-                } else if (availableEnchantments.Length == 0) {
-                    RenderLabel("This item cannot be further upgraded with this enchantment.");
-                    return;
                 }
 
                 selectedEnchantment = availableEnchantments[selectedEnchantmentIndex];
@@ -1778,7 +1788,7 @@ namespace CraftMagicItems {
         private static string ApplyVisualMapping(RecipeData recipe, BlueprintItem blueprint) {
             if (recipe?.VisualMappings != null) {
                 foreach (var mapping in recipe.VisualMappings) {
-                    if (mapping.StartsWith(blueprint.AssetGuid)) {
+                    if (blueprint.AssetGuid.StartsWith(mapping.Split(':')[0])) {
                         return mapping.Split(':')[1];
                     }
                 }

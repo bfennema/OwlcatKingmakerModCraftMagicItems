@@ -349,7 +349,7 @@ namespace CraftMagicItems {
                         skipped.Add(enchantment);
                     }
                     enchantmentsForDescription.Add(enchantment);
-                    if (guid == MithralArmorEnchantmentGuid) {
+                    if (blueprint is BlueprintItemArmor && guid == MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
                         accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
                     }
@@ -384,10 +384,10 @@ namespace CraftMagicItems {
                 var copyFromBlueprint = visual == "null" ? null : ResourcesLibrary.TryGetBlueprint<BlueprintItem>(visual);
                 var iconSprite = copyFromBlueprint == null ? null : copyFromBlueprint.Icon;
                 accessors.SetBlueprintItemIcon(blueprint, iconSprite);
-                if (blueprint is BlueprintItemEquipmentHand && copyFromBlueprint is BlueprintItemEquipmentHand equipmentHand) {
-                    accessors.SetBlueprintItemEquipmentHandVisualParameters(equipmentHand, equipmentHand.VisualParameters);
-                } else if (blueprint is BlueprintItemArmor && copyFromBlueprint is BlueprintItemArmor armor) {
-                    accessors.SetBlueprintItemArmorVisualParameters(armor, armor.VisualParameters);
+                if (blueprint is BlueprintItemEquipmentHand equipmentHand && copyFromBlueprint is BlueprintItemEquipmentHand srcEquipmentHand) {
+                    accessors.SetBlueprintItemEquipmentHandVisualParameters(equipmentHand, srcEquipmentHand.VisualParameters);
+                } else if (blueprint is BlueprintItemArmor armor && copyFromBlueprint is BlueprintItemArmor srcArmor) {
+                    accessors.SetBlueprintItemArmorVisualParameters(armor, srcArmor.VisualParameters);
                 }
             }
 
