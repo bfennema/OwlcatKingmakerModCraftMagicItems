@@ -400,6 +400,14 @@
     "Value": "When worn, this ring continually allows a living wearer to heal 1 point of damage per round."
   },
   {
+    "Key": "craftMagicItems-mundane-undersized-name",
+    "Value": "Undersized"
+  },
+  {
+    "Key": "craftMagicItems-mundane-undersized-description",
+    "Value": "Weapon is exceptionally small and deals less damage, but attacks with it suffer a penalty of -2 to attack rolls."
+  },
+  {
     "Key": "craftMagicItems-enchantment-impact-name",
     "Value": "Impact"
   },

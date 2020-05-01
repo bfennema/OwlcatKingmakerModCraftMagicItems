@@ -57,6 +57,7 @@ using Kingmaker.UnitLogic.Mechanics.Components;
 using Kingmaker.UnitLogic.Mechanics.ContextData;
 using Kingmaker.UnitLogic.Parts;
 using Kingmaker.Utility;
+using Kingmaker.View.Equipment;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityModManagerNet;
@@ -172,6 +173,27 @@ namespace CraftMagicItems {
             FeatsSection,
             CheatsSection
         }
+
+        struct  IkPatch {
+            public IkPatch(string uuid, float x, float y, float z) {
+                m_uuid = uuid;
+                m_x = x; m_y = y; m_z = z;
+            }
+            public string m_uuid;
+            public float m_x, m_y, m_z;
+        }
+
+        private static readonly IkPatch[] IkPatchList = {
+            new IkPatch("a6f7e3dc443ff114ba68b4648fd33e9f",  0.00f, -0.10f, 0.01f), // dueling sword
+            new IkPatch("13fa38737d46c9e4abc7f4d74aaa59c3",  0.00f, -0.36f, 0.00f), // tongi
+            new IkPatch("1af5621e2ae551e42bd1dd6744d98639",  0.00f, -0.07f, 0.00f), // falcata
+            new IkPatch("d516765b3c2904e4a939749526a52a9a",  0.00f, -0.15f, 0.00f), // estoc
+            new IkPatch("2ece38f30500f454b8569136221e55b0",  0.00f, -0.08f, 0.00f), // rapier
+            new IkPatch("a492410f3d65f744c892faf09daad84a",  0.00f, -0.20f, 0.00f), // heavy pick
+            new IkPatch("6ff66364e0a2c89469c2e52ebb46365e",  0.00f, -0.10f, 0.00f), // trident
+            new IkPatch("d5a167f0f0208dd439ec7481e8989e21",  0.00f, -0.08f, 0.00f), // heavy mace
+            new IkPatch("8fefb7e0da38b06408f185e29372c703", -0.14f,  0.00f, 0.00f), // heavy flail
+        };
 
         public static UnityModManager.ModEntry ModEntry;
         public static Settings ModSettings;
@@ -749,6 +771,14 @@ namespace CraftMagicItems {
                 ? ItemsFilter.ItemType.Shield
                 : blueprint.ItemType;
         }
+        private static BlueprintItem GetBaseBlueprint(BlueprintItem blueprint) {
+            if (blueprint != null) {
+                var assetGuid = CustomBlueprintBuilder.AssetGuidWithoutMatch(blueprint.AssetGuid);
+                return ResourcesLibrary.TryGetBlueprint<BlueprintItem>(assetGuid);
+            } else {
+                return null;
+            }
+        }
 
         public static RecipeData FindSourceRecipe(string selectedEnchantmentId, BlueprintItem blueprint) {
             List<RecipeData> recipes = null;
@@ -766,7 +796,7 @@ namespace CraftMagicItems {
             }
             var slot = GetItemType(blueprint);
             return recipes.FirstOrDefault(recipe => (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(slot))
-                                                    && (blueprint == null || RecipeAppliesToBlueprint(recipe, blueprint, true)));
+                                                    && (blueprint == null || RecipeAppliesToBaseBlueprint(recipe, blueprint, true)));
         }
 
         private static string FindSupersededEnchantmentId(BlueprintItem blueprint, string selectedEnchantmentId) {
@@ -863,7 +893,7 @@ namespace CraftMagicItems {
         }
 
         private static bool IsOversized(BlueprintItem blueprint) {
-            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == OversizedGuid);
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(OversizedGuid));
         }
 
         // Use instead of UIUtility.IsMagicItem.
@@ -955,6 +985,14 @@ namespace CraftMagicItems {
             }
 
             return true;
+        }
+
+        private static bool RecipeAppliesToBaseBlueprint(RecipeData recipe, BlueprintItem blueprint, bool skipEnchantedCheck = false) {
+            var baseBlueprint = GetBaseBlueprint(blueprint);
+            if (skipEnchantedCheck == false && IsEnchanted(blueprint, recipe)) {
+                skipEnchantedCheck = true;
+            }
+            return RecipeAppliesToBlueprint(recipe, baseBlueprint, skipEnchantedCheck, false);
         }
 
         private static bool RecipeAppliesToBlueprint(RecipeData recipe, BlueprintItem blueprint, bool skipEnchantedCheck = false, bool skipMaterialCheck = false) {
@@ -1745,6 +1783,7 @@ namespace CraftMagicItems {
                     : selectedEnchantment.Name;
             var name = upgradeName == null ? baseBlueprint.Name : $"{upgradeName} {baseBlueprint.Name}";
             var visual = ApplyVisualMapping(selectedRecipe, baseBlueprint);
+            var animation = ApplyAnimationMapping(selectedRecipe, baseBlueprint);
             var itemToCraft = baseBlueprint;
             var itemGuid = "[not set]";
             if (selectedRecipe != null) {
@@ -1757,11 +1796,11 @@ namespace CraftMagicItems {
                     }
                 }
                 itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null,
-                    selectedRecipe.Material, visual);
+                    selectedRecipe.Material, visual, animation);
                 if (doubleWeapon) {
                     baseBlueprint = doubleWeapon;
                     itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null,
-                        selectedRecipe.Material, visual, secondEndGuid: itemGuid);
+                        selectedRecipe.Material, visual, animation, secondEndGuid: itemGuid);
                 }
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(itemGuid);
             }
@@ -1796,6 +1835,18 @@ namespace CraftMagicItems {
         private static string ApplyVisualMapping(RecipeData recipe, BlueprintItem blueprint) {
             if (recipe?.VisualMappings != null) {
                 foreach (var mapping in recipe.VisualMappings) {
+                    if (blueprint.AssetGuid.StartsWith(mapping.Split(':')[0])) {
+                        return mapping.Split(':')[1];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static string ApplyAnimationMapping(RecipeData recipe, BlueprintItem blueprint) {
+            if (recipe?.AnimationMappings != null) {
+                foreach (var mapping in recipe.AnimationMappings) {
                     if (blueprint.AssetGuid.StartsWith(mapping.Split(':')[0])) {
                         return mapping.Split(':')[1];
                     }
@@ -2556,6 +2607,9 @@ namespace CraftMagicItems {
                 switch (recipe.CostType) {
                     case RecipeCostType.Flat:
                         return recipe.CostFactor * epicFactor;
+                    case RecipeCostType.Mult:
+                        var baseBlueprint = GetBaseBlueprint(blueprint);
+                        return baseBlueprint.Cost * (recipe.CostFactor - 1) * epicFactor;
                     case RecipeCostType.CasterLevel:
                         return recipe.CostFactor * casterLevel * epicFactor;
                     case RecipeCostType.LevelSquared:
@@ -2574,8 +2628,7 @@ namespace CraftMagicItems {
                     return 3000 - MasterworkCost; // Cost of masterwork is subsumed by the cost of adamantite
                 case PhysicalDamageMaterial.ColdIron:
                     var enhancementLevel = ItemPlusEquivalent(weapon);
-                    var assetGuid = CustomBlueprintBuilder.AssetGuidWithoutMatch(weapon.AssetGuid);
-                    var baseWeapon = ResourcesLibrary.TryGetBlueprint<BlueprintItemWeapon>(assetGuid);
+                    var baseWeapon = GetBaseBlueprint(weapon);
                     // Cold Iron weapons cost double, excluding the masterwork component and 2000 extra for enchanting the first +1
                     // double weapon
                     return (baseWeapon == null ? 0 : (second ? 0 : baseWeapon.Cost)) +
@@ -2603,7 +2656,7 @@ namespace CraftMagicItems {
             var cost = 0;
             foreach (var enchantment in blueprint.Enchantments) {
                 var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
-                if (recipe != null && recipe.CostType != RecipeCostType.EnhancementLevelSquared && RecipeAppliesToBlueprint(recipe, blueprint)) {
+                if (recipe != null && recipe.CostType != RecipeCostType.EnhancementLevelSquared && RecipeAppliesToBaseBlueprint(recipe, blueprint)) {
                     var enchantmentCost = GetEnchantmentCost(enchantment.AssetGuid, blueprint);
                     cost += enchantmentCost;
                     if (mostExpensiveEnchantmentCost < enchantmentCost) {
@@ -2918,7 +2971,7 @@ namespace CraftMagicItems {
             private static void PatchBlueprints() {
                 var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ShieldMasterGuid);
                 var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
-                for (int i = 0; i<twoWeaponFighting.ComponentsArray.Length; i++) {
+                for (int i = 0; i < twoWeaponFighting.ComponentsArray.Length; i++) {
                     if (twoWeaponFighting.ComponentsArray[i] is TwoWeaponFightingAttackPenalty component) {
                         twoWeaponFighting.ComponentsArray[i] = CraftMagicItems.Accessors.Create<TwoWeaponFightingAttackPenaltyPatch>(a => {
                             a.name = component.name.Replace("TwoWeaponFightingAttackPenalty", "TwoWeaponFightingAttackPenaltyPatch");
@@ -2928,7 +2981,7 @@ namespace CraftMagicItems {
                     Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
                 }
 
-                for (int i = 0; i<shieldMaster.ComponentsArray.Length; i++) {
+                for (int i = 0; i < shieldMaster.ComponentsArray.Length; i++) {
                     if (shieldMaster.ComponentsArray[i] is ShieldMaster component) {
                         shieldMaster.ComponentsArray[i] = CraftMagicItems.Accessors.Create<ShieldMasterPatch>(a => {
                             a.name = component.name.Replace("ShieldMaster", "ShieldMasterPatch");
@@ -2961,9 +3014,25 @@ namespace CraftMagicItems {
                 }
             }
 
+            private static void PatchIk() {
+                foreach (var patch in IkPatchList) {
+                    var weapon = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(patch.m_uuid);
+                    if (weapon != null) {
+                        var model = weapon.VisualParameters.Model; var equipmentOffsets = model.GetComponent<EquipmentOffsets>();
+                        var locator = new GameObject();
+                        locator.transform.SetParent(model.transform);
+                        locator.transform.localPosition = new Vector3(patch.m_x, patch.m_y, patch.m_z);
+                        locator.transform.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
+                        locator.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                        equipmentOffsets.IkTargetLeftHand = locator.transform;
+                    }
+                }
+            }
+
             private static void InitialiseMod() {
                 if (modEnabled) {
                     PatchBlueprints();
+                    PatchIk();
                     InitialiseCraftingData();
                     AddAllCraftingFeats();
                 }
@@ -3605,6 +3674,85 @@ namespace CraftMagicItems {
             }
         }
 
+        [Harmony12.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
+        // ReSharper disable once UnusedMember.Local
+        private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch
+        {
+            private static bool Prefix(WeaponParametersAttackBonus __instance, RuleCalculateAttackBonusWithoutTarget evt) {
+                if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
+                    IsOversized(evt.Weapon.Blueprint)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(WeaponParametersDamageBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
+        // ReSharper disable once UnusedMember.Local
+        private static class WeaponParametersDamageBonusOnEventAboutToTriggerPatch
+        {
+            private static bool Prefix(WeaponParametersDamageBonus __instance, RuleCalculateWeaponStats evt) {
+                if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
+                    IsOversized(evt.Weapon.Blueprint)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(AttackStatReplacement), "OnEventAboutToTrigger")]
+        // ReSharper disable once UnusedMember.Local
+        private static class AttackStatReplacementOnEventAboutToTriggerPatch
+        {
+            private static bool Prefix(AttackStatReplacement __instance, RuleCalculateAttackBonusWithoutTarget evt) {
+                if (evt.Weapon != null && __instance.SubCategory == WeaponSubCategory.Finessable &&
+                    evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) && IsOversized(evt.Weapon.Blueprint)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(DamageGrace), "OnEventAboutToTrigger")]
+        // ReSharper disable once UnusedMember.Local
+        private static class DamageGraceOnEventAboutToTriggerPatch
+        {
+            private static bool Prefix(DamageGrace __instance, RuleCalculateWeaponStats evt) {
+                if (evt.Weapon != null && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
+                    IsOversized(evt.Weapon.Blueprint)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
+        // ReSharper disable once UnusedMember.Local
+        private static class UIUtilityItemGetQualitiesPatch
+        {
+            // ReSharper disable once UnusedMember.Local
+            private static void Postfix(ItemEntity item, ref string __result) {
+                if (!item.IsIdentified) {
+                    return;
+                }
+                ItemEntityWeapon itemEntityWeapon = item as ItemEntityWeapon;
+                if (itemEntityWeapon == null) {
+                    return;
+                }
+                WeaponCategory category = itemEntityWeapon.Blueprint.Category;
+                if (category.HasSubCategory(WeaponSubCategory.Finessable) && IsOversized(itemEntityWeapon.Blueprint)) {
+                    __result = __result.Replace(LocalizedTexts.Instance.WeaponSubCategories.GetText(WeaponSubCategory.Finessable), "");
+                    __result = __result.Replace(",  ,", ",");
+                    char[] charsToTrim = { ',', ' ' };
+                    __result = __result.Trim(charsToTrim);
+                }
+            }
+        }
+
         [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillArmorEnchantmentsPatch
@@ -3629,22 +3777,6 @@ namespace CraftMagicItems {
                         }
                     }
                 }
-            }
-        }
-
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillWeaponDamage")]
-        // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemFillWeaponDamagePatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Prefix(RuleCalculateWeaponStats defaultWeaponStats) {
-                defaultWeaponStats.DoNotScaleDamage = false;
-                // Apparently need to reset bonus damage manually, if I'm going to re-run trigger.
-                defaultWeaponStats.AddBonusDamage(-defaultWeaponStats.BonusDamage);
-                defaultWeaponStats.DamageDescription.Clear();
-                defaultWeaponStats.DamageDescription.Add(null);
-                defaultWeaponStats.AdditionalCriticalMultiplier = 0;
-                defaultWeaponStats.CriticalEdgeBonus = 0;
-                defaultWeaponStats.OnTrigger(null);
             }
         }
 
@@ -4131,6 +4263,26 @@ namespace CraftMagicItems {
             private static bool Prefix(ref bool __result) {
                 __result = false;
                 return false;
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", Harmony12.MethodType.Getter)]
+        private static class UnitViewHandSlotDataWeaponScalePatch
+        {
+            private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
+                if (__instance.VisibleItem is ItemEntityWeapon weapon && !weapon.Blueprint.AssetGuid.Contains(",visual=")) {
+                    var enchantment = GetEnchantments(weapon.Blueprint).FirstOrDefault(e => e.AssetGuid.StartsWith(OversizedGuid));
+                    if (enchantment != null) {
+                        var component = enchantment.GetComponent<WeaponBaseSizeChange>();
+                        if (component != null) {
+                            if (component.SizeCategoryChange > 0) {
+                                __result *= 4.0f / 3.0f;
+                            } else if (component.SizeCategoryChange < 0) {
+                                __result *= 0.75f;
+                            }
+                        }
+                    }
+                }
             }
         }
     }

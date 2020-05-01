@@ -192,7 +192,7 @@
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 1,
     "OnlyForSlots": ["Weapon"],
-    "Restrictions": ["WeaponFinessable"]
+    "Restrictions": ["WeaponFinessable", "WeaponNotOversized"]
   },
   {
     "Name": "WeaponAnarchic",

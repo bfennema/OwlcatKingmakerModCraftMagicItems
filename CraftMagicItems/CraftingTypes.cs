@@ -71,7 +71,8 @@ namespace CraftMagicItems {
         LevelSquared,
         EnhancementLevelSquared,
         CasterLevel,
-        Flat
+        Flat,
+        Mult
     }
 
     public enum ItemRestrictions {
@@ -152,6 +153,7 @@ namespace CraftMagicItems {
         [JsonProperty] public bool CanApplyToMundaneItem;
 
         [JsonProperty] public string[] VisualMappings;
+        [JsonProperty] public string[] AnimationMappings;
     }
 
     public class CraftingTypeConverter : CustomCreationConverter<ICraftingData> {

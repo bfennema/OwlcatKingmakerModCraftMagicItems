@@ -21,6 +21,7 @@ using Kingmaker.UI.Common;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.View.Animation;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -38,6 +39,7 @@ namespace CraftMagicItems {
                       @")\))?"
                       + @"|enchantments=\((?<enchantments>|" + MatchedParensComma + @")\)(,remove=(?<remove>[0-9a-f;]+))?(,name=(?<name>[^✔]+)✔)?"
                       + @"(,ability=(?<ability>null|[0-9a-f]+))?(,activatableAbility=(?<activatableAbility>null|[0-9a-f]+))?(,material=(?<material>[a-zA-Z]+))?(,visual=(?<visual>null|[0-9a-f]+))?"
+                      + @"(,animation=(?<animation>null|[a-zA-Z]+))?"
                       + @"(,CL=(?<casterLevel>[0-9]+))?(,SL=(?<spellLevel>[0-9]+))?(,perDay=(?<perDay>[0-9]+))?(,nameId=(?<nameId>[^,]+))?(,descriptionId=(?<descriptionId>[^,]+))?"
                       + $"(,secondEnd=(?<secondEnd>{MatchedParensComma}))?"
                       + @"|feat=(?<feat>[-a-z]+)"
@@ -99,8 +101,8 @@ namespace CraftMagicItems {
         }
 
         public string BuildCustomRecipeItemGuid(string originalGuid, IEnumerable<string> enchantments, string[] remove = null, string name = null,
-            string ability = null, string activatableAbility = null, PhysicalDamageMaterial material = 0, string visual = null, int casterLevel = -1,
-            int spellLevel = -1, int perDay = -1, string nameId = null, string descriptionId = null, string secondEndGuid = null) {
+            string ability = null, string activatableAbility = null, PhysicalDamageMaterial material = 0, string visual = null, string animation = null,
+            int casterLevel = -1, int spellLevel = -1, int perDay = -1, string nameId = null, string descriptionId = null, string secondEndGuid = null) {
             // Check if GUID is already customised by this mod
             var match = BlueprintRegex.Match(originalGuid);
             if (match.Success && match.Groups["enchantments"].Success) {
@@ -141,6 +143,10 @@ namespace CraftMagicItems {
                     visual = match.Groups["visual"].Value;
                 }
 
+                if (animation == null && match.Groups["animation"].Success) {
+                    animation = match.Groups["animation"].Value;
+                }
+
                 if (match.Groups["casterLevel"].Success) {
                     casterLevel = Math.Max(casterLevel, int.Parse(match.Groups["casterLevel"].Value));
                 }
@@ -176,6 +182,7 @@ namespace CraftMagicItems {
                    $"{(activatableAbility == null ? "" : $",activatableAbility={activatableAbility}")}" +
                    $"{(material == 0 ? "" : $",material={material}")}" +
                    $"{(visual == null ? "" : $",visual={visual}")}" +
+                   $"{(animation == null ? "" : $",animation={animation}")}" +
                    $"{(casterLevel == -1 ? "" : $",CL={casterLevel}")}" +
                    $"{(spellLevel == -1 ? "" : $",SL={spellLevel}")}" +
                    $"{(perDay == -1 ? "" : $",perDay={perDay}")}" +
@@ -336,6 +343,7 @@ namespace CraftMagicItems {
             var enchantmentIds = enchantmentsValue.Split(';');
             var skipped = new List<BlueprintItemEnchantment>();
             var enchantmentsForDescription = new List<BlueprintItemEnchantment>();
+            int sizeCategoryChange = 0;
             if (!string.IsNullOrEmpty(enchantmentsValue)) {
                 foreach (var guid in enchantmentIds) {
                     var enchantment = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(guid);
@@ -352,6 +360,17 @@ namespace CraftMagicItems {
                     if (blueprint is BlueprintItemArmor && guid == MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
                         accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
+                    }
+                    if (blueprint is BlueprintItemEquipmentHand) {
+                        var weaponBaseSizeChange = enchantment.GetComponent<WeaponBaseSizeChange>();
+                        if (weaponBaseSizeChange != null) {
+                            sizeCategoryChange = weaponBaseSizeChange.SizeCategoryChange;
+                            if (sizeCategoryChange > 0) {
+                                accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight * 2);
+                            } else if (sizeCategoryChange < 0) {
+                                accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
+                            }
+                        }
                     }
 
                     if (!(blueprint is BlueprintItemShield) && (Main.GetItemType(blueprint) != ItemsFilter.ItemType.Shield
@@ -377,6 +396,8 @@ namespace CraftMagicItems {
                 }
             }
 
+            var equipmentHand = blueprint as BlueprintItemEquipmentHand;
+
             string visual = null;
             if (match.Groups["visual"].Success) {
                 visual = match.Groups["visual"].Value;
@@ -384,10 +405,21 @@ namespace CraftMagicItems {
                 var copyFromBlueprint = visual == "null" ? null : ResourcesLibrary.TryGetBlueprint<BlueprintItem>(visual);
                 var iconSprite = copyFromBlueprint == null ? null : copyFromBlueprint.Icon;
                 accessors.SetBlueprintItemIcon(blueprint, iconSprite);
-                if (blueprint is BlueprintItemEquipmentHand equipmentHand && copyFromBlueprint is BlueprintItemEquipmentHand srcEquipmentHand) {
+                if (equipmentHand != null && copyFromBlueprint is BlueprintItemEquipmentHand srcEquipmentHand) {
                     accessors.SetBlueprintItemEquipmentHandVisualParameters(equipmentHand, srcEquipmentHand.VisualParameters);
                 } else if (blueprint is BlueprintItemArmor armor && copyFromBlueprint is BlueprintItemArmor srcArmor) {
                     accessors.SetBlueprintItemArmorVisualParameters(armor, srcArmor.VisualParameters);
+                }
+            }
+
+            string animation = null;
+            if (match.Groups["animation"].Success) {
+                animation = match.Groups["animation"].Value;
+                WeaponAnimationStyle weaponAnimation;
+                if (Enum.TryParse(animation, out weaponAnimation)) {
+                    if (equipmentHand != null) {
+                        accessors.SetBlueprintItemEquipmentWeaponAnimationStyle(equipmentHand.VisualParameters, weaponAnimation);
+                    }
                 }
             }
 
@@ -456,8 +488,8 @@ namespace CraftMagicItems {
             }
 
             accessors.SetBlueprintItemCost(blueprint, Main.RulesRecipeItemCost(blueprint) + priceDelta);
-            return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds, name, ability, activatableAbility, material, visual, casterLevel,
-                spellLevel, perDay, nameId, descriptionId, secondEndGuid);
+            return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds, name, ability, activatableAbility, material, visual, animation,
+                casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid);
         }
 
         private T CloneObject<T>(T originalObject) {

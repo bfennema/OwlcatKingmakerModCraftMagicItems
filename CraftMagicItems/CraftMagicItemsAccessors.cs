@@ -21,6 +21,7 @@ using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.View.Animation;
 using UnityEngine;
 
 namespace CraftMagicItems {
@@ -78,6 +79,12 @@ namespace CraftMagicItems {
 
         public readonly FastSetter<BlueprintItemEquipmentHand, WeaponVisualParameters> SetBlueprintItemEquipmentHandVisualParameters =
             Accessors.CreateSetter<BlueprintItemEquipmentHand, WeaponVisualParameters>("m_VisualParameters");
+
+        public readonly FastSetter<WeaponVisualParameters, GameObject> SetWeaponVisualParametersModel =
+            Accessors.CreateSetter<WeaponVisualParameters, GameObject>("m_WeaponModel");
+
+        public readonly FastSetter<WeaponVisualParameters, WeaponAnimationStyle> SetBlueprintItemEquipmentWeaponAnimationStyle =
+            Accessors.CreateSetter<WeaponVisualParameters, WeaponAnimationStyle>("m_WeaponAnimationStyle");
 
         public readonly FastSetter<BlueprintItemArmor, ArmorVisualParameters> SetBlueprintItemArmorVisualParameters =
             Accessors.CreateSetter<BlueprintItemArmor, ArmorVisualParameters>("m_VisualParameters");
