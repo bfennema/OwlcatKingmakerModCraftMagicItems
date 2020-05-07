@@ -220,6 +220,7 @@ namespace CraftMagicItems {
             new Dictionary<UsableItemType, Dictionary<string, List<BlueprintItemEquipment>>>();
 
         private static readonly Dictionary<string, List<ItemCraftingData>> SubCraftingData = new Dictionary<string, List<ItemCraftingData>>();
+        private static readonly Dictionary<string, BlueprintItem> TypeToItem = new Dictionary<string, BlueprintItem>();
         private static readonly Dictionary<string, List<BlueprintItemEquipment>> EnchantmentIdToItem = new Dictionary<string, List<BlueprintItemEquipment>>();
         private static readonly Dictionary<string, List<RecipeData>> EnchantmentIdToRecipe = new Dictionary<string, List<RecipeData>>();
         private static readonly Dictionary<PhysicalDamageMaterial, List<RecipeData>> MaterialToRecipe = new Dictionary<PhysicalDamageMaterial, List<RecipeData>>();
@@ -771,6 +772,7 @@ namespace CraftMagicItems {
                 ? ItemsFilter.ItemType.Shield
                 : blueprint.ItemType;
         }
+
         private static BlueprintItem GetBaseBlueprint(BlueprintItem blueprint) {
             if (blueprint != null) {
                 var assetGuid = CustomBlueprintBuilder.AssetGuidWithoutMatch(blueprint.AssetGuid);
@@ -778,6 +780,21 @@ namespace CraftMagicItems {
             } else {
                 return null;
             }
+        }
+
+        private static string GetBlueprintItemType(BlueprintItem blueprint) {
+            string assetGuid = null;
+            switch (blueprint) {
+                case BlueprintItemArmor armor:   assetGuid = armor.Type.AssetGuid;  break;
+                case BlueprintItemShield shield: assetGuid = shield.Type.AssetGuid; break;
+                case BlueprintItemWeapon weapon: assetGuid = weapon.Type.AssetGuid; break;
+            }
+            return assetGuid;
+        }
+
+        private static BlueprintItem GetStandardItem(BlueprintItem blueprint) {
+            string assetGuid = GetBlueprintItemType(blueprint);
+            return !string.IsNullOrEmpty(assetGuid) && TypeToItem.ContainsKey(assetGuid) ? TypeToItem[assetGuid] : null;
         }
 
         public static RecipeData FindSourceRecipe(string selectedEnchantmentId, BlueprintItem blueprint) {
@@ -818,7 +835,7 @@ namespace CraftMagicItems {
         }
 
         private static bool DoesItemMatchAllEnchantments(BlueprintItemEquipment blueprint, string selectedEnchantmentId,
-            BlueprintItemEquipment upgradeItem = null, bool checkPrice = false) {
+            string selectedEnchantmentIdDouble = null, BlueprintItemEquipment upgradeItem = null, bool checkPrice = false) {
             var isNotable = upgradeItem && upgradeItem.IsNotable;
             var ability = upgradeItem ? upgradeItem.Ability : null;
             var activatableAbility = upgradeItem ? upgradeItem.ActivatableAbility : null;
@@ -827,8 +844,8 @@ namespace CraftMagicItems {
                 return false;
             }
 
-            var supersededEnchantmentId = FindSupersededEnchantmentId(upgradeItem, selectedEnchantmentId);
-            var enchantmentCount = (upgradeItem ? GetEnchantments(upgradeItem).Count() : 0) + (supersededEnchantmentId == null ? 1 : 0);
+            var supersededEnchantmentId = string.IsNullOrEmpty(selectedEnchantmentId) ? null : FindSupersededEnchantmentId(upgradeItem, selectedEnchantmentId);
+            var enchantmentCount = (upgradeItem ? GetEnchantments(upgradeItem).Count() : 0) + (selectedEnchantmentId == null ? 0 : supersededEnchantmentId == null ? 1 : 0);
             if (GetEnchantments(blueprint).Count() != enchantmentCount) {
                 return false;
             }
@@ -854,6 +871,16 @@ namespace CraftMagicItems {
                 // Special handler for heavy shield, because the game data has some very messed up shields in it.
                 if (blueprint.AssetGuid == "6989ca8e0d28af643b908468ead16922") {
                     return false;
+                }
+
+                if (blueprint is BlueprintItemWeapon blueprintWeapon && upgradeItem is BlueprintItemWeapon upgradeWeapon) {
+                    if (blueprintWeapon.Double && !upgradeWeapon.Double || !blueprintWeapon.Double && upgradeWeapon.Double) {
+                        return false;
+                    } else if (blueprintWeapon.Double && upgradeWeapon.Double) {
+                        if (!DoesItemMatchAllEnchantments(blueprintWeapon.SecondWeapon, selectedEnchantmentIdDouble, null, upgradeWeapon.SecondWeapon, false)) {
+                            return false;
+                        }
+                    }
                 }
             }
 
@@ -1147,7 +1174,8 @@ namespace CraftMagicItems {
 
             // Pick recipe to apply, but make any with the same ParentNameId appear in a second level menu under their parent name.
             var availableRecipes = craftingData.Recipes
-                .Where(recipe => (recipe.ParentNameId == null || recipe == craftingData.SubRecipes[recipe.ParentNameId][0])
+                .Where(recipe => recipe.NameId != null
+                                 && (recipe.ParentNameId == null || recipe == craftingData.SubRecipes[recipe.ParentNameId][0])
                                  && (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(selectedSlot))
                                  && RecipeAppliesToBlueprint(recipe, upgradeItem?.Blueprint))
                 .OrderBy(recipe => new L10NString(recipe.ParentNameId ?? recipe.NameId).ToString())
@@ -1265,14 +1293,30 @@ namespace CraftMagicItems {
             // See if the selected enchantment (plus optional mundane base item) corresponds to a vanilla blueprint.
             var allItemBlueprintsWithEnchantment = FindItemBlueprintForEnchantmentId(selectedEnchantment.AssetGuid)?.Where(blueprint =>
                 DoesBlueprintMatchSlot(blueprint, selectedSlot) && DoesBlueprintMatchRestrictions(blueprint, selectedSlot, craftingData.SlotRestrictions));
-            var matchingItem = allItemBlueprintsWithEnchantment?.FirstOrDefault(blueprint =>
-                DoesItemMatchAllEnchantments(blueprint, selectedEnchantment.AssetGuid, upgradeItem?.Blueprint as BlueprintItemEquipment, true)
-            );
+            BlueprintItemEquipment matchingItem = null;
+            if (upgradeItemDoubleWeapon != null) {
+                matchingItem = allItemBlueprintsWithEnchantment?.FirstOrDefault(blueprint =>
+                    DoesItemMatchAllEnchantments(blueprint, null, selectedEnchantment.AssetGuid, upgradeItemDoubleWeapon?.Blueprint as BlueprintItemEquipment, false)
+                );
+            } else {
+                matchingItem = allItemBlueprintsWithEnchantment?.FirstOrDefault(blueprint =>
+                    DoesItemMatchAllEnchantments(blueprint, selectedEnchantment.AssetGuid, null, upgradeItem?.Blueprint as BlueprintItemEquipment, false)
+                );
+            }
             BlueprintItemEquipment itemToCraft;
             var itemGuid = "[not set]";
             if (matchingItem) {
                 // Crafting an existing blueprint.
-                itemToCraft = matchingItem;
+                if (upgradeItemDoubleWeapon != null) {
+                    upgradeItem = upgradeItemDoubleWeapon;
+                }
+                if (RulesRecipeItemCost(matchingItem) == matchingItem.Cost) {
+                    itemToCraft = matchingItem;
+                } else {
+                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(matchingItem.AssetGuid, Enumerable.Empty<string>(),
+                        priceAdjust: RulesRecipeItemCost(matchingItem) - matchingItem.Cost);
+                    itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
+                }
             } else if (upgradeItem != null) {
                 // Upgrading to a custom blueprint
                 var name = upgradeItem.Blueprint.Name;
@@ -1699,7 +1743,7 @@ namespace CraftMagicItems {
 
             // Choose crafting data
             var itemTypes = ItemCraftingData
-                .Where(data => data.FeatGuid == null
+                .Where(data => data.NameId != null && data.FeatGuid == null
                                && (data.ParentNameId == null || SubCraftingData[data.ParentNameId][0] == data))
                 .ToArray();
             var itemTypeNames = itemTypes.Select(data => new L10NString(data.ParentNameId ?? data.NameId).ToString()).ToArray();
@@ -2127,6 +2171,13 @@ namespace CraftMagicItems {
             }
 
             return SpellIdToItem[itemType].ContainsKey(spell.AssetGuid) ? SpellIdToItem[itemType][spell.AssetGuid] : null;
+        }
+
+        private static void AddItemForType(BlueprintItem blueprint) {
+            string assetGuid = GetBlueprintItemType(blueprint);
+            if (!string.IsNullOrEmpty(assetGuid)) {
+                TypeToItem.Add(assetGuid, blueprint);
+            }
         }
 
         private static void AddItemIdForEnchantment(BlueprintItemEquipment itemBlueprint) {
@@ -2628,10 +2679,10 @@ namespace CraftMagicItems {
                     return 3000 - MasterworkCost; // Cost of masterwork is subsumed by the cost of adamantite
                 case PhysicalDamageMaterial.ColdIron:
                     var enhancementLevel = ItemPlusEquivalent(weapon);
-                    var baseWeapon = GetBaseBlueprint(weapon);
+                    var standardWeapon = GetStandardItem(weapon);
                     // Cold Iron weapons cost double, excluding the masterwork component and 2000 extra for enchanting the first +1
                     // double weapon
-                    return (baseWeapon == null ? 0 : (second ? 0 : baseWeapon.Cost)) +
+                    return (standardWeapon == null ? 0 : (second ? 0 : standardWeapon.Cost)) +
                            (enhancementLevel > 0 ? WeaponPlusCost : 0);
                 case PhysicalDamageMaterial.Silver:
                     // PhysicalDamageMaterial.Silver is really Mithral.  Non-armor Mithral items cost 500 gp per pound of the original, non-Mithral item, which
@@ -2653,7 +2704,8 @@ namespace CraftMagicItems {
             }
 
             var mostExpensiveEnchantmentCost = 0;
-            var cost = 0;
+            var standardBlueprint = GetStandardItem(blueprint);
+            var cost = !second && standardBlueprint != null ? standardBlueprint.Cost : 0;
             foreach (var enchantment in blueprint.Enchantments) {
                 var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
                 if (recipe != null && recipe.CostType != RecipeCostType.EnhancementLevelSquared && RecipeAppliesToBaseBlueprint(recipe, blueprint)) {
@@ -2775,6 +2827,13 @@ namespace CraftMagicItems {
                                 }
 
                                 recipeBased.SubRecipes[recipe.ParentNameId].Add(recipe);
+                            }
+                        }
+
+                        if (recipeBased.Name.StartsWith("CraftMundane")) {
+                            foreach (var guid in recipeBased.NewItemBaseIDs) {
+                                var blueprint = ResourcesLibrary.TryGetBlueprint(guid) as BlueprintItem;
+                                AddItemForType(blueprint);
                             }
                         }
                     }

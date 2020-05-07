@@ -39,7 +39,7 @@ namespace CraftMagicItems {
                       @")\))?"
                       + @"|enchantments=\((?<enchantments>|" + MatchedParensComma + @")\)(,remove=(?<remove>[0-9a-f;]+))?(,name=(?<name>[^✔]+)✔)?"
                       + @"(,ability=(?<ability>null|[0-9a-f]+))?(,activatableAbility=(?<activatableAbility>null|[0-9a-f]+))?(,material=(?<material>[a-zA-Z]+))?(,visual=(?<visual>null|[0-9a-f]+))?"
-                      + @"(,animation=(?<animation>null|[a-zA-Z]+))?"
+                      + @"(,animation=(?<animation>null|[a-zA-Z]+))?(,priceAdjust=(?<priceAdjust>[-0-9]+))?"
                       + @"(,CL=(?<casterLevel>[0-9]+))?(,SL=(?<spellLevel>[0-9]+))?(,perDay=(?<perDay>[0-9]+))?(,nameId=(?<nameId>[^,]+))?(,descriptionId=(?<descriptionId>[^,]+))?"
                       + $"(,secondEnd=(?<secondEnd>{MatchedParensComma}))?"
                       + @"|feat=(?<feat>[-a-z]+)"
@@ -102,7 +102,8 @@ namespace CraftMagicItems {
 
         public string BuildCustomRecipeItemGuid(string originalGuid, IEnumerable<string> enchantments, string[] remove = null, string name = null,
             string ability = null, string activatableAbility = null, PhysicalDamageMaterial material = 0, string visual = null, string animation = null,
-            int casterLevel = -1, int spellLevel = -1, int perDay = -1, string nameId = null, string descriptionId = null, string secondEndGuid = null) {
+            int casterLevel = -1, int spellLevel = -1, int perDay = -1, string nameId = null, string descriptionId = null, string secondEndGuid = null,
+            int priceAdjust = 0) {
             // Check if GUID is already customised by this mod
             var match = BlueprintRegex.Match(originalGuid);
             if (match.Success && match.Groups["enchantments"].Success) {
@@ -147,6 +148,10 @@ namespace CraftMagicItems {
                     animation = match.Groups["animation"].Value;
                 }
 
+                if (priceAdjust == 0 && match.Groups["priceAdjust"].Success) {
+                    priceAdjust = int.Parse(match.Groups["priceAdjust"].Value);
+                }
+
                 if (match.Groups["casterLevel"].Success) {
                     casterLevel = Math.Max(casterLevel, int.Parse(match.Groups["casterLevel"].Value));
                 }
@@ -183,6 +188,7 @@ namespace CraftMagicItems {
                    $"{(material == 0 ? "" : $",material={material}")}" +
                    $"{(visual == null ? "" : $",visual={visual}")}" +
                    $"{(animation == null ? "" : $",animation={animation}")}" +
+                   $"{(priceAdjust == 0 ? "" : $",priceAdjust={priceAdjust}")}" +
                    $"{(casterLevel == -1 ? "" : $",CL={casterLevel}")}" +
                    $"{(spellLevel == -1 ? "" : $",SL={spellLevel}")}" +
                    $"{(perDay == -1 ? "" : $",perDay={perDay}")}" +
@@ -333,7 +339,11 @@ namespace CraftMagicItems {
                     : ResourcesLibrary.TryGetBlueprint<BlueprintActivatableAbility>(activatableAbility);
             }
 
-            if (!initiallyMundane && enchantmentsCopy.Count == 0
+            var priceAdjust = 0;
+            if (match.Groups["priceAdjust"].Success) {
+                priceAdjust = int.Parse(match.Groups["priceAdjust"].Value);
+                priceDelta += priceAdjust;
+            } else if (!initiallyMundane && enchantmentsCopy.Count == 0
                                   && (blueprint.Ability == null || ability != null) && (blueprint.ActivatableAbility == null || activatableAbility != null)) {
                 // We're down to a base item with no abilities - reset priceDelta.
                 priceDelta = 0;
@@ -489,7 +499,7 @@ namespace CraftMagicItems {
 
             accessors.SetBlueprintItemCost(blueprint, Main.RulesRecipeItemCost(blueprint) + priceDelta);
             return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds, name, ability, activatableAbility, material, visual, animation,
-                casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid);
+                casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);
         }
 
         private T CloneObject<T>(T originalObject) {

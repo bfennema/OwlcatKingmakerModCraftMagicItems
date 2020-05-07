@@ -276,6 +276,14 @@
   },
   {
     "DataType": "RecipeBased",
+    "Name": "CraftMundaneExtraWeapons",
+    "NewItemBaseIDs": [
+      "85c8efabf99ccc143b0fc2d73e795634"
+    ],
+    "RecipeFileNames": ["MundaneRecipes.json"],
+  },
+  {
+    "DataType": "RecipeBased",
     "Name": "CraftMundaneAlchemicalItems",
     "NameId": "43190791-b32a-4df1-b278-91cbbc25592a",
     "NewItemBaseIDs": [
