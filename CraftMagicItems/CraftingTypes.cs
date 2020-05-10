@@ -134,6 +134,7 @@ namespace CraftMagicItems {
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public CrafterPrerequisiteType[] CrafterPrerequisites;
+        [JsonProperty] public bool PrerequisitesMandatory;
 
         [JsonProperty] public bool AnyPrerequisite;
 

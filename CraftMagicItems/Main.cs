@@ -1461,6 +1461,9 @@ namespace CraftMagicItems {
                 if (equipment == null || equipment.Ability != null && equipment.SpendCharges && !equipment.RestoreChargesOnRest) {
                     RenderLabel($"{upgradeItem.Name} cannot cast a spell N times a day (this is unexpected - please let the mod author know)");
                     return;
+                } else if (!equipment.Ability.IsSpell) {
+                    RenderLabel($"{equipment.Ability.Name} is not a spell, so cannot be upgraded.");
+                    return;
                 }
             }
 
@@ -1566,7 +1569,8 @@ namespace CraftMagicItems {
             RenderLabel(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
             GameLogContext.Clear();
             var recipe = new RecipeData {
-                PrerequisiteSpells = new[] {ability}
+                PrerequisiteSpells = new[] {ability},
+                PrerequisitesMandatory = true
             };
             RenderRecipeBasedCraftItemControl(caster, craftingData, recipe, selectedCasterLevel, itemToCraft, upgradeItem);
         }
@@ -2496,8 +2500,8 @@ namespace CraftMagicItems {
                     CraftItem(resultItem, upgradeItem);
                 } else {
                     var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, recipe?.Name,
-                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.AnyPrerequisite ?? false, upgradeItem,
-                        recipe?.CrafterPrerequisites ?? new CrafterPrerequisiteType[0]);
+                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisitesMandatory ?? false,
+                        recipe?.AnyPrerequisite ?? false, upgradeItem, recipe?.CrafterPrerequisites ?? new CrafterPrerequisiteType[0]);
                     AddNewProject(caster.Descriptor, project);
                     CalculateProjectEstimate(project);
                     currentSection = OpenSection.ProjectsSection;
@@ -2717,7 +2721,7 @@ namespace CraftMagicItems {
                 }
             }
 
-            if (blueprint is BlueprintItemEquipment equipment && equipment.Ability != null && equipment.RestoreChargesOnRest) {
+            if (blueprint is BlueprintItemEquipment equipment && equipment.Ability != null && equipment.Ability.IsSpell && equipment.RestoreChargesOnRest) {
                 var castSpellCost = (int)(equipment.Charges * equipment.CasterLevel * 360 * (equipment.SpellLevel == 0 ? 0.5 : equipment.SpellLevel));
                 cost += castSpellCost;
                 if (mostExpensiveEnchantmentCost < castSpellCost) {
@@ -3432,7 +3436,7 @@ namespace CraftMagicItems {
                 var missing = CheckSpellPrerequisites(project, caster, isAdventuring, out var missingSpells, out var spellsToCast);
                 if (missing > 0) {
                     var missingSpellNames = missingSpells.Select(ability => ability.Name).BuildCommaList(project.AnyPrerequisite);
-                    if (craftingData.PrerequisitesMandatory) {
+                    if (craftingData.PrerequisitesMandatory || project.PrerequisitesMandatory) {
                         project.AddMessage(L10NFormat("craftMagicItems-logMessage-missing-prerequisite",
                             project.ResultItem.Name, missingSpellNames));
                         AddBattleLogMessage(project.LastMessage);
@@ -3495,7 +3499,7 @@ namespace CraftMagicItems {
                                     // We've run out of items that can cast the spell...crafting progress is going to slow, if not stop.
                                     progressGold -= progressPerDay * (daysCrafting - day);
                                     skillCheck -= MissingPrerequisiteDCModifier;
-                                    if (craftingData.PrerequisitesMandatory) {
+                                    if (craftingData.PrerequisitesMandatory || project.PrerequisitesMandatory) {
                                         AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-prerequisite", project.ResultItem.Name, spell.Name));
                                         daysCrafting = day;
                                         break;
