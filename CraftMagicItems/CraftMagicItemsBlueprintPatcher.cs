@@ -491,7 +491,8 @@ namespace CraftMagicItems {
             if (descriptionId != null) {
                 accessors.SetBlueprintItemDescriptionText(blueprint, new L10NString(descriptionId));
                 accessors.SetBlueprintItemFlavorText(blueprint, new L10NString(""));
-            } else if (!DoesBlueprintShowEnchantments(blueprint) || enchantmentsForDescription.Count != skipped.Count || removed.Count > 0) {
+            } else if ((blueprint is BlueprintItemShield || Main.GetItemType(blueprint) != ItemsFilter.ItemType.Shield)
+                && (!DoesBlueprintShowEnchantments(blueprint) || enchantmentsForDescription.Count != skipped.Count || removed.Count > 0)) {
                 accessors.SetBlueprintItemDescriptionText(blueprint,
                     Main.BuildCustomRecipeItemDescription(blueprint, enchantmentsForDescription, skipped, removed, replaceAbility, ability, casterLevel, perDay));
                 accessors.SetBlueprintItemFlavorText(blueprint, new L10NString(""));

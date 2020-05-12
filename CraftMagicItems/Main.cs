@@ -110,6 +110,7 @@ namespace CraftMagicItems {
         private const string MartialWeaponProficiencies = "203992ef5b35c864390b4e4a1e200629";
         private const string ChannelEnergyFeatureGuid = "a79013ff4bcd4864cb669622a29ddafb";
         private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
+        private const string ProdigiousTwoWeaponFightingGuid = "ddba046d03074037be18ad33ea462028";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
         private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
         private const string WeaponLightShieldGuid = "1fd965e522502fe479fdd423cca07684";
@@ -2836,8 +2837,10 @@ namespace CraftMagicItems {
 
                         if (recipeBased.Name.StartsWith("CraftMundane")) {
                             foreach (var guid in recipeBased.NewItemBaseIDs) {
-                                var blueprint = ResourcesLibrary.TryGetBlueprint(guid) as BlueprintItem;
-                                AddItemForType(blueprint);
+                                if (!guid.Contains("#CraftMagicItems")) {
+                                    var blueprint = ResourcesLibrary.TryGetBlueprint(guid) as BlueprintItem;
+                                    AddItemForType(blueprint);
+                                }
                             }
                         }
                     }
@@ -2953,6 +2956,7 @@ namespace CraftMagicItems {
             public class TwoWeaponFightingAttackPenaltyPatch : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleAttackWithWeapon>
             {
                 public BlueprintFeature shieldMaster;
+                public BlueprintFeature prodigiousTwoWeaponFighting;
                 private int penalty = 0;
 
                 public override void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt) {
@@ -2970,7 +2974,8 @@ namespace CraftMagicItems {
                     int num2 = (rank <= 1) ? -8 : -2;
                     penalty = (evt.Weapon != maybeWeapon) ? num2 : num;
                     UnitPartWeaponTraining unitPartWeaponTraining = base.Owner.Get<UnitPartWeaponTraining>();
-                    bool flag2 = base.Owner.State.Features.EffortlessDualWielding && unitPartWeaponTraining != null && unitPartWeaponTraining.IsSuitableWeapon(maybeWeapon2);
+                    bool flag2 = (base.Owner.State.Features.EffortlessDualWielding && unitPartWeaponTraining != null && unitPartWeaponTraining.IsSuitableWeapon(maybeWeapon2))
+                        || (prodigiousTwoWeaponFighting != null && base.Owner.Progression.Features.HasFact(prodigiousTwoWeaponFighting));
                     if (!maybeWeapon2.Blueprint.IsLight && !maybeWeapon.Blueprint.Double && !flag2) {
                         penalty += -2;
                     }
@@ -3039,6 +3044,7 @@ namespace CraftMagicItems {
                         twoWeaponFighting.ComponentsArray[i] = CraftMagicItems.Accessors.Create<TwoWeaponFightingAttackPenaltyPatch>(a => {
                             a.name = component.name.Replace("TwoWeaponFightingAttackPenalty", "TwoWeaponFightingAttackPenaltyPatch");
                             a.shieldMaster = shieldMaster;
+                            a.prodigiousTwoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ProdigiousTwoWeaponFightingGuid);
                         });
                     }
                     Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
