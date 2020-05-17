@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using Kingmaker;
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Items;
@@ -27,7 +28,8 @@ namespace CraftMagicItems {
 
         [JsonProperty] public int CasterLevel;
 
-        [JsonProperty] public BlueprintAbility[] Prerequisites;
+        [JsonProperty] public BlueprintAbility[] SpellPrerequisites;
+        [JsonProperty] public BlueprintFeature[] FeatPrerequisites;
         [JsonProperty] public bool PrerequisitesMandatory;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
@@ -48,8 +50,8 @@ namespace CraftMagicItems {
         [JsonProperty] public ItemEntity UpgradeItem;
 
         public CraftingProjectData(UnitEntityData crafter, int targetCost, int goldSpent, int casterLevel, ItemEntity resultItem, string itemType,
-            string recipeName = null, BlueprintAbility[] prerequisites = null, bool prerequisitesMandatory = false, bool anyPrerequisite = false,
-            ItemEntity upgradeItem = null, CrafterPrerequisiteType[] crafterPrerequisites = null) {
+            string recipeName = null, BlueprintAbility[] spellPrerequisites = null, BlueprintFeature[] featPrerequisites = null, bool prerequisitesMandatory = false,
+            bool anyPrerequisite = false, ItemEntity upgradeItem = null, CrafterPrerequisiteType[] crafterPrerequisites = null) {
             Crafter = crafter;
             TargetCost = targetCost;
             GoldSpent = goldSpent;
@@ -57,7 +59,8 @@ namespace CraftMagicItems {
             ResultItem = resultItem;
             ItemType = itemType.Contains("Armour") ? itemType.Replace("Armour", "Armor") : itemType;
             RecipeName = recipeName;
-            Prerequisites = prerequisites;
+            SpellPrerequisites = spellPrerequisites;
+            FeatPrerequisites = featPrerequisites;
             PrerequisitesMandatory = prerequisitesMandatory;
             AnyPrerequisite = anyPrerequisite;
             Progress = 0;

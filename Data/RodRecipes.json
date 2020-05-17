@@ -1,0 +1,167 @@
+[
+  {
+    "Name": "MetamagicRodLesserEmpower",
+    "NameId": "5054ea7d-c1f8-4052-a30f-cbea0e527ecb",
+    "Enchantments": [],
+    "ResultItem": "1e7a5a4d257cf434a87e687c9ee7a872",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["a1de1e4f92195b442adb946f0e2b9d4e"],
+    "CostType": "Flat",
+    "CostFactor": 9000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodNormalEmpower",
+    "NameId": "978b8d8f-dd55-4857-b590-59d7a7eaf348",
+    "Enchantments": [],
+    "ResultItem": "a02f06b63af839a448147dadff3724f2",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["a1de1e4f92195b442adb946f0e2b9d4e"],
+    "CostType": "Flat",
+    "CostFactor": 32500,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodGreaterEmpower",
+    "NameId": "0effa0ab-8ba8-4d0a-9ffb-a75e58fb8a2d",
+    "Enchantments": [],
+    "ResultItem": "81d504243708f504dbfe3f8f72efdeda",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["a1de1e4f92195b442adb946f0e2b9d4e"],
+    "CostType": "Flat",
+    "CostFactor": 73000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodLesserExtend",
+    "NameId": "ef81bfef-b963-4a70-b649-32887ae8dd9a",
+    "Enchantments": [],
+    "ResultItem": "1cf04842d5dbd0f49946b1af1022cd1a",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["f180e72e4a9cbaa4da8be9bc958132ef"],
+    "CostType": "Flat",
+    "CostFactor": 3000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodNormalExtend",
+    "NameId": "5e6cb30d-8f75-42c4-9f4b-6b18ba63e2b3",
+    "Enchantments": [],
+    "ResultItem": "1b2a09528da9e9948aa9026037bada90",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["f180e72e4a9cbaa4da8be9bc958132ef"],
+    "CostType": "Flat",
+    "CostFactor": 11000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodGreaterExtend",
+    "NameId": "a2705fb9-1572-4204-acc7-8f30683d07ea",
+    "Enchantments": [],
+    "ResultItem": "9bab0e37c72be78418516e57a5e78a99",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["f180e72e4a9cbaa4da8be9bc958132ef"],
+    "CostType": "Flat",
+    "CostFactor": 24500,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodLesserMaximize",
+    "NameId": "8aeda2b5-6e43-4b37-ba8d-faf53d2ff171",
+    "Enchantments": [],
+    "ResultItem": "651b0460f600d5f42b0467e7186aab80",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["7f2b282626862e345935bbea5e66424b"],
+    "CostType": "Flat",
+    "CostFactor": 14000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodNormalMaximize",
+    "NameId": "793ae5e4-3079-4b3c-93c8-7d094c1da511",
+    "Enchantments": [],
+    "ResultItem": "9a511d3b04f08944eb3db4462f88c2c0",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["7f2b282626862e345935bbea5e66424b"],
+    "CostType": "Flat",
+    "CostFactor": 54000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodGreaterMaximize",
+    "NameId": "b441bdb2-badf-4913-b5e7-a20ffdbdb223",
+    "Enchantments": [],
+    "ResultItem": "d0b7d29c9bea99d4bb25f8f6a29261c5",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["7f2b282626862e345935bbea5e66424b"],
+    "CostType": "Flat",
+    "CostFactor": 121500,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodLesserQuicken",
+    "NameId": "c76786fe-5d5b-43bb-afd1-5d4d15186862",
+    "Enchantments": [],
+    "ResultItem": "55a059b32df920c4abe65b8ee8b56056",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["ef7ece7bb5bb66a41b256976b27f424e"],
+    "CostType": "Flat",
+    "CostFactor": 35000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodNormalQuicken",
+    "NameId": "cb62e61d-d023-4d66-a428-0fe13e92ee5e",
+    "Enchantments": [],
+    "ResultItem": "551dcb2932443c944a6f120048c7d9f7",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["ef7ece7bb5bb66a41b256976b27f424e"],
+    "CostType": "Flat",
+    "CostFactor": 75500,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodGreaterQuicken",
+    "NameId": "88174df7-14c2-401e-8657-3fa749ef607d",
+    "Enchantments": [],
+    "ResultItem": "843ae85d505be8441b9fbb47b04e19e0",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["ef7ece7bb5bb66a41b256976b27f424e"],
+    "CostType": "Flat",
+    "CostFactor": 170000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodLesserReach",
+    "NameId": "981f7d1a-c111-4f54-8b69-597f42a0db48",
+    "Enchantments": [],
+    "ResultItem": "8b0261621069c9a41a70f1aaefa21c75",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["46fad72f54a33dc4692d3b62eca7bb78"],
+    "CostType": "Flat",
+    "CostFactor": 3000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodNormalReach",
+    "NameId": "46d465e9-483c-4fd9-8efd-1e8a2c1022af",
+    "Enchantments": [],
+    "ResultItem": "648f56fbbaa71624c8ba968ade382ac6",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["46fad72f54a33dc4692d3b62eca7bb78"],
+    "CostType": "Flat",
+    "CostFactor": 11000,
+    "OnlyForSlots": ["Other"]
+  },
+  {
+    "Name": "MetamagicRodGreaterReach",
+    "NameId": "70fe7baf-5f2e-4d0f-9e7c-3f471a3c19a3",
+    "Enchantments": [],
+    "ResultItem": "08942f26792fed84cb28b8e97b2de5c7",
+    "CasterLevelStart": 9,
+    "PrerequisiteFeats": ["46fad72f54a33dc4692d3b62eca7bb78"],
+    "CostType": "Flat",
+    "CostFactor": 24500,
+    "OnlyForSlots": ["Other"]
+  }
+]

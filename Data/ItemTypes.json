@@ -141,6 +141,17 @@
   },
   {
     "DataType": "RecipeBased",
+    "Name": "Rods",
+    "NameId": "b281224c-fede-414d-80ab-5acba5288829",
+    "FeatGuid": "ef7ece7bb5bb66a41b256976b27f424e#CraftMagicItems(feat=rod)",
+    "MinimumCasterLevel": 9,
+    "PrerequisitesMandatory": false,
+    "NewItemBaseIDs": [],
+    "RecipeFileNames": ["RodRecipes.json"],
+    "Slots": ["Other"]
+  },
+  {
+    "DataType": "RecipeBased",
     "Name": "CraftMundaneArmor",
     "NameId": "99d4ca00-bf3d-4d42-bf9c-aac1f4a407d6",
     "NewItemBaseIDs": [

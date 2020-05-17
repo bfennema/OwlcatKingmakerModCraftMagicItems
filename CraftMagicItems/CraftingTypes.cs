@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items;
 using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Equipment;
@@ -135,6 +136,7 @@ namespace CraftMagicItems {
         [JsonProperty] public int MundaneDC;
         [JsonProperty] public PhysicalDamageMaterial Material;
         [JsonProperty] public BlueprintAbility[] PrerequisiteSpells;
+        [JsonProperty] public BlueprintFeature[] PrerequisiteFeats;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public CrafterPrerequisiteType[] CrafterPrerequisites;
