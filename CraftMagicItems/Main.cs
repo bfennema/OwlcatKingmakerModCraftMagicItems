@@ -49,6 +49,7 @@ using Kingmaker.UI.Tooltip;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Alignments;
 using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
@@ -176,7 +177,7 @@ namespace CraftMagicItems {
             CheatsSection
         }
 
-        struct  IkPatch {
+        struct IkPatch {
             public IkPatch(string uuid, float x, float y, float z) {
                 m_uuid = uuid;
                 m_x = x; m_y = y; m_z = z;
@@ -1068,6 +1069,9 @@ namespace CraftMagicItems {
             }
 
             item.PostLoad();
+            if (craftingData.Count != 0) {
+                item.SetCount(craftingData.Count);
+            }
             return item;
         }
 
@@ -1379,7 +1383,7 @@ namespace CraftMagicItems {
                 }
                 if (selectedShieldWeapon) {
                     itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItemShieldWeapon.Blueprint.AssetGuid, enchantments,
-                        supersededEnchantmentId == null ? null : new[] { supersededEnchantmentId });
+                        supersededEnchantmentId == null ? null : new[] {supersededEnchantmentId});
                     itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItemShield.Blueprint.AssetGuid, Enumerable.Empty<string>(),
                         name: name, descriptionId: "null", secondEndGuid: itemGuid);
                 } else {
@@ -1898,12 +1902,12 @@ namespace CraftMagicItems {
                         }
                     }
                     var enchantments = selectedEnchantment == null ? new List<string>() : new List<string> { selectedEnchantment.AssetGuid };
-                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null,
-                        selectedRecipe.Material, visual, animation);
+                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
+                        -1, selectedRecipe.Material, visual, animation);
                     if (doubleWeapon) {
                         baseBlueprint = doubleWeapon;
-                        itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null,
-                            selectedRecipe.Material, visual, animation, secondEndGuid: itemGuid);
+                        itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
+                            -1, selectedRecipe.Material, visual, animation, secondEndGuid: itemGuid);
                     }
                 } else if (baseBlueprint is BlueprintItemShield shield) {
                     if (shield.WeaponComponent != null) {
@@ -1923,8 +1927,8 @@ namespace CraftMagicItems {
                             visual: visual, animation: animation, secondEndGuid: shield.WeaponComponent != null ? itemGuid : null);
                 } else {
                     var enchantments = selectedEnchantment == null ? new List<string>() : new List<string> { selectedEnchantment.AssetGuid };
-                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null,
-                        selectedRecipe.Material, visual, animation);
+                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
+                        -1, selectedRecipe.Material, visual, animation);
                 }
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(itemGuid);
             }
@@ -2329,11 +2333,15 @@ namespace CraftMagicItems {
 
             using (new DisableBattleLog(!ModSettings.CraftingTakesNoTime)) {
                 var holdingSlot = upgradeItem?.HoldingSlot;
+                var slotIndex = upgradeItem?.InventorySlotIndex;
                 if (upgradeItem != null) {
                     Game.Instance.Player.Inventory.Remove(upgradeItem);
                 }
                 if (holdingSlot == null) {
                     Game.Instance.Player.Inventory.Add(resultItem);
+                    if (slotIndex is int value) {
+                        resultItem.SetSlotIndex(value);
+                    }
                 } else {
                     holdingSlot.InsertItem(resultItem);
                 }
@@ -2523,7 +2531,9 @@ namespace CraftMagicItems {
 
         private static void RenderRecipeBasedCraftItemControl(UnitEntityData caster, ItemCraftingData craftingData, RecipeData recipe, int casterLevel,
             BlueprintItem itemBlueprint, ItemEntity upgradeItem = null) {
-            var requiredProgress = (itemBlueprint.Cost - (upgradeItem?.Blueprint.Cost ?? 0)) / 4;
+            int baseCost = (craftingData.Count != 0 ? craftingData.Count : 1) * itemBlueprint.Cost;
+            int upgradeCost = (craftingData.Count != 0 ? craftingData.Count : 1) * (upgradeItem?.Blueprint.Cost ?? 0);
+            var requiredProgress = (baseCost - upgradeCost) / 4;
             var goldCost = (int) Mathf.Round(requiredProgress * ModSettings.CraftingPriceScale);
             if (IsMundaneCraftingData(craftingData)) {
                 // For mundane crafting, the gold cost is less, and the cost of the recipes don't increase the required progress.
@@ -2534,16 +2544,18 @@ namespace CraftMagicItems {
                     recipeCost += enchantmentRecipe?.CostFactor ?? 0;
                 }
 
-                if (itemBlueprint is BlueprintItemShield shield) {
+                if (itemBlueprint is BlueprintItemEquipmentUsable) {
+                    if (craftingData.Count > 0) {
+                        recipeCost = craftingData.Count * (itemBlueprint.Cost - 2);
+                    }
+                } else if (itemBlueprint is BlueprintItemShield shield) {
                     if (shield.WeaponComponent && shield.WeaponComponent.DamageType.Physical.Material != 0 && (shield.WeaponComponent.DamageType.Physical.Form & PhysicalDamageForm.Piercing) != 0) {
                         recipeCost += GetSpecialMaterialCost(shield.WeaponComponent.DamageType.Physical.Material, shield.WeaponComponent, 10, 5.0f);
                     }
                 } else {
-                    var assetGuid = CustomBlueprintBuilder.AssetGuidWithoutMatch(itemBlueprint.AssetGuid);
-                    var baseItem = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(assetGuid);
-
                     if (itemBlueprint is BlueprintItemWeapon weapon && weapon.DamageType.Physical.Material != 0) {
-                        recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, baseItem.Cost, baseItem.Weight);
+                        var standardBlueprint = GetStandardItem(itemBlueprint);
+                        recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, standardBlueprint.Cost, standardBlueprint.Weight);
                     }
 
                     if (itemBlueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
@@ -3109,8 +3121,7 @@ namespace CraftMagicItems {
             }
 
             [AllowMultipleComponents]
-            public class TwoWeaponFightingAttackPenaltyPatch : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleAttackWithWeapon>
-            {
+            public class TwoWeaponFightingAttackPenaltyPatch : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleAttackWithWeapon> {
                 public BlueprintFeature shieldMaster;
                 public BlueprintFeature prodigiousTwoWeaponFighting;
                 private int penalty = 0;
@@ -3148,8 +3159,7 @@ namespace CraftMagicItems {
             }
 
             [AllowMultipleComponents]
-            public class ShieldMasterPatch : GameLogicComponent, IInitiatorRulebookHandler<RuleCalculateDamage>, IInitiatorRulebookHandler<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleCalculateWeaponStats>
-            {
+            public class ShieldMasterPatch : GameLogicComponent, IInitiatorRulebookHandler<RuleCalculateDamage>, IInitiatorRulebookHandler<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleCalculateWeaponStats> {
                 public void OnEventAboutToTrigger(RuleCalculateDamage evt) {
                     if (!evt.Initiator.Body.SecondaryHand.HasShield || evt.DamageBundle.Weapon == null || !evt.DamageBundle.Weapon.IsShield) {
                         return;
@@ -4531,6 +4541,17 @@ namespace CraftMagicItems {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        [Harmony12.HarmonyPatch(typeof(ActivatableAbility), "OnEventDidTrigger", new Type[] { typeof(RuleAttackWithWeaponResolve) })]
+        private static class ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch {
+            private static bool Prefix(ActivatableAbility __instance, RuleAttackWithWeaponResolve evt) {
+                if (evt.Damage != null && evt.AttackRoll.IsHit) {
+                    return false;
+                } else {
+                    return true;
                 }
             }
         }

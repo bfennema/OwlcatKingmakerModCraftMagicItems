@@ -72,6 +72,10 @@
     "Value": "Arms and Armor"
   },
   {
+    "Key": "craftMagicItems-itemType-quiver",
+    "Value": "Quiver"
+  },
+  {
     "Key": "craftMagicItems-recipeType-unarmed-attacks",
     "Value": "Mighty Fists"
   },
@@ -534,6 +538,30 @@
   {
     "Key": "craftMagicItems-mundane-undersized-description",
     "Value": "Weapon is exceptionally small and deals less damage, but attacks with it suffer a penalty of -2 to attack rolls."
+  },
+  {
+    "Key": "craftMagicItems-mundane-coldiron-quiver-name",
+    "Value": "Quiver of Cold Iron Ammunition"
+  },
+  {
+    "Key": "craftMagicItems-mundane-coldiron-quiver-description",
+    "Value": "The owner of this quiver can use it to shoot cold iron arrows or bolts. Cold Iron arrows and bolts are known for their effectiveness against demons and fey creatures."
+  },
+  {
+    "Key": "craftMagicItems-mundane-silver-quiver-name",
+    "Value": "Quiver of Silver Ammunition"
+  },
+  {
+    "Key": "craftMagicItems-mundane-silver-quiver-description",
+    "Value": "The owner of this quiver can use it to shoot silver arrows or bolts. Silver arrows and bolts are known for their effectiveness against lycanthropes."
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantite-quiver-name",
+    "Value": "Quiver of Adamantine Ammunition"
+  },
+  {
+    "Key": "craftMagicItems-mundane-adamantite-quiver-description",
+    "Value": "The owner of this quiver can use it to shoot adamantine arrows or bolts. Adamantine arrows and bolts are known for their effectiveness against golems."
   },
   {
     "Key": "craftMagicItems-enchantment-impact-name",

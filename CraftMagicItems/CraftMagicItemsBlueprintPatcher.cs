@@ -39,7 +39,9 @@ namespace CraftMagicItems {
                       + @"CL=(?<casterLevel>\d+)(?<spellLevelMatch>,SL=(?<spellLevel>\d+))?(?<spellIdMatch>,spellId=\((?<spellId>" + MatchedParensComma +
                       @")\))?"
                       + @"|enchantments=\((?<enchantments>|" + MatchedParensComma + @")\)(,remove=(?<remove>[0-9a-f;]+))?(,name=(?<name>[^✔]+)✔)?"
-                      + @"(,ability=(?<ability>null|[0-9a-f]+))?(,activatableAbility=(?<activatableAbility>null|[0-9a-f]+))?(,material=(?<material>[a-zA-Z]+))?(,visual=(?<visual>null|[0-9a-f]+))?"
+                      + @"(,ability=(?<ability>null|[0-9a-f]+))?"
+                      + $"(,activatableAbility=(?<activatableAbility>{MatchedParensComma}))?(,charges=(?<charges>[0-9]+))?(,weight=(?<weight>[0-9]+))?"
+                      + @"(,material=(?<material>[a-zA-Z]+))?(,visual=(?<visual>null|[0-9a-f]+))?"
                       + @"(,animation=(?<animation>null|[a-zA-Z]+))?(,priceAdjust=(?<priceAdjust>[-0-9]+))?"
                       + @"(,CL=(?<casterLevel>[0-9]+))?(,SL=(?<spellLevel>[0-9]+))?(,perDay=(?<perDay>[0-9]+))?(,nameId=(?<nameId>[^,]+))?(,descriptionId=(?<descriptionId>[^,]+))?"
                       + $"(,secondEnd=(?<secondEnd>{MatchedParensComma}))?"
@@ -100,7 +102,7 @@ namespace CraftMagicItems {
         }
 
         public string BuildCustomRecipeItemGuid(string originalGuid, IEnumerable<string> enchantments, string[] remove = null, string name = null,
-            string ability = null, string activatableAbility = null, PhysicalDamageMaterial material = 0, string visual = null, string animation = null,
+            string ability = null, string activatableAbility = null, int charges = -1, int weight = -1, PhysicalDamageMaterial material = 0, string visual = null, string animation = null,
             int casterLevel = -1, int spellLevel = -1, int perDay = -1, string nameId = null, string descriptionId = null, string secondEndGuid = null,
             int priceAdjust = 0) {
             // Check if GUID is already customised by this mod
@@ -135,6 +137,14 @@ namespace CraftMagicItems {
                     activatableAbility = match.Groups["activatableAbility"].Value;
                 }
 
+                if (charges == -1 && match.Groups["charges"].Success) {
+                    perDay = int.Parse(match.Groups["charges"].Value);
+                }
+
+                if (weight == -1 && match.Groups["weight"].Success) {
+                    weight = int.Parse(match.Groups["weight"].Value);
+                }
+
                 if (material == 0 && match.Groups["material"].Success) {
                     Enum.TryParse(match.Groups["material"].Value, out material);
                 }
@@ -160,7 +170,7 @@ namespace CraftMagicItems {
                 }
 
                 if (perDay == -1 && match.Groups["perDay"].Success) {
-                    perDay = Math.Max(perDay, int.Parse(match.Groups["perDay"].Value));
+                    perDay = int.Parse(match.Groups["perDay"].Value);
                 }
 
                 if (name == null && nameId == null && match.Groups["nameId"].Success) {
@@ -184,6 +194,8 @@ namespace CraftMagicItems {
                    $"{(name == null ? "" : $",name={name.Replace('✔', '_')}✔")}" +
                    $"{(ability == null ? "" : $",ability={ability}")}" +
                    $"{(activatableAbility == null ? "" : $",activatableAbility={activatableAbility}")}" +
+                   $"{(charges == -1 ? "" : $",charges={charges}")}" +
+                   $"{(weight == -1 ? "" : $",weight={weight}")}" +
                    $"{(material == 0 ? "" : $",material={material}")}" +
                    $"{(visual == null ? "" : $",visual={visual}")}" +
                    $"{(animation == null ? "" : $",animation={animation}")}" +
@@ -389,6 +401,21 @@ namespace CraftMagicItems {
                     : ResourcesLibrary.TryGetBlueprint<BlueprintActivatableAbility>(activatableAbility);
             }
 
+            int charges = -1;
+            if (match.Groups["charges"].Success) {
+                charges = int.Parse(match.Groups["charges"].Value);
+                blueprint.Charges = charges;
+                blueprint.SpendCharges = true;
+                blueprint.RestoreChargesOnRest = false;
+                accessors.SetBlueprintItemIsStackable(blueprint, true);
+            }
+
+            int weight = -1;
+            if (match.Groups["weight"].Success) {
+                weight = int.Parse(match.Groups["weight"].Value);
+                accessors.SetBlueprintItemWeight(blueprint, weight * .01f);
+            }
+
             var priceAdjust = 0;
             if (match.Groups["priceAdjust"].Success) {
                 priceAdjust = int.Parse(match.Groups["priceAdjust"].Value);
@@ -548,7 +575,7 @@ namespace CraftMagicItems {
 
             accessors.SetBlueprintItemCost(blueprint, Main.RulesRecipeItemCost(blueprint) + priceDelta);
             return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds.Count > 0 ? removedIds.ToArray() : null, name, ability,
-                activatableAbility, material, visual, animation, casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);
+                activatableAbility, charges, weight, material, visual, animation, casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);
         }
 
         private T CloneObject<T>(T originalObject) {

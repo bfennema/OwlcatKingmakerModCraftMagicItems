@@ -102,6 +102,8 @@ namespace CraftMagicItems {
 
         public readonly FastSetter<BlueprintItem, int> SetBlueprintItemCost = Accessors.CreateSetter<BlueprintItem, int>("m_Cost");
 
+        public readonly FastSetter<BlueprintItem, bool> SetBlueprintItemIsStackable = Accessors.CreateSetter<BlueprintItem, bool>("m_IsStackable");
+
         public readonly FastGetter<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentEnchantName =
             Accessors.CreateGetter<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
 

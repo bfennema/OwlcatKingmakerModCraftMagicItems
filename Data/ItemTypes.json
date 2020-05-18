@@ -298,6 +298,20 @@
   },
   {
     "DataType": "RecipeBased",
+    "Name": "CraftMundaneQuiver",
+    "NameId": "craftMagicItems-itemType-quiver",
+    "NewItemBaseIDs": [
+      "25f9b5ef564cbef49a1e54c48e67dfc1#CraftMagicItems(enchantments=(),activatableAbility=5a769135b9b00684ea010d36ae49848e#CraftMagicItems(ColdIronQuiverAbility),charges=1,weight=15,visual=7a69e2421e92efc49b8d2ee592de2f72,priceAdjust=-13996,nameId=craftMagicItems-mundane-coldiron-quiver-name,descriptionId=craftMagicItems-mundane-coldiron-quiver-description)",
+      "25f9b5ef564cbef49a1e54c48e67dfc1#CraftMagicItems(enchantments=(),activatableAbility=5a769135b9b00684ea010d36ae49848e#CraftMagicItems(SilverQuiverAbility),charges=1,weight=15,visual=059441667d95ad140924a36452799a3c,priceAdjust=-13992,nameId=craftMagicItems-mundane-silver-quiver-name,descriptionId=craftMagicItems-mundane-silver-quiver-description)",
+      "25f9b5ef564cbef49a1e54c48e67dfc1#CraftMagicItems(enchantments=(),activatableAbility=5a769135b9b00684ea010d36ae49848e#CraftMagicItems(AdamantiteQuiverAbility),charges=1,weight=15,visual=911d0f8cad672454a94286a9feafc360,priceAdjust=-13940,nameId=craftMagicItems-mundane-adamantite-quiver-name,descriptionId=craftMagicItems-mundane-adamantite-quiver-description)",
+    ],
+    "Count": 20,
+    "MundaneBaseDC": 20,
+    "RecipeFileNames": ["MundaneRecipes.json"],
+    "Slots": ["Usable"]
+  },
+  {
+    "DataType": "RecipeBased",
     "Name": "CraftMundaneAlchemicalItems",
     "NameId": "43190791-b32a-4df1-b278-91cbbc25592a",
     "NewItemBaseIDs": [

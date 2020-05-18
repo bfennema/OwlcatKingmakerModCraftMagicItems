@@ -15,8 +15,6 @@ For details, see the mod page here: https://www.nexusmods.com/pathfinderkingmake
 * Undead characters (Jaethal) eat rations and sleep normally.  Could give them the benefits of Sustenance...
 
 
-* Craft Rod.
-* Mechanism for 3rd party mods to add more recipes, either for vanilla enchantments or their own custom enchantments.
 * Enchantments with restrictions (such as Celestial "minimum +3") should be displayed in the UI.
 * Make characters in town work from the "stash" (and their own equipment) rather than from the party inventory.
 * Trailblazer's Helm can cast two different spells!
@@ -31,12 +29,9 @@ For details, see the mod page here: https://www.nexusmods.com/pathfinderkingmake
 * In BuildCustomRecipeItemGuid, sort enchantments and remove GUIDs lexographically so blueprint is always the same.
 * Add "Fabricate" custom spell to instantly do mundane crafting, and to add special materials to existing items.
 * Ioun stone enchantments?  Could also do as a specific item recipe, a la Bag of Holding.
-* Custom "quiver" items which can contain arrows of a particular type, which modify the damage of any ranged weapons you
-        use when they're equipped in your belt slots?
 * Metamagic effects on spells
 * Dragonhide is called "dragonscale".  Ironwood?
 * Request for https://www.d20pfsrd.com/magic-items/wondrous-items/m-p/page-of-spell-knowledge/
-* Mundane crafting - craft shields with shield spikes?  Tricky, the base spiked shield blueprints are weapons...
 * In-game GUI
 * Bracers of archery (lesser/greater) - requires both Craft Wondrous Items and Craft Arms and Armor
 * Craft Construct?  Either a build-your-own-pet, Eidolon style, or a Golem-in-a-bottle like arrangement.

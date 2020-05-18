@@ -38,6 +38,7 @@ namespace CraftMagicItems {
         [JsonProperty] public int MinimumCasterLevel;
         [JsonProperty] public bool PrerequisitesMandatory;
         [JsonProperty] public string[] NewItemBaseIDs;
+        [JsonProperty] public int Count;
     }
 
     public class SpellBasedItemCraftingData : ItemCraftingData {
