@@ -21,8 +21,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(BlueprintItemWeapon), "BaseDamage", Harmony12.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
-        private static class BlueprintItemWeaponBaseDamage
-        {
+        private static class BlueprintItemWeaponBaseDamage {
             private static void Postfix(BlueprintItemWeapon __instance, ref DiceFormula __result) {
                 foreach (var enchantment in __instance.Enchantments) {
                     var component = enchantment.GetComponent<WeaponBaseSizeChange>();
@@ -36,8 +35,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(BlueprintItemWeapon), "AttackBonusStat", Harmony12.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
-        private static class BlueprintItemWeaponAttackBonusStat
-        {
+        private static class BlueprintItemWeaponAttackBonusStat {
             private static void Postfix(BlueprintItemWeapon __instance, ref StatType __result) {
                 foreach (var enchantment in __instance.Enchantments) {
                     var component = enchantment.GetComponent<WeaponBaseSizeChange>();

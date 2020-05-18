@@ -95,6 +95,8 @@ namespace CraftMagicItems {
         WeaponTwoHanded,
         WeaponOversized,
         WeaponNotOversized,
+        WeaponDouble,
+        WeaponNotDouble,
         Armor,
         ArmorMetal,
         ArmorNotMetal,

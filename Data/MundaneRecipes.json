@@ -291,7 +291,7 @@
     "CostFactor": 2,
     "MundaneDC": 3,
     "OnlyForSlots": ["Weapon"],
-    "Restrictions": ["WeaponOneHanded", "WeaponNotOversized", "WeaponMelee"],
+    "Restrictions": ["WeaponOneHanded", "WeaponNotOversized", "WeaponNotDouble", "WeaponMelee"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "f717b39c351b8b44388c471d4d272f4e:6fd0a849531617844b195f452661b2cd",
@@ -331,7 +331,7 @@
     "CostFactor": 1,
     "MundaneDC": 3,
     "OnlyForSlots": ["Weapon"],
-    "Restrictions": ["WeaponNotLight", "WeaponNotOversized", "WeaponMelee"],
+    "Restrictions": ["WeaponNotLight", "WeaponNotOversized", "WeaponNotDouble", "WeaponMelee"],
     "CanApplyToMundaneItem": true,
     "VisualMappings": [
       "f58e421cb8b4ed64ba195123df754055:5363519e36752d84698e03a86fb33afb",

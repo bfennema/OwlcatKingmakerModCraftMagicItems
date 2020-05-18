@@ -53,9 +53,7 @@ using Kingmaker.UnitLogic.Alignments;
 using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
-using Kingmaker.UnitLogic.Mechanics;
 using Kingmaker.UnitLogic.Mechanics.Components;
-using Kingmaker.UnitLogic.Mechanics.ContextData;
 using Kingmaker.UnitLogic.Parts;
 using Kingmaker.Utility;
 using Kingmaker.View.Equipment;
@@ -818,10 +816,10 @@ namespace CraftMagicItems {
             }
             var slot = GetItemType(blueprint);
             return recipes.FirstOrDefault(recipe => (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(slot))
-                                                    && (blueprint == null || RecipeAppliesToBaseBlueprint(recipe, blueprint, true)));
+                                                    && (blueprint == null || RecipeAppliesToBlueprint(recipe, blueprint, true)));
         }
 
-        private static string FindSupersededEnchantmentId(BlueprintItem blueprint, string selectedEnchantmentId, RecipeData sourceRecipe = null) {
+        private static string FindSupersededEnchantmentId(BlueprintItem blueprint, string selectedEnchantmentId) {
             if (blueprint != null) {
                 var selectedRecipe = FindSourceRecipe(selectedEnchantmentId, blueprint);
                 foreach (var enchantment in GetEnchantments(blueprint, selectedRecipe)) {
@@ -831,7 +829,7 @@ namespace CraftMagicItems {
                 }
 
                 // Special case - enchanting a masterwork item supersedes the masterwork quality
-                if (IsMasterwork(blueprint, sourceRecipe)) {
+                if (IsMasterwork(blueprint)) {
                     return MasterworkGuid;
                 }
             }
@@ -930,8 +928,8 @@ namespace CraftMagicItems {
             return L10NFormat(key, commaList, array[array.Length - 1]);
         }
 
-        private static bool IsMasterwork(BlueprintItem blueprint, RecipeData sourceRecipe = null) {
-            return GetEnchantments(blueprint, sourceRecipe).Any(enchantment => enchantment.AssetGuid == MasterworkGuid);
+        private static bool IsMasterwork(BlueprintItem blueprint) {
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == MasterworkGuid);
         }
 
         private static bool IsOversized(BlueprintItem blueprint) {
@@ -1011,6 +1009,8 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded || weapon.Double:
                         case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
                         case ItemRestrictions.WeaponNotOversized when weapon == null || IsOversized(weapon):
+                        case ItemRestrictions.WeaponDouble when weapon == null || !weapon.Double:
+                        case ItemRestrictions.WeaponNotDouble when weapon == null || weapon.Double:
                         case ItemRestrictions.Armor when armor == null:
                         case ItemRestrictions.ArmorMetal when armor == null || !IsMetalArmor(armor.Type):
                         case ItemRestrictions.ArmorNotMetal when armor == null || IsMetalArmor(armor.Type):
@@ -1029,14 +1029,6 @@ namespace CraftMagicItems {
             }
 
             return true;
-        }
-
-        private static bool RecipeAppliesToBaseBlueprint(RecipeData recipe, BlueprintItem blueprint, bool skipEnchantedCheck = false) {
-            var baseBlueprint = GetBaseBlueprint(blueprint);
-            if (skipEnchantedCheck == false && IsEnchanted(blueprint, recipe)) {
-                skipEnchantedCheck = true;
-            }
-            return RecipeAppliesToBlueprint(recipe, baseBlueprint, skipEnchantedCheck, false);
         }
 
         private static bool RecipeAppliesToBlueprint(RecipeData recipe, BlueprintItem blueprint, bool skipEnchantedCheck = false, bool skipMaterialCheck = false) {
@@ -1375,7 +1367,7 @@ namespace CraftMagicItems {
                     supersededEnchantmentId = null;
                 } else {
                     enchantments = new List<string> {selectedEnchantment.AssetGuid};
-                    supersededEnchantmentId = FindSupersededEnchantmentId(upgradeItem.Blueprint, selectedEnchantment.AssetGuid, selectedRecipe);
+                    supersededEnchantmentId = FindSupersededEnchantmentId(upgradeItem.Blueprint, selectedEnchantment.AssetGuid);
                 }
 
                 if (upgradeItemShield != null) {
@@ -2820,13 +2812,24 @@ namespace CraftMagicItems {
 
             var mostExpensiveEnchantmentCost = 0;
             var mithralArmorEnchantmentGuid = false;
-            var cost = baseCost;
+            var cost = 0;
             foreach (var enchantment in blueprint.Enchantments) {
                 if (enchantment.AssetGuid == MithralArmorEnchantmentGuid) {
                     mithralArmorEnchantmentGuid = true;
+                } else if (enchantment.AssetGuid.StartsWith(OversizedGuid)) {
+                    var weaponBaseSizeChange = enchantment.GetComponent<WeaponBaseSizeChange>();
+                    if (weaponBaseSizeChange != null) {
+                        var sizeCategoryChange = weaponBaseSizeChange.SizeCategoryChange;
+                        if (sizeCategoryChange > 0) {
+                            baseCost *= 2;
+                            weight *= 2.0f;
+                        } else if (sizeCategoryChange < 0) {
+                            weight /= 2.0f;
+                        }
+                    }
                 }
                 var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
-                if (recipe != null && recipe.CostType != RecipeCostType.EnhancementLevelSquared && RecipeAppliesToBaseBlueprint(recipe, blueprint)) {
+                if (recipe != null && recipe.CostType != RecipeCostType.EnhancementLevelSquared && RecipeAppliesToBlueprint(recipe, blueprint)) {
                     var enchantmentCost = GetEnchantmentCost(enchantment.AssetGuid, blueprint);
                     cost += enchantmentCost;
                     if (mostExpensiveEnchantmentCost < enchantmentCost) {
@@ -2861,9 +2864,9 @@ namespace CraftMagicItems {
                 var factor = blueprint is BlueprintItemWeapon ? WeaponPlusCost : ArmorPlusCost;
                 cost += enhancementLevel * enhancementLevel * factor;
                 if (blueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
-                    return cost + RulesRecipeItemCost(doubleWeapon.SecondWeapon, 0, 0.0f);
+                    return baseCost + cost + RulesRecipeItemCost(doubleWeapon.SecondWeapon, 0, 0.0f);
                 }
-                return cost;
+                return baseCost + cost;
             }
 
             if (ItemPlusEquivalent(blueprint) > 0) {
@@ -2876,7 +2879,7 @@ namespace CraftMagicItems {
             }
 
             // Usable (belt slot) items cost double.
-            return (3 * cost - mostExpensiveEnchantmentCost) / (blueprint is BlueprintItemEquipmentUsable ? 1 : 2);
+            return (3 * (baseCost + cost) - mostExpensiveEnchantmentCost) / (blueprint is BlueprintItemEquipmentUsable ? 1 : 2);
         }
 
         // Attempt to work out the cost of enchantments which aren't in recipes by checking if blueprint, which contains the enchantment, contains only other
@@ -3863,8 +3866,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
-        private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch
-        {
+        private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch {
             private static bool Prefix(WeaponParametersAttackBonus __instance, RuleCalculateAttackBonusWithoutTarget evt) {
                 if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
                     IsOversized(evt.Weapon.Blueprint)) {
@@ -3877,8 +3879,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(WeaponParametersDamageBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
         // ReSharper disable once UnusedMember.Local
-        private static class WeaponParametersDamageBonusOnEventAboutToTriggerPatch
-        {
+        private static class WeaponParametersDamageBonusOnEventAboutToTriggerPatch {
             private static bool Prefix(WeaponParametersDamageBonus __instance, RuleCalculateWeaponStats evt) {
                 if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
                     IsOversized(evt.Weapon.Blueprint)) {
@@ -3891,8 +3892,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(AttackStatReplacement), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
-        private static class AttackStatReplacementOnEventAboutToTriggerPatch
-        {
+        private static class AttackStatReplacementOnEventAboutToTriggerPatch {
             private static bool Prefix(AttackStatReplacement __instance, RuleCalculateAttackBonusWithoutTarget evt) {
                 if (evt.Weapon != null && __instance.SubCategory == WeaponSubCategory.Finessable &&
                     evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) && IsOversized(evt.Weapon.Blueprint)) {
@@ -3905,8 +3905,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(DamageGrace), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
-        private static class DamageGraceOnEventAboutToTriggerPatch
-        {
+        private static class DamageGraceOnEventAboutToTriggerPatch {
             private static bool Prefix(DamageGrace __instance, RuleCalculateWeaponStats evt) {
                 if (evt.Weapon != null && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
                     IsOversized(evt.Weapon.Blueprint)) {
@@ -3919,8 +3918,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
         // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemGetQualitiesPatch
-        {
+        private static class UIUtilityItemGetQualitiesPatch {
             // ReSharper disable once UnusedMember.Local
             private static void Postfix(ItemEntity item, ref string __result) {
                 if (!item.IsIdentified) {
@@ -3942,8 +3940,7 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
         // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemFillArmorEnchantmentsPatch
-        {
+        private static class UIUtilityItemFillArmorEnchantmentsPatch {
             // ReSharper disable once UnusedMember.Local
             private static void Postfix(TooltipData data, ItemEntityShield armor) {
                 if (armor.IsIdentified) {
@@ -4454,8 +4451,7 @@ namespace CraftMagicItems {
         }
 
         [Harmony12.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", Harmony12.MethodType.Getter)]
-        private static class UnitViewHandSlotDataWeaponScalePatch
-        {
+        private static class UnitViewHandSlotDataWeaponScalePatch {
             private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
                 if (__instance.VisibleItem is ItemEntityWeapon weapon && !weapon.Blueprint.AssetGuid.Contains(",visual=")) {
                     var enchantment = GetEnchantments(weapon.Blueprint).FirstOrDefault(e => e.AssetGuid.StartsWith(OversizedGuid));
