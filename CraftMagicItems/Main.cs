@@ -1298,7 +1298,7 @@ namespace CraftMagicItems {
             }
 
             if (selectedRecipe.PrerequisiteFeats != null && selectedRecipe.PrerequisiteFeats.Length > 0) {
-                prerequisites += $"; {selectedRecipe.PrerequisiteFeats.Select(feature => feature.Name).BuildCommaList(selectedRecipe.AnyPrerequisite)}";
+                prerequisites += $"; {selectedRecipe.PrerequisiteFeats.Select(feature => feature.Blueprint.Name).BuildCommaList(selectedRecipe.AnyPrerequisite)}";
             }
 
             if (selectedRecipe.CrafterPrerequisites != null) {
@@ -1315,7 +1315,7 @@ namespace CraftMagicItems {
 
             if (selectedRecipe.ResultItem != null) {
                 // Just craft the item resulting from the recipe.
-                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem);
+                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem.Blueprint);
                 return;
             }
 
@@ -1657,7 +1657,7 @@ namespace CraftMagicItems {
         }
 
         private static int RenderCraftingSkillInformation(UnitEntityData crafter, StatType skill, int dc, int casterLevel = 0,
-            BlueprintAbility[] prerequisiteSpells = null, BlueprintFeature[] prerequisiteFeats = null, bool anyPrerequisite = false,
+            BlueprintAbility[] prerequisiteSpells = null, CraftingBlueprint<BlueprintFeature>[] prerequisiteFeats = null, bool anyPrerequisite = false,
             CrafterPrerequisiteType[] crafterPrerequisites = null,
             bool render = true) {
             if (render) {
@@ -2596,7 +2596,7 @@ namespace CraftMagicItems {
                     CraftItem(resultItem, upgradeItem);
                 } else {
                     var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, recipe?.Name,
-                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisiteFeats ?? new BlueprintFeature[0], recipe?.PrerequisitesMandatory ?? false,
+                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisiteFeats ?? new CraftingBlueprint<BlueprintFeature>[0], recipe?.PrerequisitesMandatory ?? false,
                         recipe?.AnyPrerequisite ?? false, upgradeItem, recipe?.CrafterPrerequisites ?? new CrafterPrerequisiteType[0]);
                     AddNewProject(caster.Descriptor, project);
                     CalculateProjectEstimate(project);
@@ -2942,8 +2942,16 @@ namespace CraftMagicItems {
                     if (itemData is RecipeBasedItemCraftingData recipeBased) {
                         recipeBased.Recipes = recipeBased.RecipeFileNames.Aggregate(Enumerable.Empty<RecipeData>(),
                             (all, fileName) => all.Concat(ReadJsonFile<RecipeData[]>($"{ModEntry.Path}/Data/{fileName}"))
-                        ).ToArray();
+                        ).Where(recipe => recipe.ResultItem == null || recipe.ResultItem.Blueprint != null).ToArray();
                         foreach (var recipe in recipeBased.Recipes) {
+                            if (recipe.PrerequisiteFeats != null) {
+                                var feats = recipe.PrerequisiteFeats.Where(feat => feat.Blueprint != null).ToArray();
+                                if (feats.Length > 0) {
+                                    recipe.PrerequisiteFeats = feats;
+                                } else {
+                                    recipe.PrerequisiteFeats = null;
+                                }
+                            }
                             foreach (var enchantment in recipe.Enchantments) {
                                 AddRecipeForEnchantment(enchantment.AssetGuid, recipe);
                             }
@@ -3465,19 +3473,19 @@ namespace CraftMagicItems {
             return CheckFeatPrerequisites(project.FeatPrerequisites, project.AnyPrerequisite, caster, out missingFeats);
         }
 
-        private static int CheckFeatPrerequisites(BlueprintFeature[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
+        private static int CheckFeatPrerequisites(CraftingBlueprint<BlueprintFeature>[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
             out List<BlueprintFeature> missingFeats) {
             missingFeats = new List<BlueprintFeature>();
             if (prerequisites != null) {
                 foreach (var featBlueprint in prerequisites) {
-                    var feat = caster.GetFeature(featBlueprint);
+                    var feat = caster.GetFeature(featBlueprint.Blueprint);
                     if (feat != null) {
                         if (anyPrerequisite) {
                             missingFeats.Clear();
                             return 0;
                         }
                     } else {
-                        missingFeats.Add(featBlueprint);
+                        missingFeats.Add(featBlueprint.Blueprint);
                     }
                 }
             }

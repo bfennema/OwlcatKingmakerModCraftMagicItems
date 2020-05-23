@@ -29,7 +29,8 @@ namespace CraftMagicItems {
         [JsonProperty] public int CasterLevel;
 
         [JsonProperty] public BlueprintAbility[] SpellPrerequisites;
-        [JsonProperty] public BlueprintFeature[] FeatPrerequisites;
+        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintFeature>))]
+        public CraftingBlueprint<BlueprintFeature>[] FeatPrerequisites;
         [JsonProperty] public bool PrerequisitesMandatory;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
@@ -50,7 +51,7 @@ namespace CraftMagicItems {
         [JsonProperty] public ItemEntity UpgradeItem;
 
         public CraftingProjectData(UnitEntityData crafter, int targetCost, int goldSpent, int casterLevel, ItemEntity resultItem, string itemType,
-            string recipeName = null, BlueprintAbility[] spellPrerequisites = null, BlueprintFeature[] featPrerequisites = null, bool prerequisitesMandatory = false,
+            string recipeName = null, BlueprintAbility[] spellPrerequisites = null, CraftingBlueprint<BlueprintFeature>[] featPrerequisites = null, bool prerequisitesMandatory = false,
             bool anyPrerequisite = false, ItemEntity upgradeItem = null, CrafterPrerequisiteType[] crafterPrerequisites = null) {
             Crafter = crafter;
             TargetCost = targetCost;

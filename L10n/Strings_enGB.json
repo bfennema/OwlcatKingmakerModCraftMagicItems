@@ -516,6 +516,126 @@
     "Value": "When worn, this ring continually allows a living wearer to heal 1 point of damage per round."
   },
   {
+    "Key": "craftMagicItems-item-intensified-lesser-name",
+    "Value": "Lesser Intensified Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-intensified-normal-name",
+    "Value": "Regular Intensified Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-intensified-greater-name",
+    "Value": "Greater Intensified Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-toppling-lesser-name",
+    "Value": "Lesser Toppling Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-toppling-normal-name",
+    "Value": "Regular Toppling Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-toppling-greater-name",
+    "Value": "Greater Toppling Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-rime-lesser-name",
+    "Value": "Lesser Rime Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-rime-normal-name",
+    "Value": "Regular Rime Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-rime-greater-name",
+    "Value": "Greater Rime Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-dazing-lesser-name",
+    "Value": "Lesser Dazing Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-dazing-normal-name",
+    "Value": "Regular Dazing Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-dazing-greater-name",
+    "Value": "Greater Dazing Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-persistent-lesser-name",
+    "Value": "Lesser Persistent Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-persistent-normal-name",
+    "Value": "Regular Persistent Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-persistent-greater-name",
+    "Value": "Greater Persistent Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-selective-lesser-name",
+    "Value": "Lesser Selective Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-selective-normal-name",
+    "Value": "Regular Selective Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-selective-greater-name",
+    "Value": "Greater Selective Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-acid-lesser-name",
+    "Value": "Lesser Elemental Acid Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-acid-normal-name",
+    "Value": "Regular Elemental Acid Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-elemental-acid-greater-name",
+    "Value": "Greater Elemental Acid Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-cold-lesser-name",
+    "Value": "Lesser Elemental Cold Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-cold-normal-name",
+    "Value": "Regular Elemental Cold Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-elemental-cold-greater-name",
+    "Value": "Greater Elemental Cold Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-fire-lesser-name",
+    "Value": "Lesser Elemental Fire Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-fire-normal-name",
+    "Value": "Regular Elemental Fire Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-elemental-fire-greater-name",
+    "Value": "Greater Elemental Fire Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-electricity-lesser-name",
+    "Value": "Lesser Elemental Electricity Metamagic Rod"
+  },
+  {
+    "Key": "craftMagicItems-item-elemental-electricity-normal-name",
+    "Value": "Regular Elemental Electricity Metamagic Rod"
+  },
+    {
+    "Key": "craftMagicItems-item-elemental-electricity-greater-name",
+    "Value": "Greater Elemental Electricity Metamagic Rod"
+  },
+  {
     "Key": "craftMagicItems-mundane-undersized-name",
     "Value": "Undersized"
   },

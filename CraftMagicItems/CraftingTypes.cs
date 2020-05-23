@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items;
 using Kingmaker.Blueprints.Items.Ecnchantments;
@@ -120,6 +121,16 @@ namespace CraftMagicItems {
         FeatureChannelEnergy
     }
 
+    public class CraftingBlueprint<T>
+    {
+        [JsonIgnore]
+        private T m_blueprint;
+        public CraftingBlueprint(T blueprint) {
+            m_blueprint = blueprint;
+        }
+        public T Blueprint => m_blueprint;
+    }
+
     public class RecipeData {
         [JsonProperty] public string Name;
         [JsonProperty] public string NameId;
@@ -127,7 +138,8 @@ namespace CraftMagicItems {
         [JsonProperty] public string BonusTypeId;
         [JsonProperty] public string BonusToId;
         [JsonProperty] public BlueprintItemEnchantment[] Enchantments;
-        [JsonProperty] public BlueprintItem ResultItem;
+        [JsonProperty] [JsonConverter(typeof(CraftingBlueprintConverter<BlueprintItem>))]
+        public CraftingBlueprint<BlueprintItem> ResultItem;
         [JsonProperty] public bool EnchantmentsCumulative;
         [JsonProperty] public int CasterLevelStart;
         [JsonProperty] public int CasterLevelMultiplier;
@@ -136,7 +148,8 @@ namespace CraftMagicItems {
         [JsonProperty] public int MundaneDC;
         [JsonProperty] public PhysicalDamageMaterial Material;
         [JsonProperty] public BlueprintAbility[] PrerequisiteSpells;
-        [JsonProperty] public BlueprintFeature[] PrerequisiteFeats;
+        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintFeature>))]
+        public CraftingBlueprint<BlueprintFeature>[] PrerequisiteFeats;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public CrafterPrerequisiteType[] CrafterPrerequisites;
@@ -162,6 +175,24 @@ namespace CraftMagicItems {
         [JsonProperty] public string[] VisualMappings;
         [JsonProperty] public string[] AnimationMappings;
         [JsonProperty] public string[] NameMappings;
+    }
+
+    public class CraftingBlueprintConverter<T> : JsonConverter where T : BlueprintScriptableObject {
+        public override bool CanConvert(Type objectType) {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+            string text = (string)reader.Value;
+            if (text == null || text == "null") {
+                return null;
+            }
+            return new CraftingBlueprint<T>(ResourcesLibrary.TryGetBlueprint(text) as T);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+            throw new NotImplementedException();
+        }
     }
 
     public class CraftingTypeConverter : CustomCreationConverter<ICraftingData> {
