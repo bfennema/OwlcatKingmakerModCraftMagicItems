@@ -1209,9 +1209,9 @@ namespace CraftMagicItems {
                                  && (recipe.ParentNameId == null || recipe == craftingData.SubRecipes[recipe.ParentNameId][0])
                                  && (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(selectedSlot))
                                  && RecipeAppliesToBlueprint(recipe, upgradeItem?.Blueprint))
-                .OrderBy(recipe => new L10NString(recipe.ParentNameId ?? recipe.NameId).ToString())
+                .OrderBy(recipe => recipe.ParentNameId ?? recipe.NameId)
                 .ToArray();
-            var recipeNames = availableRecipes.Select(recipe => new L10NString(recipe.ParentNameId ?? recipe.NameId).ToString())
+            var recipeNames = availableRecipes.Select(recipe => recipe.ParentNameId ?? recipe.NameId)
                 .Concat(upgradeItem == null && (craftingData.NewItemBaseIDs == null || craftingData.NewItemBaseIDs.Length == 0) || upgradeItemDoubleWeapon != null || (upgradeItemShield != null && upgradeItemShieldArmor != upgradeItem)
                     ? new string[0]
                     : new[] {new L10NString("craftMagicItems-label-cast-spell-n-times").ToString()})
@@ -1227,10 +1227,10 @@ namespace CraftMagicItems {
             if (selectedRecipe.ParentNameId != null) {
                 var category = recipeNames[selectedRecipeIndex];
                 var availableSubRecipes = craftingData.SubRecipes[selectedRecipe.ParentNameId]
-                    .OrderBy(recipe => new L10NString(recipe.NameId).ToString())
+                    .OrderBy(recipe => recipe.NameId)
                     .ToArray();
-                recipeNames = availableSubRecipes.Select(recipe => new L10NString(recipe.NameId).ToString()).ToArray();
-                var selectedSubRecipeIndex = RenderSelection(category + ": ", recipeNames, 6, ref selectedCustomName);
+                recipeNames = availableSubRecipes.Select(recipe => recipe.NameId).ToArray();
+                var selectedSubRecipeIndex = RenderSelection(category + ": ", recipeNames, 5, ref selectedCustomName);
                 selectedRecipe = availableSubRecipes[selectedSubRecipeIndex];
             }
 
@@ -1315,7 +1315,7 @@ namespace CraftMagicItems {
 
             if (selectedRecipe.ResultItem != null) {
                 // Just craft the item resulting from the recipe.
-                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem.Blueprint);
+                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem[0].Blueprint);
                 return;
             }
 
@@ -1858,9 +1858,9 @@ namespace CraftMagicItems {
                 .Where(recipe => (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(selectedSlot))
                                  && RecipeAppliesToBlueprint(recipe, baseBlueprint, skipMaterialCheck: true)
                                  && (recipe.Enchantments.Length != 1 || !baseBlueprint.Enchantments.Contains(recipe.Enchantments[0])))
-                .OrderBy(recipe => new L10NString(recipe.NameId).ToString())
+                .OrderBy(recipe => recipe.NameId)
                 .ToArray();
-            var recipeNames = availableRecipes.Select(recipe => new L10NString(recipe.NameId).ToString()).ToArray();
+            var recipeNames = availableRecipes.Select(recipe => recipe.NameId).ToArray();
             var selectedRecipeIndex = RenderSelection("Craft: ", recipeNames, 6, ref selectedCustomName);
             var selectedRecipe = availableRecipes.Any() ? availableRecipes[selectedRecipeIndex] : null;
             var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0] : null;
@@ -1878,7 +1878,7 @@ namespace CraftMagicItems {
 
             // Upgrading to a custom blueprint, rather than use the standard mithral/adamantine blueprints.
             var upgradeName = selectedRecipe != null && selectedRecipe.Material != 0
-                ? new L10NString(selectedRecipe.NameId).ToString()
+                ? selectedRecipe.NameId
                 : selectedEnchantment == null
                     ? null
                     : selectedEnchantment.Name;
@@ -2629,10 +2629,10 @@ namespace CraftMagicItems {
                     var newBonus = recipe.Enchantments.IndexOf(enchantment) + 1;
                     var bonusString = GetBonusString(newBonus, recipe);
                     var bonusDescription = recipe.BonusTypeId != null
-                        ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), new L10NString(recipe.NameId))
+                        ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), recipe.NameId)
                         : recipe.BonusToId != null
-                            ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.NameId), new L10NString(recipe.BonusToId))
-                            : L10NFormat("craftMagicItems-custom-description-bonus", new L10NString(recipe.NameId));
+                            ? L10NFormat("craftMagicItems-custom-description-bonus-to", recipe.NameId, new L10NString(recipe.BonusToId))
+                            : L10NFormat("craftMagicItems-custom-description-bonus", recipe.NameId);
                     var upgradeFrom = removed.FirstOrDefault(remove => FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
                     var oldBonus = int.MaxValue;
                     if (upgradeFrom != null) {
@@ -2942,8 +2942,21 @@ namespace CraftMagicItems {
                     if (itemData is RecipeBasedItemCraftingData recipeBased) {
                         recipeBased.Recipes = recipeBased.RecipeFileNames.Aggregate(Enumerable.Empty<RecipeData>(),
                             (all, fileName) => all.Concat(ReadJsonFile<RecipeData[]>($"{ModEntry.Path}/Data/{fileName}"))
-                        ).Where(recipe => recipe.ResultItem == null || recipe.ResultItem.Blueprint != null).ToArray();
+                        ).Where(recipe => recipe.ResultItem == null || recipe.ResultItem.Where(result => result.Blueprint != null).Count() > 0).ToArray();
                         foreach (var recipe in recipeBased.Recipes) {
+                            if (recipe.ResultItem != null) {
+                                recipe.ResultItem = recipe.ResultItem.Where(result => result.Blueprint != null).ToArray();
+                                if (recipe.NameId == null) {
+                                    recipe.NameId = recipe.ResultItem[0].Blueprint.Name;
+                                } else {
+                                    recipe.NameId = new L10NString(recipe.NameId).ToString();
+                                }
+                            } else if (recipe.NameId != null) {
+                                recipe.NameId = new L10NString(recipe.NameId).ToString();
+                            }
+                            if (recipe.ParentNameId != null) {
+                                recipe.ParentNameId = new L10NString(recipe.ParentNameId).ToString();
+                            }
                             if (recipe.PrerequisiteFeats != null) {
                                 var feats = recipe.PrerequisiteFeats.Where(feat => feat.Blueprint != null).ToArray();
                                 if (feats.Length > 0) {

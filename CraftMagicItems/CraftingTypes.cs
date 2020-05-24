@@ -138,8 +138,8 @@ namespace CraftMagicItems {
         [JsonProperty] public string BonusTypeId;
         [JsonProperty] public string BonusToId;
         [JsonProperty] public BlueprintItemEnchantment[] Enchantments;
-        [JsonProperty] [JsonConverter(typeof(CraftingBlueprintConverter<BlueprintItem>))]
-        public CraftingBlueprint<BlueprintItem> ResultItem;
+        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItem>))]
+        public CraftingBlueprint<BlueprintItem>[] ResultItem;
         [JsonProperty] public bool EnchantmentsCumulative;
         [JsonProperty] public int CasterLevelStart;
         [JsonProperty] public int CasterLevelMultiplier;
