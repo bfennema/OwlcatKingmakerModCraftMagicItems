@@ -812,5 +812,19 @@
     "CostFactor": 1,
     "OnlyForSlots": ["Weapon"],
     "Restrictions": ["WeaponMelee", "WeaponOneHanded", "WeaponNotOversized"]
+  },
+  {
+    "Name": "WeaponVeering",
+    "NameId": "craftMagicItems-enchantment-veering-name",
+    "Enchantments": [
+      "8d1096d3c259455cb438c6abb333dd8b"
+    ],
+    "CasterLevelStart": 5,
+    "CasterLevelMultiplier": 0,
+    "CostType": "EnhancementLevelSquared",
+    "PrerequisiteSpells": ["4ac47ddb9fa1eaf43a1b6809980cfbd2"],
+    "CostFactor": 1,
+    "OnlyForSlots": ["Weapon"],
+    "Restrictions": ["WeaponRanged"]
   }
 ]

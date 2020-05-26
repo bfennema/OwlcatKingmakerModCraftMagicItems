@@ -137,7 +137,8 @@ namespace CraftMagicItems {
         [JsonProperty] public string ParentNameId;
         [JsonProperty] public string BonusTypeId;
         [JsonProperty] public string BonusToId;
-        [JsonProperty] public BlueprintItemEnchantment[] Enchantments;
+        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItemEnchantment>))]
+        public CraftingBlueprint<BlueprintItemEnchantment>[] Enchantments;
         [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItem>))]
         public CraftingBlueprint<BlueprintItem>[] ResultItem;
         [JsonProperty] public bool EnchantmentsCumulative;

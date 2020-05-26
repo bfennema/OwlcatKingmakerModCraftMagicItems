@@ -560,6 +560,10 @@
     "Value": "A thundering burst weapon functions as a thundering weapon that explodes with a deafening thunderclap when making a successful critical hit. The sonic damage does not harm the wielder. In addition to the extra 1d6 sonic damage from the thundering ability, a corrosive burst weapon deals an extra 1d10 points of sonic damage on a successful critical hit. If the weapon's critical multiplier is ×3, add an extra 2d10 points of sonic damage instead, and if the multiplier is ×4, add an extra 3d10 points of sonic damage."
   },
   {
+    "Key": "craftMagicItems-enchantment-veering-name",
+    "Value": "Veering"
+  },
+  {
     "Key": "craftMagicItems-item-boots-striding-springing-name",
     "Value": "Boots of Striding and Springing"
   },
