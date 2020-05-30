@@ -2,7 +2,6 @@
   {
     "Name": "Standard",
     "NameId": "80ad0aba-45a1-42ec-911a-9d326c9e57f3",
-    "Enchantments": [],
     "PrerequisiteSpells": [],
     "CostType": "Flat",
     "CostFactor": 0,
@@ -135,7 +134,6 @@
   {
     "Name": "ColdIronShieldSpikes",
     "NameId": "craftMagicItems-mundane-cold-iron-shield-spikes-name",
-    "Enchantments": [],
     "Material": "ColdIron",
     "PrerequisiteSpells": [],
     "CostType": "Flat",
@@ -240,7 +238,6 @@
   {
     "Name": "ColdIronWeapon",
     "NameId": "aead3835-1773-440e-86c5-ae99a535450e",
-    "Enchantments": [],
     "Material": "ColdIron",
     "PrerequisiteSpells": [],
     "CostType": "Flat",

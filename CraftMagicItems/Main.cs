@@ -2945,7 +2945,7 @@ namespace CraftMagicItems {
                         ).Where(recipe => {
                             return (recipe.ResultItem != null && recipe.ResultItem.Where(result => result.Blueprint != null).Count() > 0)
                                 || (recipe.Enchantments != null && recipe.Enchantments.Where(enchantment => enchantment.Blueprint != null).Count() > 0)
-                                || (recipe.Material != 0);
+                                || (recipe.ResultItem == null && recipe.Enchantments == null);
                         }).ToArray();
                         foreach (var recipe in recipeBased.Recipes) {
                             if (recipe.ResultItem != null) {
