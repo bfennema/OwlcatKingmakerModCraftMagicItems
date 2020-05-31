@@ -1401,7 +1401,7 @@ namespace CraftMagicItems {
                 // Crafting a new custom blueprint from scratch.
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
                 var baseBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(selectedBaseGuid);
-                RenderCustomNameField($"{new L10NString(selectedRecipe.NameId)} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
+                RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint, selectedRecipe).Select(enchantment => enchantment.AssetGuid).ToArray();
                 IEnumerable<string> enchantments;
                 if (selectedRecipe.EnchantmentsCumulative) {
@@ -1620,6 +1620,7 @@ namespace CraftMagicItems {
             }
 
             var itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
+
             // Render craft button
             GameLogContext.Count = selectedCastsPerDay;
             RenderLabel(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
@@ -1902,12 +1903,12 @@ namespace CraftMagicItems {
                         }
                     }
                     var enchantments = selectedEnchantment == null ? new List<string>() : new List<string> { selectedEnchantment.AssetGuid };
-                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
-                        -1, selectedRecipe.Material, visual, animation);
+                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, name: name,
+                        material: selectedRecipe.Material, visual: visual, animation: animation);
                     if (doubleWeapon) {
                         baseBlueprint = doubleWeapon;
-                        itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
-                            -1, selectedRecipe.Material, visual, animation, secondEndGuid: itemGuid);
+                        itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, name: name,
+                            material: selectedRecipe.Material, visual: visual, animation: animation, secondEndGuid: itemGuid);
                     }
                 } else if (baseBlueprint is BlueprintItemShield shield) {
                     if (shield.WeaponComponent != null) {
@@ -1927,8 +1928,8 @@ namespace CraftMagicItems {
                             visual: visual, animation: animation, secondEndGuid: shield.WeaponComponent != null ? itemGuid : null);
                 } else {
                     var enchantments = selectedEnchantment == null ? new List<string>() : new List<string> { selectedEnchantment.AssetGuid };
-                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, null, name, null, null, -1,
-                        -1, selectedRecipe.Material, visual, animation);
+                    itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(baseBlueprint.AssetGuid, enchantments, name: name,
+                        material: selectedRecipe.Material, visual: visual, animation: animation);
                 }
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(itemGuid);
             }
@@ -2634,7 +2635,7 @@ namespace CraftMagicItems {
                             if (!string.IsNullOrEmpty(enchantment.Name)) {
                                 return enchantment.Name;
                             } else {
-                                return new L10NString(recipe.NameId);
+                                return recipe.NameId;
                             }
                         }
                     }
