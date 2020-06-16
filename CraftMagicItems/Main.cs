@@ -214,7 +214,7 @@ namespace CraftMagicItems {
         private static bool selectedDoubleWeaponSecondEnd;
         private static bool selectedShieldWeapon;
         private static int selectedCastsPerDay;
-        private static string selectedBaseGuid;
+        private static BlueprintItemEquipment selectedBaseBlueprint;
         private static string selectedCustomName;
         private static BlueprintItem upgradingBlueprint;
         private static bool selectedBondWithNewObject;
@@ -790,7 +790,7 @@ namespace CraftMagicItems {
             string assetGuid = null;
             switch (blueprint) {
                 case BlueprintItemArmor armor:   assetGuid = armor.Type.AssetGuid;  break;
-                case BlueprintItemShield shield: assetGuid = shield.Type.AssetGuid; break;
+                case BlueprintItemShield shield: assetGuid = shield.WeaponComponent != null ? shield.WeaponComponent.Type.AssetGuid : shield.ArmorComponent.Type.AssetGuid; break;
                 case BlueprintItemWeapon weapon: assetGuid = weapon.Type.AssetGuid; break;
             }
             return assetGuid;
@@ -1239,26 +1239,26 @@ namespace CraftMagicItems {
             }
 
             BlueprintItemEnchantment selectedEnchantment = null;
-            CraftingBlueprint<BlueprintItemEnchantment>[] availableEnchantments = null;
+            BlueprintItemEnchantment[] availableEnchantments = null;
             var selectedEnchantmentIndex = 0;
             if (selectedRecipe.ResultItem == null) {
                 // Pick specific enchantment from the recipe
                 if (selectedRecipe.EnchantmentsCumulative && upgradeItem != null) {
                     var itemEnchantments = GetEnchantments(upgradeItem.Blueprint, selectedRecipe);
-                    availableEnchantments = selectedRecipe.Enchantments.Where(enchantment => !itemEnchantments.Contains(enchantment.Blueprint)).ToArray();
+                    availableEnchantments = selectedRecipe.Enchantments.Where(enchantment => !itemEnchantments.Contains(enchantment)).ToArray();
                 } else {
                     availableEnchantments = selectedRecipe.Enchantments;
-                    var supersededEnchantment = upgradeItem != null ? FindSupersededEnchantmentId(upgradeItem.Blueprint, availableEnchantments[0].Blueprint.AssetGuid) : null;
+                    var supersededEnchantment = upgradeItem != null ? FindSupersededEnchantmentId(upgradeItem.Blueprint, availableEnchantments[0].AssetGuid) : null;
                     if (supersededEnchantment != null) {
                         // Don't offer downgrade options.
-                        var existingIndex = availableEnchantments.FindIndex(enchantment => enchantment.Blueprint.AssetGuid == supersededEnchantment);
+                        var existingIndex = availableEnchantments.FindIndex(enchantment => enchantment.AssetGuid == supersededEnchantment);
                         availableEnchantments = availableEnchantments.Skip(existingIndex + 1).ToArray();
                     }
                 }
 
-                var component = selectedRecipe.Enchantments[0].Blueprint.GetComponent<AddStatBonusEquipment>();
+                var component = selectedRecipe.Enchantments[0].GetComponent<AddStatBonusEquipment>();
                 if (availableEnchantments.Length == 0 || (component != null && upgradeItem != null && upgradeItem.Blueprint.Enchantments.Any(enchantment => {
-                    if (!selectedRecipe.Enchantments.Any(e => e.Blueprint == enchantment)) {
+                    if (!selectedRecipe.Enchantments.Any(e => e == enchantment)) {
                         var component2 = enchantment.GetComponent<AddStatBonusEquipment>();
 
                         if (component2 && component.Stat == component2.Stat) {
@@ -1273,24 +1273,24 @@ namespace CraftMagicItems {
                     var counter = selectedRecipe.Enchantments.Length - availableEnchantments.Length;
                     var enchantmentNames = availableEnchantments.Select(enchantment => {
                         counter++;
-                        return enchantment.Blueprint.Name.Empty() ? GetBonusString(counter, selectedRecipe) : enchantment.Blueprint.Name;
+                        return enchantment.Name.Empty() ? GetBonusString(counter, selectedRecipe) : enchantment.Name;
                     });
                     selectedEnchantmentIndex = RenderSelection("", enchantmentNames.ToArray(), 6);
                 }
 
-                selectedEnchantment = availableEnchantments[selectedEnchantmentIndex].Blueprint;
+                selectedEnchantment = availableEnchantments[selectedEnchantmentIndex];
             }
 
             var casterLevel = selectedRecipe.CasterLevelStart
                               + (selectedEnchantment == null
                                   ? 0
-                                  : selectedRecipe.Enchantments.FindIndex(e => e.Blueprint == selectedEnchantment) * selectedRecipe.CasterLevelMultiplier);
+                                  : selectedRecipe.Enchantments.FindIndex(e => e == selectedEnchantment) * selectedRecipe.CasterLevelMultiplier);
             if (selectedEnchantment != null) {
                 if (!string.IsNullOrEmpty(selectedEnchantment.Description)) {
                     RenderLabel(selectedEnchantment.Description);
                 }
                 if (selectedRecipe.CostType == RecipeCostType.EnhancementLevelSquared) {
-                    RenderLabel($"Plus equivalent: +{GetPlusOfRecipe(selectedRecipe, selectedRecipe.Enchantments.FindIndex(e => e.Blueprint == selectedEnchantment) + 1)}");
+                    RenderLabel($"Plus equivalent: +{GetPlusOfRecipe(selectedRecipe, selectedRecipe.Enchantments.FindIndex(e => e == selectedEnchantment) + 1)}");
                 }
             }
 
@@ -1302,7 +1302,7 @@ namespace CraftMagicItems {
             }
 
             if (selectedRecipe.PrerequisiteFeats != null && selectedRecipe.PrerequisiteFeats.Length > 0) {
-                prerequisites += $"; {selectedRecipe.PrerequisiteFeats.Select(feature => feature.Blueprint.Name).BuildCommaList(selectedRecipe.AnyPrerequisite)}";
+                prerequisites += $"; {selectedRecipe.PrerequisiteFeats.Select(feature => feature.Name).BuildCommaList(selectedRecipe.AnyPrerequisite)}";
             }
 
             if (selectedRecipe.CrafterPrerequisites != null) {
@@ -1319,7 +1319,7 @@ namespace CraftMagicItems {
 
             if (selectedRecipe.ResultItem != null) {
                 // Just craft the item resulting from the recipe.
-                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem[0].Blueprint);
+                RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, selectedRecipe.ResultItem);
                 return;
             }
 
@@ -1371,7 +1371,7 @@ namespace CraftMagicItems {
                 IEnumerable<string> enchantments;
                 string supersededEnchantmentId;
                 if (selectedRecipe.EnchantmentsCumulative) {
-                    enchantments = availableEnchantments.Take(selectedEnchantmentIndex + 1).Select(enchantment => enchantment.Blueprint.AssetGuid);
+                    enchantments = availableEnchantments.Take(selectedEnchantmentIndex + 1).Select(enchantment => enchantment.AssetGuid);
                     supersededEnchantmentId = null;
                 } else {
                     enchantments = new List<string> {selectedEnchantment.AssetGuid};
@@ -1400,16 +1400,16 @@ namespace CraftMagicItems {
             } else {
                 // Crafting a new custom blueprint from scratch.
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
-                var baseBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(selectedBaseGuid);
+                var baseBlueprint = selectedBaseBlueprint;
                 RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint, selectedRecipe).Select(enchantment => enchantment.AssetGuid).ToArray();
                 IEnumerable<string> enchantments;
                 if (selectedRecipe.EnchantmentsCumulative) {
-                    enchantments = availableEnchantments.Take(selectedEnchantmentIndex + 1).Select(enchantment => enchantment.Blueprint.AssetGuid);
+                    enchantments = availableEnchantments.Take(selectedEnchantmentIndex + 1).Select(enchantment => enchantment.AssetGuid);
                 } else {
                     enchantments = new List<string> { selectedEnchantment.AssetGuid };
                 }
-                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseGuid, enchantments, enchantmentsToRemove,
+                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseBlueprint.AssetGuid, enchantments, enchantmentsToRemove,
                     selectedCustomName ?? "[custom item]", "null", "null");
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
             }
@@ -1498,15 +1498,15 @@ namespace CraftMagicItems {
         }
 
         private static void SelectRandomApplicableBaseGuid(ItemCraftingData craftingData, ItemsFilter.ItemType selectedSlot) {
-            if (selectedBaseGuid != null) {
-                var baseBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(selectedBaseGuid);
+            if (selectedBaseBlueprint != null) {
+                var baseBlueprint = selectedBaseBlueprint;
                 if (!baseBlueprint || !DoesBlueprintMatchSlot(baseBlueprint, selectedSlot)) {
-                    selectedBaseGuid = null;
+                    selectedBaseBlueprint = null;
                 }
             }
 
-            selectedBaseGuid = selectedBaseGuid ?? RandomBaseBlueprintId(craftingData,
-                                   guid => DoesBlueprintMatchSlot(ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(guid), selectedSlot));
+            selectedBaseBlueprint = selectedBaseBlueprint ?? RandomBaseBlueprintId(craftingData,
+                                   blueprint => DoesBlueprintMatchSlot(blueprint, selectedSlot));
         }
 
         private static void RenderCastSpellNTimes(UnitEntityData caster, RecipeBasedItemCraftingData craftingData, ItemEntity upgradeItem,
@@ -1604,9 +1604,9 @@ namespace CraftMagicItems {
                 // Pick random base item
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
                 // Create customised item GUID
-                var baseBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(selectedBaseGuid);
+                var baseBlueprint = selectedBaseBlueprint;
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint).Select(enchantment => enchantment.AssetGuid).ToArray();
-                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseGuid, new List<string>(), enchantmentsToRemove, selectedCustomName,
+                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseBlueprint.AssetGuid, new List<string>(), enchantmentsToRemove, selectedCustomName,
                     ability.AssetGuid, "null", casterLevel: selectedCasterLevel, spellLevel: spellLevel, perDay: selectedCastsPerDay);
             } else {
                 // Option to rename item
@@ -1662,7 +1662,7 @@ namespace CraftMagicItems {
         }
 
         private static int RenderCraftingSkillInformation(UnitEntityData crafter, StatType skill, int dc, int casterLevel = 0,
-            BlueprintAbility[] prerequisiteSpells = null, CraftingBlueprint<BlueprintFeature>[] prerequisiteFeats = null, bool anyPrerequisite = false,
+            BlueprintAbility[] prerequisiteSpells = null, BlueprintFeature[] prerequisiteFeats = null, bool anyPrerequisite = false,
             CrafterPrerequisiteType[] crafterPrerequisites = null,
             bool render = true) {
             if (render) {
@@ -1838,7 +1838,6 @@ namespace CraftMagicItems {
             } else {
                 // Choose mundane item of selected type to create
                 var blueprints = craftingData.NewItemBaseIDs
-                    .Select(ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>)
                     .Where(blueprint => blueprint != null
                                         && (!(blueprint is BlueprintItemWeapon weapon) || !weapon.Category.HasSubCategory(WeaponSubCategory.Disabled)))
                     .OrderBy(blueprint => blueprint.Name)
@@ -1862,13 +1861,13 @@ namespace CraftMagicItems {
             var availableRecipes = craftingData.Recipes
                 .Where(recipe => (recipe.OnlyForSlots == null || recipe.OnlyForSlots.Contains(selectedSlot))
                                  && RecipeAppliesToBlueprint(recipe, baseBlueprint, skipMaterialCheck: true)
-                                 && (recipe.Enchantments.Length != 1 || !baseBlueprint.Enchantments.Contains(recipe.Enchantments[0].Blueprint)))
+                                 && (recipe.Enchantments.Length != 1 || !baseBlueprint.Enchantments.Contains(recipe.Enchantments[0])))
                 .OrderBy(recipe => recipe.NameId)
                 .ToArray();
             var recipeNames = availableRecipes.Select(recipe => recipe.NameId).ToArray();
             var selectedRecipeIndex = RenderSelection("Craft: ", recipeNames, 6, ref selectedCustomName);
             var selectedRecipe = availableRecipes.Any() ? availableRecipes[selectedRecipeIndex] : null;
-            var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0].Blueprint : null;
+            var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0] : null;
             if (selectedRecipe != null && selectedRecipe.Material != 0) {
                 RenderLabel(GetWeaponMaterialDescription(selectedRecipe.Material));
             } else if (selectedEnchantment != null && !string.IsNullOrEmpty(selectedEnchantment.Description)) {
@@ -2318,7 +2317,7 @@ namespace CraftMagicItems {
             return caster.Descriptor.Progression.Features.Enumerable.Any(feat => feat.Blueprint.AssetGuid == featGuid);
         }
 
-        private static string RandomBaseBlueprintId(ItemCraftingData itemData, Func<string, bool> selector = null) {
+        private static BlueprintItemEquipment RandomBaseBlueprintId(ItemCraftingData itemData, Func<BlueprintItemEquipment, bool> selector = null) {
             var blueprintIds = selector == null ? itemData.NewItemBaseIDs : itemData.NewItemBaseIDs.Where(selector).ToArray();
             return blueprintIds[RandomGenerator.Next(blueprintIds.Length)];
         }
@@ -2481,7 +2480,7 @@ namespace CraftMagicItems {
                 if (itemBlueprintList == null) {
                     // No items for that spell exist at all - create a custom blueprint with casterLevel, spellLevel and spellId
                     var blueprintId =
-                        blueprintPatcher.BuildCustomSpellItemGuid(RandomBaseBlueprintId(craftingData), casterLevel, spellLevel, spellBlueprint.AssetGuid);
+                        blueprintPatcher.BuildCustomSpellItemGuid(RandomBaseBlueprintId(craftingData).AssetGuid, casterLevel, spellLevel, spellBlueprint.AssetGuid);
                     itemBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(blueprintId);
                 } else if (existingItemBlueprint == null) {
                     // No item for this spell & caster level - create a custom blueprint with casterLevel and optionally SpellLevel
@@ -2609,15 +2608,15 @@ namespace CraftMagicItems {
                     CraftItem(resultItem, upgradeItem);
                 } else {
                     var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, recipe?.Name,
-                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisiteFeats ?? new CraftingBlueprint<BlueprintFeature>[0], recipe?.PrerequisitesMandatory ?? false,
+                        recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisiteFeats ?? Array.Empty<BlueprintFeature>(), recipe?.PrerequisitesMandatory ?? false,
                         recipe?.AnyPrerequisite ?? false, upgradeItem, recipe?.CrafterPrerequisites ?? new CrafterPrerequisiteType[0]);
                     AddNewProject(caster.Descriptor, project);
                     CalculateProjectEstimate(project);
                     currentSection = OpenSection.ProjectsSection;
                 }
 
-                // Reset base GUID for next item
-                selectedBaseGuid = null;
+                // Reset base blueprint for next item
+                selectedBaseBlueprint = null;
                 // And stop upgrading the item, if relevant.
                 upgradingBlueprint = null;
             }
@@ -2639,7 +2638,7 @@ namespace CraftMagicItems {
                             }
                         }
                     }
-                    var newBonus = recipe.Enchantments.FindIndex(e => e.Blueprint == enchantment) + 1;
+                    var newBonus = recipe.Enchantments.FindIndex(e => e == enchantment) + 1;
                     var bonusString = GetBonusString(newBonus, recipe);
                     var bonusDescription = recipe.BonusTypeId != null
                         ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), recipe.NameId)
@@ -2649,7 +2648,7 @@ namespace CraftMagicItems {
                     var upgradeFrom = removed.FirstOrDefault(remove => FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
                     var oldBonus = int.MaxValue;
                     if (upgradeFrom != null) {
-                        oldBonus = recipe.Enchantments.FindIndex(e => e.Blueprint == upgradeFrom) + 1;
+                        oldBonus = recipe.Enchantments.FindIndex(e => e == upgradeFrom) + 1;
                     }
                     if (oldBonus > newBonus) {
                         if (skipped.Contains(enchantment)) {
@@ -2732,7 +2731,7 @@ namespace CraftMagicItems {
                 if (EnchantmentIdToRecipe.ContainsKey(enchantment.AssetGuid)) {
                     var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
                     if (recipe != null && recipe.CostType == RecipeCostType.EnhancementLevelSquared) {
-                        var level = recipe.Enchantments.FindIndex(e => e.Blueprint == enchantment) + 1;
+                        var level = recipe.Enchantments.FindIndex(e => e == enchantment) + 1;
                         if (recipe.EnchantmentsCumulative) {
                             cumulative[recipe] = cumulative.ContainsKey(recipe) ? Math.Max(level, cumulative[recipe]) : level;
                         } else {
@@ -2764,7 +2763,7 @@ namespace CraftMagicItems {
         private static int GetEnchantmentCost(string enchantmentId, BlueprintItem blueprint) {
             var recipe = FindSourceRecipe(enchantmentId, blueprint);
             if (recipe != null) {
-                var index = recipe.Enchantments.FindIndex(enchantment => enchantment.Blueprint.AssetGuid == enchantmentId);
+                var index = recipe.Enchantments.FindIndex(enchantment => enchantment.AssetGuid == enchantmentId);
                 var casterLevel = recipe.CasterLevelStart + index * recipe.CasterLevelMultiplier;
                 var epicFactor = casterLevel > 20 ? 2 : 1;
                 switch (recipe.CostType) {
@@ -2956,15 +2955,15 @@ namespace CraftMagicItems {
                         recipeBased.Recipes = recipeBased.RecipeFileNames.Aggregate(Enumerable.Empty<RecipeData>(),
                             (all, fileName) => all.Concat(ReadJsonFile<RecipeData[]>($"{ModEntry.Path}/Data/{fileName}"))
                         ).Where(recipe => {
-                            return (recipe.ResultItem != null && recipe.ResultItem.Where(result => result.Blueprint != null).Count() > 0)
-                                || (recipe.Enchantments != null && recipe.Enchantments.Where(enchantment => enchantment.Blueprint != null).Count() > 0)
-                                || (recipe.ResultItem == null && recipe.Enchantments == null);
+                            return (recipe.ResultItem != null)
+                                || (recipe.Enchantments.Length > 0)
+                                || (recipe.NoResultItem && recipe.NoEnchantments);
                         }).ToArray();
+
                         foreach (var recipe in recipeBased.Recipes) {
                             if (recipe.ResultItem != null) {
-                                recipe.ResultItem = recipe.ResultItem.Where(result => result.Blueprint != null).ToArray();
                                 if (recipe.NameId == null) {
-                                    recipe.NameId = recipe.ResultItem[0].Blueprint.Name;
+                                    recipe.NameId = recipe.ResultItem.Name;
                                 } else {
                                     recipe.NameId = new L10NString(recipe.NameId).ToString();
                                 }
@@ -2974,22 +2973,7 @@ namespace CraftMagicItems {
                             if (recipe.ParentNameId != null) {
                                 recipe.ParentNameId = new L10NString(recipe.ParentNameId).ToString();
                             }
-                            if (recipe.PrerequisiteFeats != null) {
-                                var feats = recipe.PrerequisiteFeats.Where(feat => feat.Blueprint != null).ToArray();
-                                if (feats.Length > 0) {
-                                    recipe.PrerequisiteFeats = feats;
-                                } else {
-                                    recipe.PrerequisiteFeats = null;
-                                }
-                            }
-                            if (recipe.Enchantments != null) {
-                                recipe.Enchantments = recipe.Enchantments.Where(enchantment => enchantment.Blueprint != null).ToArray();
-                            } else {
-                                recipe.Enchantments = new CraftingBlueprint<BlueprintItemEnchantment>[0];
-                            }
-                            foreach (var enchantment in recipe.Enchantments) {
-                                AddRecipeForEnchantment(enchantment.Blueprint.AssetGuid, recipe);
-                            }
+                            recipe.Enchantments.ForEach(enchantment => AddRecipeForEnchantment(enchantment.AssetGuid, recipe));
                             if (recipe.Material != 0) {
                                 AddRecipeForMaterial(recipe.Material, recipe);
                             }
@@ -3005,9 +2989,8 @@ namespace CraftMagicItems {
                         }
 
                         if (recipeBased.Name.StartsWith("CraftMundane")) {
-                            foreach (var guid in recipeBased.NewItemBaseIDs) {
-                                if (!guid.Contains("#CraftMagicItems")) {
-                                    var blueprint = ResourcesLibrary.TryGetBlueprint(guid) as BlueprintItem;
+                            foreach (var blueprint in recipeBased.NewItemBaseIDs) {
+                                if (!blueprint.AssetGuid.Contains("#CraftMagicItems")) {
                                     AddItemForType(blueprint);
                                 }
                             }
@@ -3506,19 +3489,19 @@ namespace CraftMagicItems {
             return CheckFeatPrerequisites(project.FeatPrerequisites, project.AnyPrerequisite, caster, out missingFeats);
         }
 
-        private static int CheckFeatPrerequisites(CraftingBlueprint<BlueprintFeature>[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
+        private static int CheckFeatPrerequisites(BlueprintFeature[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
             out List<BlueprintFeature> missingFeats) {
             missingFeats = new List<BlueprintFeature>();
             if (prerequisites != null) {
                 foreach (var featBlueprint in prerequisites) {
-                    var feat = caster.GetFeature(featBlueprint.Blueprint);
+                    var feat = caster.GetFeature(featBlueprint);
                     if (feat != null) {
                         if (anyPrerequisite) {
                             missingFeats.Clear();
                             return 0;
                         }
                     } else {
-                        missingFeats.Add(featBlueprint.Blueprint);
+                        missingFeats.Add(featBlueprint);
                     }
                 }
             }

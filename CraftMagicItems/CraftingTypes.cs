@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items;
@@ -9,6 +10,7 @@ using Kingmaker.Enums.Damage;
 using Kingmaker.RuleSystem;
 using Kingmaker.UI.Common;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.Utility;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -29,6 +31,15 @@ namespace CraftMagicItems {
         DataTypeEnum DataType { get; set; }
     }
 
+    public class CraftingBlueprint<T> {
+        [JsonIgnore]
+        private T m_blueprint;
+        public CraftingBlueprint(T blueprint) {
+            m_blueprint = blueprint;
+        }
+        public T Blueprint => m_blueprint;
+    }
+
     public class ItemCraftingData : ICraftingData {
         public DataTypeEnum DataType { get; set; }
         [JsonProperty] public string Name;
@@ -37,8 +48,25 @@ namespace CraftMagicItems {
         [JsonProperty] public string FeatGuid;
         [JsonProperty] public int MinimumCasterLevel;
         [JsonProperty] public bool PrerequisitesMandatory;
-        [JsonProperty] public string[] NewItemBaseIDs;
+        [JsonProperty("NewItemBaseIDs", ItemConverterType = typeof(CraftingBlueprintArrayConverter<BlueprintItemEquipment>))]
+        private CraftingBlueprint<BlueprintItemEquipment>[][] m_NewItemBaseIDs;
         [JsonProperty] public int Count;
+        [JsonIgnore] private BlueprintItemEquipment[] m_CachedNewItemBaseIDs;
+        [JsonIgnore] public BlueprintItemEquipment[] NewItemBaseIDs {
+            get {
+                if (m_CachedNewItemBaseIDs == null && m_NewItemBaseIDs != null) {
+                    List<BlueprintItemEquipment> list = new List<BlueprintItemEquipment>();
+                    foreach (var row in m_NewItemBaseIDs) {
+                        var tmp = row.FirstOrDefault(blueprint => blueprint.Blueprint != null);
+                        if (tmp != null) {
+                            list.Add(tmp.Blueprint);
+                        }
+                    }
+                    m_CachedNewItemBaseIDs = list.ToArray();
+                }
+                return m_CachedNewItemBaseIDs;
+            }
+        }
     }
 
     public class SpellBasedItemCraftingData : ItemCraftingData {
@@ -122,26 +150,16 @@ namespace CraftMagicItems {
         FeatureChannelEnergy
     }
 
-    public class CraftingBlueprint<T>
-    {
-        [JsonIgnore]
-        private T m_blueprint;
-        public CraftingBlueprint(T blueprint) {
-            m_blueprint = blueprint;
-        }
-        public T Blueprint => m_blueprint;
-    }
-
     public class RecipeData {
         [JsonProperty] public string Name;
         [JsonProperty] public string NameId;
         [JsonProperty] public string ParentNameId;
         [JsonProperty] public string BonusTypeId;
         [JsonProperty] public string BonusToId;
-        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItemEnchantment>))]
-        public CraftingBlueprint<BlueprintItemEnchantment>[] Enchantments;
-        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItem>))]
-        public CraftingBlueprint<BlueprintItem>[] ResultItem;
+        [JsonProperty("Enchantments", ItemConverterType = typeof(CraftingBlueprintArrayConverter<BlueprintItemEnchantment>))]
+        private CraftingBlueprint<BlueprintItemEnchantment>[][] m_Enchantments;
+        [JsonProperty("ResultItem", ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintItem>))]
+        private CraftingBlueprint<BlueprintItem>[] m_ResultItem;
         [JsonProperty] public bool EnchantmentsCumulative;
         [JsonProperty] public int CasterLevelStart;
         [JsonProperty] public int CasterLevelMultiplier;
@@ -150,8 +168,8 @@ namespace CraftMagicItems {
         [JsonProperty] public int MundaneDC;
         [JsonProperty] public PhysicalDamageMaterial Material;
         [JsonProperty] public BlueprintAbility[] PrerequisiteSpells;
-        [JsonProperty(ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintFeature>))]
-        public CraftingBlueprint<BlueprintFeature>[] PrerequisiteFeats;
+        [JsonProperty("PrerequisiteFeats", ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintFeature>))]
+        private CraftingBlueprint<BlueprintFeature>[] m_PrerequisiteFeats;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public CrafterPrerequisiteType[] CrafterPrerequisites;
@@ -177,11 +195,68 @@ namespace CraftMagicItems {
         [JsonProperty] public string[] VisualMappings;
         [JsonProperty] public string[] AnimationMappings;
         [JsonProperty] public string[] NameMappings;
+
+        [JsonIgnore] public bool NoEnchantments { get => m_Enchantments == null; }
+        [JsonIgnore] private BlueprintItemEnchantment[] m_CachedEnchantments;
+        [JsonIgnore] public BlueprintItemEnchantment[] Enchantments {
+            get {
+                if (m_CachedEnchantments == null) {
+                    List<BlueprintItemEnchantment> list = new List<BlueprintItemEnchantment>();
+                    if (m_Enchantments != null) {
+                        foreach (var row in m_Enchantments) {
+                            var tmp = row.FirstOrDefault(blueprint => blueprint.Blueprint != null);
+                            if (tmp != null) {
+                                list.Add(tmp.Blueprint);
+                            }
+                        }
+                    }
+                    m_CachedEnchantments = list.ToArray();
+                }
+                return m_CachedEnchantments;
+            }
+        }
+
+        [JsonIgnore] public bool NoResultItem { get => m_ResultItem == null; }
+        [JsonIgnore] public BlueprintItem ResultItem {
+            get => m_ResultItem.FirstOrDefault(r => r.Blueprint != null)?.Blueprint;
+        }
+
+        [JsonIgnore] private BlueprintFeature[] m_CachedPrerequisiteFeats;
+        [JsonIgnore] public BlueprintFeature[] PrerequisiteFeats {
+            get {
+                if (m_CachedPrerequisiteFeats == null && m_PrerequisiteFeats != null) {
+                    m_CachedPrerequisiteFeats = m_PrerequisiteFeats.Where(blueprint => blueprint.Blueprint != null).Select(blueprint => blueprint.Blueprint).ToArray();
+                    if (m_CachedPrerequisiteFeats.Length == 0) {
+                        m_PrerequisiteFeats = null;
+                        m_CachedPrerequisiteFeats = null;
+                    }
+                }
+                return m_CachedPrerequisiteFeats;
+            }
+        }
+    }
+
+    public class CraftingBlueprintArrayConverter<T> : JsonConverter where T : BlueprintScriptableObject {
+        public override bool CanConvert(Type objectType) {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+            if (reader.TokenType == JsonToken.Null) {
+                return null;
+            }
+            serializer.Converters.Add(new CraftingBlueprintConverter<T>());
+            return serializer.Deserialize<CraftingBlueprint<T>[]>(reader);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+            throw new NotImplementedException();
+        }
     }
 
     public class CraftingBlueprintConverter<T> : JsonConverter where T : BlueprintScriptableObject {
         public override bool CanConvert(Type objectType) {
-            throw new NotImplementedException();
+            return objectType == typeof(CraftingBlueprint<T>);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {

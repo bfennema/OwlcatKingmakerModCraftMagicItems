@@ -90,6 +90,7 @@ namespace CraftMagicItems {
         private static bool initialised;
 
         public WildEnchantment() {
+            this.name = "Wild";
             Main.Accessors.SetBlueprintItemEnchantmentEnchantName(this, new L10NString("craftMagicItems-enchantment-wild-name"));
             Main.Accessors.SetBlueprintItemEnchantmentDescription(this, new L10NString("craftMagicItems-enchantment-wild-description"));
             Main.Accessors.SetBlueprintItemEnchantmentPrefix(this, new L10NString(""));
