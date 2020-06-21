@@ -23,8 +23,8 @@ namespace CraftMagicItems {
             Frequency = DurationRate.Rounds;
             FxOnStart = new PrefabLink();
             FxOnRemove = new PrefabLink();
-            Main.Accessors.SetBlueprintUnitFactDisplayName(this, new L10NString("craftMagicItems-enchantment-wild-name"));
-            Main.Accessors.SetBlueprintUnitFactDescription(this, new L10NString("craftMagicItems-enchantment-wild-description"));
+            Main.Accessors.SetBlueprintUnitFactDisplayName(this) = new L10NString("craftMagicItems-enchantment-wild-name");
+            Main.Accessors.SetBlueprintUnitFactDescription(this) = new L10NString("craftMagicItems-enchantment-wild-description");
         }
     }
 
@@ -94,19 +94,19 @@ namespace CraftMagicItems {
 
         public WildEnchantment() {
             this.name = "Wild";
-            Main.Accessors.SetBlueprintItemEnchantmentEnchantName(this, new L10NString("craftMagicItems-enchantment-wild-name"));
-            Main.Accessors.SetBlueprintItemEnchantmentDescription(this, new L10NString("craftMagicItems-enchantment-wild-description"));
-            Main.Accessors.SetBlueprintItemEnchantmentPrefix(this, new L10NString(""));
-            Main.Accessors.SetBlueprintItemEnchantmentSuffix(this, new L10NString(""));
-            Main.Accessors.SetBlueprintItemEnchantmentEnchantmentCost(this, 1);
-            Main.Accessors.SetBlueprintItemEnchantmentEnchantmentIdentifyDC(this, 5);
+            Main.Accessors.SetBlueprintItemEnchantmentEnchantName(this) = new L10NString("craftMagicItems-enchantment-wild-name");
+            Main.Accessors.SetBlueprintItemEnchantmentDescription(this) = new L10NString("craftMagicItems-enchantment-wild-description");
+            Main.Accessors.SetBlueprintItemEnchantmentPrefix(this) = new L10NString("");
+            Main.Accessors.SetBlueprintItemEnchantmentSuffix(this) = new L10NString("");
+            Main.Accessors.SetBlueprintItemEnchantmentEnchantmentCost(this) = 1;
+            Main.Accessors.SetBlueprintItemEnchantmentEnchantmentIdentifyDC(this) = 5;
         }
 
-        [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenu), "Start")]
         // ReSharper disable once UnusedMember.Local
         public static class MainMenuStartPatch {
             private static void AddBlueprint(string guid, BlueprintScriptableObject blueprint) {
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, guid);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint) = guid;
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(guid, blueprint);
                 ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(blueprint);
             }
@@ -126,7 +126,7 @@ namespace CraftMagicItems {
             }
         }
 #if PATCH21
-        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
         private static class MainMenuUiContextInitializePatch {
             private static void Postfix() {
                 MainMenuStartPatch.Postfix();

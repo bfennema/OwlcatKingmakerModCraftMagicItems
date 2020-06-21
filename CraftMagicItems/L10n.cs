@@ -69,8 +69,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(LocalizationManager))]
-        [Harmony12.HarmonyPatch("CurrentLocale", Harmony12.MethodType.Setter)]
+        [HarmonyLib.HarmonyPatch(typeof(LocalizationManager), "CurrentLocale", HarmonyLib.MethodType.Setter)]
         private static class LocalizationManagerCurrentLocaleSetterPatch {
             // ReSharper disable once UnusedMember.Local
             private static void Postfix() {
@@ -78,7 +77,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenu), "Start")]
         private static class MainMenuStartPatch {
             private static void Prefix() {
                 // Kingmaker Mod Loader doesn't appear to patch the game before LocalizationManager.CurrentLocale has been set.
@@ -89,7 +88,7 @@ namespace CraftMagicItems {
         }
 
 #if PATCH21
-        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
         private static class MainMenuUiContextInitializePatch {
             private static void Prefix() {
                 // Kingmaker Mod Loader doesn't appear to patch the game before LocalizationManager.CurrentLocale has been set.

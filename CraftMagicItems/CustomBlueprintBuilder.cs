@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Kingmaker.Blueprints;
 #if !PATCH21_BETA
@@ -102,7 +100,7 @@ namespace CraftMagicItems {
                 }
 #endif
                 // Insert patched blueprint into ResourcesLibrary under the new GUID.
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, newAssetId);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint) = newAssetId;
                 if (ResourcesLibrary.LibraryObject.BlueprintsByAssetId != null) {
                     ResourcesLibrary.LibraryObject.BlueprintsByAssetId[newAssetId] = blueprint;
                 }
@@ -127,19 +125,7 @@ namespace CraftMagicItems {
         }
 
         // This patch is generic, and makes custom blueprints fall back to their initial version.
-        [Harmony12.HarmonyPatch(typeof(ResourcesLibrary), "TryGetBlueprint")]
-        // ReSharper disable once UnusedMember.Local
-        private static class ResourcesLibraryTryGetBlueprintFallbackPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static MethodBase TargetMethod() {
-                // ResourcesLibrary.TryGetBlueprint has two definitions which only differ by return type :(
-                var allMethods = typeof(ResourcesLibrary).GetMethods();
-                return allMethods.Single(info => info.Name == "TryGetBlueprint" && info.ReturnType == typeof(BlueprintScriptableObject));
-            }
-
-            // ReSharper disable once UnusedMember.Local
-            [Harmony12.HarmonyPriority(Harmony12.Priority.First)]
-            // ReSharper disable once InconsistentNaming
+        public static class ResourcesLibraryTryGetBlueprintFallbackPatch {
             private static void Postfix(string assetId, ref BlueprintScriptableObject __result) {
                 if (__result == null && assetId.Length > VanillaAssetIdLength) {
                     // Failed to load custom blueprint - return the original.
@@ -149,26 +135,13 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(ResourcesLibrary), "TryGetBlueprint")]
-        // ReSharper disable once UnusedMember.Local
-        private static class ResourcesLibraryTryGetBlueprintModPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static MethodBase TargetMethod() {
-                // ResourcesLibrary.TryGetBlueprint has two definitions which only differ by return type :(
-                var allMethods = typeof(ResourcesLibrary).GetMethods();
-                return allMethods.Single(info => info.Name == "TryGetBlueprint" && info.ReturnType == typeof(BlueprintScriptableObject));
-            }
-
-            // ReSharper disable once UnusedMember.Local
+        public static class ResourcesLibraryTryGetBlueprintModPatch {
             private static void Prefix(ref string assetId) {
                 // Perform any backward compatibility substitutions
                 for (var index = 0; index < substitutions.Length; index ++) {
                     assetId = assetId.Replace(substitutions[index].oldGuid, substitutions[index].newGuid);
                 }
             }
-
-            // ReSharper disable once UnusedMember.Local
-            // ReSharper disable once InconsistentNaming
             private static void Postfix(string assetId, ref BlueprintScriptableObject __result) {
                 if (__result != null && assetId != __result.AssetGuid) {
                     __result = PatchBlueprint(assetId, __result);

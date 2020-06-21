@@ -43,7 +43,7 @@ namespace CraftMagicItems {
         }
 
         // If the owner of a bonded object casts a spell when not wielding it, they need to make a Concentration check or lose the spell.
-        [Harmony12.HarmonyPatch(typeof(UnitUseAbility), "MakeConcentrationCheckIfCastingIsDifficult")]
+        [HarmonyLib.HarmonyPatch(typeof(UnitUseAbility), "MakeConcentrationCheckIfCastingIsDifficult")]
         // ReSharper disable once UnusedMember.Local
         private static class UnitUseAbilityMakeConcentrationCheckIfCastingIsDifficultPatch {
             // ReSharper disable once UnusedMember.Local

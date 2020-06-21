@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using Harmony12;
 using Kingmaker;
 #if PATCH21
 using Kingmaker.Assets.UI.Context;
@@ -23,7 +22,7 @@ namespace CraftMagicItems {
     public class CreateQuiverAbility : ScriptableObject {
         private static bool initialised;
 
-        [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenu), "Start")]
         // ReSharper disable once UnusedMember.Local
         public static class MainMenuStartPatch {
             private static void AddQuiver(BlueprintActivatableAbility ability, BlueprintBuff buff, string guid, PhysicalDamageMaterial material) {
@@ -43,8 +42,8 @@ namespace CraftMagicItems {
 
 #endif
                 quiverBuff.ComponentsArray = new BlueprintComponent[] { component };
-                Main.Accessors.SetBlueprintUnitFactDisplayName(quiverBuff, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name"));
-                Main.Accessors.SetBlueprintUnitFactDescription(quiverBuff, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description"));
+                Main.Accessors.SetBlueprintUnitFactDisplayName(quiverBuff) = new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name");
+                Main.Accessors.SetBlueprintUnitFactDescription(quiverBuff) = new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description");
 #if PATCH21_BETA
                 quiverBuff.OnEnable();
                 foreach (var c in quiverBuff.ComponentsArray) {
@@ -54,7 +53,7 @@ namespace CraftMagicItems {
 
                 var buffGuid = $"{guid}#CraftMagicItems({material.ToString()}QuiverBuff)";
 
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverBuff, buffGuid);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverBuff) = buffGuid;
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(buffGuid, quiverBuff);
                 ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(quiverBuff);
 
@@ -65,8 +64,8 @@ namespace CraftMagicItems {
 
 #endif
                 quiverAbility.Buff = quiverBuff;
-                Main.Accessors.SetBlueprintUnitFactDisplayName(quiverAbility, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name"));
-                Main.Accessors.SetBlueprintUnitFactDescription(quiverAbility, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description"));
+                Main.Accessors.SetBlueprintUnitFactDisplayName(quiverAbility) = new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name");
+                Main.Accessors.SetBlueprintUnitFactDescription(quiverAbility) = new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description");
 #if PATCH21_BETA
                 quiverBuff.OnEnable();
                 foreach (var c in quiverAbility.ComponentsArray) {
@@ -76,7 +75,7 @@ namespace CraftMagicItems {
 
                 var abilityGuid = $"{guid}#CraftMagicItems({material.ToString()}QuiverAbility)";
 
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverAbility, abilityGuid);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverAbility) = abilityGuid;
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(abilityGuid, quiverAbility);
                 ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(quiverAbility);
             }
@@ -97,7 +96,7 @@ namespace CraftMagicItems {
         }
 
 #if PATCH21
-        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
         private static class MainMenuUiContextInitializePatch {
             private static void Postfix() {
                 MainMenuStartPatch.Postfix();
@@ -105,17 +104,17 @@ namespace CraftMagicItems {
         }
 #endif
 
-        [Harmony12.HarmonyPatch(typeof(ItemSlot), "InsertItem")]
+        [HarmonyLib.HarmonyPatch(typeof(ItemSlot), "InsertItem")]
         // ReSharper disable once UnusedMember.Local
         private static class ItemSlotInsertItemPatch {
-            static readonly MethodInfo methodToReplace = AccessTools.Property(typeof(ItemEntity), "IsStackable").GetGetMethod();
+            static readonly MethodInfo methodToReplace = HarmonyLib.AccessTools.Property(typeof(ItemEntity), "IsStackable").GetGetMethod();
             static readonly string quiverGuid = "25f9b5ef564cbef49a1e54c48e67dfc1#CraftMagicItems";
 
             // ReSharper disable once UnusedMember.Local
-            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            private static IEnumerable<HarmonyLib.CodeInstruction> Transpiler(IEnumerable<HarmonyLib.CodeInstruction> instructions) {
                 foreach (var inst in instructions) {
                     if (inst.opcode == OpCodes.Callvirt && inst.operand as MethodInfo == methodToReplace) {
-                        yield return new Harmony12.CodeInstruction(OpCodes.Call, new Func<ItemEntity, bool>(IsStackable).Method);
+                        yield return new HarmonyLib.CodeInstruction(OpCodes.Call, new Func<ItemEntity, bool>(IsStackable).Method);
                     } else {
                         yield return inst;
                     }
