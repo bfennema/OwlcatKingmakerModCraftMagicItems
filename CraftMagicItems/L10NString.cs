@@ -18,7 +18,7 @@ namespace CraftMagicItems {
                     LocalizationManager.CurrentPack.Strings[key] = result;
                 }
             }
-            Harmony12.Traverse.Create(this).Field("m_Key").SetValue(key);
+            HarmonyLib.Traverse.Create(this).Field("m_Key").SetValue(key);
         }
     }
 
@@ -27,10 +27,10 @@ namespace CraftMagicItems {
 
         public FakeL10NString(string fakeValue) {
             this.fakeValue = fakeValue;
-            Harmony12.Traverse.Create(this).Field("m_Key").SetValue(fakeValue);
+            HarmonyLib.Traverse.Create(this).Field("m_Key").SetValue(fakeValue);
         }
 
-        [Harmony12.HarmonyPatch(typeof(LocalizedString), "LoadString")]
+        [HarmonyLib.HarmonyPatch(typeof(LocalizedString), "LoadString")]
         // ReSharper disable once UnusedMember.Local
         private static class LocalizedStringLoadStringPatch {
             // ReSharper disable once UnusedMember.Local
@@ -44,7 +44,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(LocalizedString), "IsSet")]
+        [HarmonyLib.HarmonyPatch(typeof(LocalizedString), "IsSet")]
         // ReSharper disable once UnusedMember.Local
         private static class LocalizedStringIsSetPatch {
             // ReSharper disable once UnusedMember.Local
@@ -58,7 +58,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(LocalizedString), "IsEmpty")]
+        [HarmonyLib.HarmonyPatch(typeof(LocalizedString), "IsEmpty")]
         // ReSharper disable once UnusedMember.Local
         private static class LocalizedStringIsEmptyPatch {
             // ReSharper disable once UnusedMember.Local

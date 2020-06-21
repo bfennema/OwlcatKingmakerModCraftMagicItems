@@ -30,10 +30,10 @@ namespace CraftMagicItems {
 
         private static bool initialised;
 
-        [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenu), "Start")]
         public static class MainMenuStartPatch {
             private static void AddBlueprint(string guid, BlueprintScriptableObject blueprint) {
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, guid);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint) = guid;
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(guid, blueprint);
                 ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(blueprint);
             }
@@ -44,14 +44,14 @@ namespace CraftMagicItems {
                     initialised = true;
                     AddBlueprint(SustenanceEnchantmentGuid, BlueprintSustenanceEnchantment);
                     AddBlueprint(SustenanceFactGuid, BlueprintSustenanceFact);
-                    Main.Accessors.SetBlueprintItemEnchantmentEnchantName(BlueprintSustenanceEnchantment,
-                        new L10NString("craftMagicItems-enchantment-sustenance-name"));
-                    Main.Accessors.SetBlueprintItemEnchantmentDescription(BlueprintSustenanceEnchantment,
-                        new L10NString("craftMagicItems-enchantment-sustenance-description"));
-                    Main.Accessors.SetBlueprintItemEnchantmentPrefix(BlueprintSustenanceEnchantment, new L10NString(""));
-                    Main.Accessors.SetBlueprintItemEnchantmentSuffix(BlueprintSustenanceEnchantment, new L10NString(""));
-                    Main.Accessors.SetBlueprintItemEnchantmentEnchantmentCost(BlueprintSustenanceEnchantment, 1);
-                    Main.Accessors.SetBlueprintItemEnchantmentEnchantmentIdentifyDC(BlueprintSustenanceEnchantment, 5);
+                    Main.Accessors.SetBlueprintItemEnchantmentEnchantName(BlueprintSustenanceEnchantment) =
+                        new L10NString("craftMagicItems-enchantment-sustenance-name");
+                    Main.Accessors.SetBlueprintItemEnchantmentDescription(BlueprintSustenanceEnchantment) =
+                        new L10NString("craftMagicItems-enchantment-sustenance-description");
+                    Main.Accessors.SetBlueprintItemEnchantmentPrefix(BlueprintSustenanceEnchantment) = new L10NString("");
+                    Main.Accessors.SetBlueprintItemEnchantmentSuffix(BlueprintSustenanceEnchantment) = new L10NString("");
+                    Main.Accessors.SetBlueprintItemEnchantmentEnchantmentCost(BlueprintSustenanceEnchantment) = 1;
+                    Main.Accessors.SetBlueprintItemEnchantmentEnchantmentIdentifyDC(BlueprintSustenanceEnchantment) = 5;
                     var addSustenanceFact = CreateInstance<AddUnitFactEquipment>();
                     addSustenanceFact.Blueprint = BlueprintSustenanceFact;
                     addSustenanceFact.name = "AddUnitFactEquipment-SustenanceFact";
@@ -61,15 +61,15 @@ namespace CraftMagicItems {
                     BlueprintSustenanceFact.Frequency = DurationRate.Rounds;
                     BlueprintSustenanceFact.FxOnStart = new PrefabLink();
                     BlueprintSustenanceFact.FxOnRemove = new PrefabLink();
-                    Main.Accessors.SetBlueprintUnitFactDisplayName(BlueprintSustenanceFact, new L10NString("craftMagicItems-enchantment-sustenance-name"));
-                    Main.Accessors.SetBlueprintUnitFactDescription(BlueprintSustenanceFact,
-                        new L10NString("craftMagicItems-enchantment-sustenance-description"));
+                    Main.Accessors.SetBlueprintUnitFactDisplayName(BlueprintSustenanceFact) = new L10NString("craftMagicItems-enchantment-sustenance-name");
+                    Main.Accessors.SetBlueprintUnitFactDescription(BlueprintSustenanceFact) =
+                        new L10NString("craftMagicItems-enchantment-sustenance-description");
                 }
             }
         }
 
 #if PATCH21
-        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
         private static class MainMenuUiContextInitializePatch {
             private static void Postfix() {
                 MainMenuStartPatch.Postfix();
@@ -81,7 +81,7 @@ namespace CraftMagicItems {
             return unit?.Descriptor.GetFact(BlueprintSustenanceFact) != null;
         }
 
-        [Harmony12.HarmonyPatch(typeof(RestController), "CalculateNeededRations")]
+        [HarmonyLib.HarmonyPatch(typeof(RestController), "CalculateNeededRations")]
         // ReSharper disable once UnusedMember.Local
         private static class RestControllerCalculateNeededRationsPatch {
             // ReSharper disable once UnusedMember.Local
@@ -103,7 +103,7 @@ namespace CraftMagicItems {
             return roles;
         }
 
-        [Harmony12.HarmonyPatch(typeof(CampManager), "RemoveAllCompanionRoles")]
+        [HarmonyLib.HarmonyPatch(typeof(CampManager), "RemoveAllCompanionRoles")]
         // ReSharper disable once UnusedMember.Local
         private static class CampManagerRemoveAllCompanionRolesPatch {
             // ReSharper disable once UnusedMember.Local
@@ -117,7 +117,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(MemberUIBody), "CheckHasRole")]
+        [HarmonyLib.HarmonyPatch(typeof(MemberUIBody), "CheckHasRole")]
         private static class MemberUiBodyCheckHasRolePatch {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix(MemberUIBody __instance, ref bool __result) {
@@ -125,7 +125,7 @@ namespace CraftMagicItems {
                 if (UnitHasSustenance(unit) && CountRoles(unit) < 2) {
                     // The unit can still be assigned to another role.
                     __instance.HasRole = false;
-                    Harmony12.Traverse.Create(__instance).Method("SetupRoleView").GetValue();
+                    HarmonyLib.Traverse.Create(__instance).Method("SetupRoleView").GetValue();
                     __result = false;
                     return false;
                 }
@@ -138,7 +138,7 @@ namespace CraftMagicItems {
             return current.Contains(unit) && (best == null || current.Count > best.Count) ? current : best;
         }
 
-        [Harmony12.HarmonyPatch(typeof(CampingState), "CleanupRoles")]
+        [HarmonyLib.HarmonyPatch(typeof(CampingState), "CleanupRoles")]
         // ReSharper disable once UnusedMember.Local
         private static class CampingStateCleanupRolesPatch {
             // ReSharper disable once UnusedMember.Local
@@ -171,7 +171,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(CampingState), "GetRolesCount")]
+        [HarmonyLib.HarmonyPatch(typeof(CampingState), "GetRolesCount")]
         // ReSharper disable once UnusedMember.Local
         private static class RestControllerIsTiredPatch {
             // ReSharper disable once UnusedMember.Local

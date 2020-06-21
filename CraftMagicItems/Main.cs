@@ -120,7 +120,6 @@ namespace CraftMagicItems {
         private const string MartialWeaponProficiencies = "203992ef5b35c864390b4e4a1e200629";
         private const string ChannelEnergyFeatureGuid = "a79013ff4bcd4864cb669622a29ddafb";
         private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
-        private const string ProdigiousTwoWeaponFightingGuid = "ddba046d03074037be18ad33ea462028";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
         private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
         private const string WeaponLightShieldGuid = "1fd965e522502fe479fdd423cca07684";
@@ -202,6 +201,45 @@ namespace CraftMagicItems {
             public float m_x, m_y, m_z;
         }
 
+        struct MethodPatch {
+            public MethodPatch(MethodBase original, HarmonyLib.HarmonyMethod prefix = null, HarmonyLib.HarmonyMethod postfix = null) {
+                m_original = original;
+                m_prefix = prefix;
+                m_postfix = postfix;
+            }
+            public MethodInfo Patch(HarmonyLib.Harmony instance) {
+                return instance.Patch(m_original, m_prefix, m_postfix);
+            }
+            public bool MatchOriginal(MethodBase method) {
+                return m_original != null & m_original == method;
+            }
+            public bool MatchPrefix(MethodBase method) {
+                return m_prefix != null && m_prefix.method == method;
+            }
+            public bool MatchPostfix(MethodBase method) {
+                return m_postfix != null && m_postfix.method == method;
+            }
+            MethodBase m_original;
+            HarmonyLib.HarmonyMethod m_prefix;
+            HarmonyLib.HarmonyMethod m_postfix;
+        }
+
+        private static readonly MethodPatch[] MethodPatchList =
+        {
+            new MethodPatch(
+                typeof(ResourcesLibrary).GetMethods().Single(m => m.Name == "TryGetBlueprint" && m.ReturnType == typeof(BlueprintScriptableObject)),
+                postfix: new HarmonyLib.HarmonyMethod(typeof(CustomBlueprintBuilder.ResourcesLibraryTryGetBlueprintFallbackPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static)) { priority = HarmonyLib.Priority.First }),
+            new MethodPatch(typeof(ResourcesLibrary).GetMethods().Single(m => m.Name == "TryGetBlueprint" && m.ReturnType == typeof(BlueprintScriptableObject)),
+                new HarmonyLib.HarmonyMethod(typeof(CustomBlueprintBuilder.ResourcesLibraryTryGetBlueprintModPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static)),
+                new HarmonyLib.HarmonyMethod(typeof(CustomBlueprintBuilder.ResourcesLibraryTryGetBlueprintModPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static))),
+            new MethodPatch(
+                typeof(Game).GetMethod("OnAreaLoaded", BindingFlags.NonPublic | BindingFlags.Instance),
+                postfix: new HarmonyLib.HarmonyMethod(typeof(GameOnAreaLoadedPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static))),
+            new MethodPatch(
+                typeof(Player).GetMethod("PostLoad"),
+                postfix: new HarmonyLib.HarmonyMethod(typeof(PlayerPostLoadPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static))),
+        };
+
         private static readonly IkPatch[] IkPatchList = {
             new IkPatch("a6f7e3dc443ff114ba68b4648fd33e9f",  0.00f, -0.10f, 0.01f), // dueling sword
             new IkPatch("13fa38737d46c9e4abc7f4d74aaa59c3",  0.00f, -0.36f, 0.00f), // tongi
@@ -221,7 +259,7 @@ namespace CraftMagicItems {
         public static CustomLootItem[] CustomLootItems;
 
         private static bool modEnabled = true;
-        private static Harmony12.HarmonyInstance harmonyInstance;
+        private static HarmonyLib.Harmony harmonyInstance;
         private static CraftMagicItemsBlueprintPatcher blueprintPatcher;
         private static OpenSection currentSection = OpenSection.CraftMagicItemsSection;
         private static readonly Dictionary<string, int> SelectedIndex = new Dictionary<string, int>();
@@ -260,30 +298,40 @@ namespace CraftMagicItems {
         /**
          * Patch all HarmonyPatch classes in the assembly, starting in the order of the methods named in methodNameOrder, and the rest after that.
          */
-        private static void PatchAllOrdered(params string[] methodNameOrder) {
-            var allAttributes = Assembly.GetExecutingAssembly().GetTypes()
-                    .Select(type => new {type, methods = Harmony12.HarmonyMethodExtensions.GetHarmonyMethods(type)})
-                    .Where(pair => pair.methods != null && pair.methods.Count > 0)
-                    .Select(pair => new {pair.type, attributes = Harmony12.HarmonyMethod.Merge(pair.methods)})
-                    .OrderBy(pair => methodNameOrder
-                                         .Select((name, index) => new {name, index})
-                                         .FirstOrDefault(nameIndex => nameIndex.name.Equals(pair.attributes.methodName))?.index
-                                     ?? methodNameOrder.Length)
-                ;
-            foreach (var pair in allAttributes) {
-                new Harmony12.PatchProcessor(harmonyInstance, pair.type, pair.attributes).Patch();
+        private static void PatchAllOrdered(params MethodPatch[] orderedMethods) {
+            foreach (var method in orderedMethods) {
+                method.Patch(harmonyInstance);
             }
+            harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         /**
          * Unpatch all HarmonyPatch classes for harmonyInstance, except the ones whose method names match exceptMethodName
          */
-        private static void UnpatchAllExcept(params string[] exceptMethodName) {
+        private static void UnpatchAllExcept(params MethodPatch[] exceptMethods) {
             if (harmonyInstance != null) {
                 try {
                     foreach (var method in harmonyInstance.GetPatchedMethods().ToArray()) {
-                        if (!exceptMethodName.Contains(method.Name) && harmonyInstance.GetPatchInfo(method).Owners.Contains(harmonyInstance.Id)) {
-                            harmonyInstance.Unpatch(method, Harmony12.HarmonyPatchType.All, harmonyInstance.Id);
+                        var patchInfo = HarmonyLib.Harmony.GetPatchInfo(method);
+                        if (patchInfo.Owners.Contains(harmonyInstance.Id)) {
+                            var methodPatches = exceptMethods.Where(m => m.MatchOriginal(method));
+                            if (methodPatches.Count() > 0) {
+                                foreach (var patch in patchInfo.Prefixes) {
+                                    if (!methodPatches.Any(m => m.MatchPrefix(patch.PatchMethod))) {
+                                        harmonyInstance.Unpatch(method, patch.PatchMethod);
+                                    }
+                                }
+                                foreach (var patch in patchInfo.Postfixes) {
+                                    if (!methodPatches.Any(m => m.MatchPostfix(patch.PatchMethod))) {
+                                        harmonyInstance.Unpatch(method, patch.PatchMethod);
+                                    }
+                                }
+                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.Finalizer, harmonyInstance.Id);
+                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.Transpiler, harmonyInstance.Id);
+                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.ReversePatch, harmonyInstance.Id);
+                            } else {
+                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.All, harmonyInstance.Id);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -304,9 +352,9 @@ namespace CraftMagicItems {
                 modEntry.OnToggle = OnToggle;
                 modEntry.OnGUI = OnGui;
                 CustomBlueprintBuilder.InitialiseBlueprintRegex(CraftMagicItemsBlueprintPatcher.BlueprintRegex);
-                harmonyInstance = Harmony12.HarmonyInstance.Create("kingmaker.craftMagicItems");
+                harmonyInstance = new HarmonyLib.Harmony("kingmaker.craftMagicItems");
                 // Patch the recovery methods first.
-                PatchAllOrdered("TryGetBlueprint", "PostLoad", "OnAreaLoaded");
+                PatchAllOrdered(MethodPatchList);
                 Accessors = new CraftMagicItemsAccessors();
                 blueprintPatcher = new CraftMagicItemsBlueprintPatcher(Accessors, modEnabled);
             } catch (Exception e) {
@@ -314,7 +362,7 @@ namespace CraftMagicItems {
                 modEnabled = false;
                 CustomBlueprintBuilder.Enabled = false;
                 // Unpatch everything except methods involved in recovering a save when mod is disabled.
-                UnpatchAllExcept("TryGetBlueprint", "PostLoad", "OnAreaLoaded");
+                UnpatchAllExcept(MethodPatchList);
                 throw;
             }
         }
@@ -2143,7 +2191,7 @@ namespace CraftMagicItems {
 
                         var addedFeature = caster.Descriptor.Progression.Features.AddFeature(learnFeat);
                         addedFeature.Source = feature.Source;
-                        var mFacts = Accessors.GetFeatureCollectionFacts(caster.Descriptor.Progression.Features);
+                        var mFacts = caster.Descriptor.Progression.Features.RawFacts;
                         if (removedFeatIndex < mFacts.Count) {
                             // Move the new feat to the place in the list originally occupied by the removed one.
                             mFacts.Remove(addedFeature);
@@ -3053,7 +3101,7 @@ namespace CraftMagicItems {
             return true;
         }
 
-        [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenu), "Start")]
         private static class MainMenuStartPatch {
             private static bool mainMenuStarted;
 
@@ -3215,28 +3263,28 @@ namespace CraftMagicItems {
                 }
             }
 
-            [Harmony12.HarmonyPatch(typeof(TwoWeaponFightingAttackPenalty), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonusWithoutTarget) })]
+            [HarmonyLib.HarmonyPatch(typeof(TwoWeaponFightingAttackPenalty), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonusWithoutTarget) })]
             private static class TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch {
                 static public BlueprintFeature ShieldMaster;
                 static MethodInfo methodToFind;
                 private static bool Prepare() {
                     try {
-                        methodToFind = Harmony12.AccessTools.Property(typeof(ItemEntityWeapon), nameof(ItemEntityWeapon.IsShield)).GetGetMethod();
+                        methodToFind = HarmonyLib.AccessTools.Property(typeof(ItemEntityWeapon), nameof(ItemEntityWeapon.IsShield)).GetGetMethod();
                     } catch (Exception ex) {
                         Main.ModEntry.Logger.Log($"Error Preparing: {ex.Message}");
                         return false;
                     }
                     return true;
                 }
-                private static IEnumerable<Harmony12.CodeInstruction> Transpiler(IEnumerable<Harmony12.CodeInstruction> instructions, ILGenerator il) {
+                private static IEnumerable<HarmonyLib.CodeInstruction> Transpiler(IEnumerable<HarmonyLib.CodeInstruction> instructions, ILGenerator il) {
                     Label start = il.DefineLabel();
-                    yield return new Harmony12.CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new Harmony12.CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new Harmony12.CodeInstruction(OpCodes.Call, new Func<TwoWeaponFightingAttackPenalty, RuleCalculateAttackBonusWithoutTarget, bool>(CheckShieldMaster).Method);
-                    yield return new Harmony12.CodeInstruction(OpCodes.Brfalse_S, start);
-                    yield return new Harmony12.CodeInstruction(OpCodes.Ret);
+                    yield return new HarmonyLib.CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new HarmonyLib.CodeInstruction(OpCodes.Ldarg_1);
+                    yield return new HarmonyLib.CodeInstruction(OpCodes.Call, new Func<TwoWeaponFightingAttackPenalty, RuleCalculateAttackBonusWithoutTarget, bool>(CheckShieldMaster).Method);
+                    yield return new HarmonyLib.CodeInstruction(OpCodes.Brfalse_S, start);
+                    yield return new HarmonyLib.CodeInstruction(OpCodes.Ret);
                     var skip = 0;
-                    Harmony12.CodeInstruction prev = instructions.First();
+                    HarmonyLib.CodeInstruction prev = instructions.First();
                     prev.labels.Add(start);
                     foreach (var inst in instructions.Skip(1)) {
                         if (prev.opcode == OpCodes.Ldloc_1 && inst.opcode == OpCodes.Callvirt && inst.operand as MethodInfo == methodToFind) {
@@ -3319,7 +3367,7 @@ namespace CraftMagicItems {
                 var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ShieldMasterGuid);
                 var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
                 TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.ShieldMaster = shieldMaster;
-                Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
+                Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting) = new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921");
 
                 for (int i = 0; i < shieldMaster.ComponentsArray.Length; i++) {
                     if (shieldMaster.ComponentsArray[i] is ShieldMaster component) {
@@ -3330,15 +3378,15 @@ namespace CraftMagicItems {
                 }
 
                 var lightShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponLightShieldGuid);
-                Accessors.SetBlueprintItemBaseDamage(lightShield, new DiceFormula(1, DiceType.D3));
+                Accessors.SetBlueprintItemBaseDamage(lightShield) = new DiceFormula(1, DiceType.D3);
                 var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponHeavyShieldGuid);
-                Accessors.SetBlueprintItemBaseDamage(heavyShield, new DiceFormula(1, DiceType.D4));
+                Accessors.SetBlueprintItemBaseDamage(heavyShield) = new DiceFormula(1, DiceType.D4);
 
                 for (int i = 0; i < ItemEnchantmentGuids.Length; i += 2) {
                     var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i]);
                     var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i + 1]);
-                    Accessors.SetBlueprintItemEnchantmentEnchantName(dest, Accessors.GetBlueprintItemEnchantmentEnchantName(source));
-                    Accessors.SetBlueprintItemEnchantmentDescription(dest, Accessors.GetBlueprintItemEnchantmentDescription(source));
+                    Accessors.SetBlueprintItemEnchantmentEnchantName(dest) = Accessors.GetBlueprintItemEnchantmentEnchantName(source);
+                    Accessors.SetBlueprintItemEnchantmentDescription(dest) = Accessors.GetBlueprintItemEnchantmentDescription(source);
                 }
 
                 var longshankBane = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(LongshankBaneGuid);
@@ -3382,7 +3430,7 @@ namespace CraftMagicItems {
                 }
             }
 
-            [Harmony12.HarmonyPriority(Harmony12.Priority.Last)]
+            [HarmonyLib.HarmonyPriority(HarmonyLib.Priority.Last)]
             public static void Postfix() {
                 if (!mainMenuStarted) {
                     mainMenuStarted = true;
@@ -3397,6 +3445,8 @@ namespace CraftMagicItems {
                     SustenanceEnchantment.MainMenuStartPatch.Postfix();
                     WildEnchantment.MainMenuStartPatch.Postfix();
                     CreateQuiverAbility.MainMenuStartPatch.Postfix();
+                    InitialiseMod();
+                    return;
                 }
 
                 if (!modEnabled) {
@@ -3408,8 +3458,10 @@ namespace CraftMagicItems {
                     EnchantmentIdToItem.Clear();
                     EnchantmentIdToCost.Clear();
                     EnchantmentIdToRecipe.Clear();
+                    UnpatchAllExcept(MethodPatchList);
                 } else if (mainMenuStarted) {
                     // If the mod is enabled and we're past the Start of main menu, (re-)initialise.
+                    PatchAllOrdered();
                     InitialiseMod();
                 }
                 L10n.SetEnabled(modEnabled);
@@ -3417,9 +3469,9 @@ namespace CraftMagicItems {
         }
 
 #if PATCH21
-        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
         private static class MainMenuUiContextInitializePatch {
-            [Harmony12.HarmonyPriority(Harmony12.Priority.Last)]
+            [HarmonyLib.HarmonyPriority(HarmonyLib.Priority.Last)]
             private static void Postfix() {
                 MainMenuStartPatch.Postfix();
             }
@@ -3428,7 +3480,7 @@ namespace CraftMagicItems {
 
 #if !PATCH21
         // Fix issue in Owlcat's UI - ActionBarManager.Update does not refresh the Groups (spells/Actions/Belt)
-        [Harmony12.HarmonyPatch(typeof(ActionBarManager), "Update")]
+        [HarmonyLib.HarmonyPatch(typeof(ActionBarManager), "Update")]
         private static class ActionBarManagerUpdatePatch {
             private static void Prefix(ActionBarManager __instance) {
                 var mNeedReset = Accessors.GetActionBarManagerNeedReset(__instance);
@@ -3440,7 +3492,7 @@ namespace CraftMagicItems {
         }
 #endif
 
-        [Harmony12.HarmonyPatch(typeof(BlueprintItemEquipmentUsable), "Cost", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(BlueprintItemEquipmentUsable), "Cost", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemEquipmentUsableCostPatch {
             // ReSharper disable once UnusedMember.Local
@@ -3467,7 +3519,7 @@ namespace CraftMagicItems {
         }
 
         // Load Variant spells into m_KnownSpellLevels
-        [Harmony12.HarmonyPatch(typeof(Spellbook), "PostLoad")]
+        [HarmonyLib.HarmonyPatch(typeof(Spellbook), "PostLoad")]
         // ReSharper disable once UnusedMember.Local
         private static class SpellbookPostLoadPatch {
             // ReSharper disable once UnusedMember.Local
@@ -3491,7 +3543,7 @@ namespace CraftMagicItems {
         }
 
         // Owlcat's code doesn't correctly detect that a variant spell is in a spellList when its parent spell is.
-        [Harmony12.HarmonyPatch(typeof(BlueprintAbility), "IsInSpellList")]
+        [HarmonyLib.HarmonyPatch(typeof(BlueprintAbility), "IsInSpellList")]
         // ReSharper disable once UnusedMember.Global
         public static class BlueprintAbilityIsInSpellListPatch {
             // ReSharper disable once UnusedMember.Local
@@ -3516,7 +3568,7 @@ namespace CraftMagicItems {
         }
 
 #if !PATCH21
-        [Harmony12.HarmonyPatch(typeof(LogDataManager.LogItemData), "UpdateSize")]
+        [HarmonyLib.HarmonyPatch(typeof(LogDataManager.LogItemData), "UpdateSize")]
         private static class LogItemDataUpdateSizePatch {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix() {
@@ -3528,7 +3580,7 @@ namespace CraftMagicItems {
 
         // Add "pending" log items when the battle log becomes available again, so crafting messages sent when e.g. camping
         // in the overland map are still shown eventually.
-        [Harmony12.HarmonyPatch(typeof(BattleLogManager), "Initialize")]
+        [HarmonyLib.HarmonyPatch(typeof(BattleLogManager), "Initialize")]
         // ReSharper disable once UnusedMember.Local
         private static class BattleLogManagerInitializePatch {
             // ReSharper disable once UnusedMember.Local
@@ -3922,7 +3974,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(CapitalCompanionLogic), "OnFactActivate")]
+        [HarmonyLib.HarmonyPatch(typeof(CapitalCompanionLogic), "OnFactActivate")]
         // ReSharper disable once UnusedMember.Local
         private static class CapitalCompanionLogicOnFactActivatePatch {
             // ReSharper disable once UnusedMember.Local
@@ -3937,7 +3989,7 @@ namespace CraftMagicItems {
         }
 
         // Make characters in the party work on their crafting projects when they rest.
-        [Harmony12.HarmonyPatch(typeof(RestController), "ApplyRest")]
+        [HarmonyLib.HarmonyPatch(typeof(RestController), "ApplyRest")]
         // ReSharper disable once UnusedMember.Local
         private static class RestControllerApplyRestPatch {
             // ReSharper disable once UnusedMember.Local
@@ -3968,13 +4020,13 @@ namespace CraftMagicItems {
                         }
                     } else if (!unitLoot.ComponentsArray.Any(component => component is LootItemsPackFixed pack && pack.Item.Item == blueprint)) {
                         var lootItem = new LootItem();
-                        Accessors.SetLootItemItem(lootItem, blueprint);
+                        Accessors.SetLootItemItem(lootItem) = blueprint;
 #if PATCH21_BETA
                         var lootComponent = SerializedScriptableObject.CreateInstance<LootItemsPackFixed>();
 #else
                         var lootComponent = ScriptableObject.CreateInstance<LootItemsPackFixed>();
 #endif
-                        Accessors.SetLootItemsPackFixedItem(lootComponent, lootItem);
+                        Accessors.SetLootItemsPackFixedItem(lootComponent) = lootItem;
                         blueprintPatcher.EnsureComponentNameUnique(lootComponent, unitLoot.ComponentsArray);
                         var components = unitLoot.ComponentsArray.ToList();
                         components.Add(lootComponent);
@@ -3983,7 +4035,7 @@ namespace CraftMagicItems {
                 }
             }
             if (tableCount > 0) {
-                Harmony12.FileLog.Log($"!!! Failed to match all loot table names for {blueprint.Name}.  {tableCount} table names not found.");
+                HarmonyLib.FileLog.Log($"!!! Failed to match all loot table names for {blueprint.Name}.  {tableCount} table names not found.");
             }
         }
 
@@ -3992,18 +4044,14 @@ namespace CraftMagicItems {
                 var firstTime = (version == null || version.CompareTo(lootItem.AddInVersion) < 0);
                 var item = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(lootItem.AssetGuid);
                 if (item == null) {
-                    Harmony12.FileLog.Log($"!!! Loot item not created: {lootItem.AssetGuid}");
+                    HarmonyLib.FileLog.Log($"!!! Loot item not created: {lootItem.AssetGuid}");
                 } else {
                     AddToLootTables(item, lootItem.LootTables, firstTime);
                 }
             }
         }
 
-        // After loading a save, perform various backward compatibility and initialisation operations.
-        [Harmony12.HarmonyPatch(typeof(Player), "PostLoad")]
-        // ReSharper disable once UnusedMember.Local
-        private static class PlayerPostLoadPatch {
-            // ReSharper disable once UnusedMember.Local
+        public static class PlayerPostLoadPatch {
             private static void Postfix() {
                 ItemUpgradeProjects.Clear();
                 ItemCreationProjects.Clear();
@@ -4069,10 +4117,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(Game), "OnAreaLoaded")]
-        // ReSharper disable once UnusedMember.Local
-        private static class GameOnAreaLoadedPatch {
-            // ReSharper disable once UnusedMember.Local
+        public static class GameOnAreaLoadedPatch {
             private static void Postfix() {
                 if (CustomBlueprintBuilder.DidDowngrade) {
                     UIUtility.ShowMessageBox("Craft Magic Items is disabled.  All your custom enchanted items and crafting feats have been replaced with " +
@@ -4087,7 +4132,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch {
             private static bool Prefix(WeaponParametersAttackBonus __instance, RuleCalculateAttackBonusWithoutTarget evt) {
@@ -4100,7 +4145,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponParametersDamageBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponParametersDamageBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponParametersDamageBonusOnEventAboutToTriggerPatch {
             private static bool Prefix(WeaponParametersDamageBonus __instance, RuleCalculateWeaponStats evt) {
@@ -4113,7 +4158,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(AttackStatReplacement), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(AttackStatReplacement), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class AttackStatReplacementOnEventAboutToTriggerPatch {
             private static bool Prefix(AttackStatReplacement __instance, RuleCalculateAttackBonusWithoutTarget evt) {
@@ -4126,7 +4171,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(DamageGrace), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(DamageGrace), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class DamageGraceOnEventAboutToTriggerPatch {
             private static bool Prefix(DamageGrace __instance, RuleCalculateWeaponStats evt) {
@@ -4139,7 +4184,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
+        [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemGetQualitiesPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4161,7 +4206,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
+        [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillArmorEnchantmentsPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4187,7 +4232,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(UIUtilityItem), "FillEnchantmentDescription")]
+        [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "FillEnchantmentDescription")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillEnchantmentDescriptionPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4286,7 +4331,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(UIUtility), "IsMagicItem")]
+        [HarmonyLib.HarmonyPatch(typeof(UIUtility), "IsMagicItem")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityIsMagicItem {
             // ReSharper disable once UnusedMember.Local
@@ -4297,7 +4342,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(ItemEntity), "VendorDescription", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(ItemEntity), "VendorDescription", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class ItemEntityVendorDescriptionPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4326,7 +4371,7 @@ namespace CraftMagicItems {
         // Owlcat's code doesn't filter out undamaged characters, so it will always return someone.  This meant that with the "auto-cast healing" camping
         // option enabled on, healers would burn all their spell slots healing undamaged characters when they started resting, leaving them no spells to cast
         // when crafting.  Change it so it returns null if the most damaged character is undamaged.
-        [Harmony12.HarmonyPatch(typeof(UnitUseSpellsOnRest), "GetUnitWithMaxDamage")]
+        [HarmonyLib.HarmonyPatch(typeof(UnitUseSpellsOnRest), "GetUnitWithMaxDamage")]
         // ReSharper disable once UnusedMember.Local
         private static class UnitUseSpellsOnRestGetUnitWithMaxDamagePatch {
             // ReSharper disable once UnusedMember.Local
@@ -4346,7 +4391,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponEnergyDamageDice), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponEnergyDamageDice), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponEnergyDamageDiceOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4371,7 +4416,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponEnergyBurst), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponEnergyBurst), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponEnergyBurstOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4392,7 +4437,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponExtraAttack), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponExtraAttack), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponExtraAttackOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4411,7 +4456,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponDamageAgainstAlignment), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponDamageAgainstAlignment), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponDamageAgainstAlignmentOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4436,7 +4481,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateWeaponStatsPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4471,7 +4516,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonus) })]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonus) })]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateAttackBonusPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4502,7 +4547,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponConditionalDamageDice), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalDamageDice), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponConditionalDamageDiceOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4538,7 +4583,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(BrilliantEnergy), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(BrilliantEnergy), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class BrilliantEnergyOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4554,7 +4599,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(MissAgainstFactOwner), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(MissAgainstFactOwner), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class MissAgainstFactOwnerOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4575,7 +4620,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(WeaponReality), "OnEventAboutToTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(WeaponReality), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponRealityOnEventAboutToTriggerPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4594,7 +4639,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(AddInitiatorAttackRollTrigger), "CheckConditions")]
+        [HarmonyLib.HarmonyPatch(typeof(AddInitiatorAttackRollTrigger), "CheckConditions")]
         // ReSharper disable once UnusedMember.Local
         private static class AddInitiatorAttackRollTriggerCheckConditionsPatch {
             // ReSharper disable once UnusedMember.Local
@@ -4617,7 +4662,7 @@ namespace CraftMagicItems {
         }
 
 #if !PATCH21
-        [Harmony12.HarmonyPatch(typeof(RuleCalculateAttacksCount), "OnTrigger")]
+        [HarmonyLib.HarmonyPatch(typeof(RuleCalculateAttacksCount), "OnTrigger")]
         private static class RuleCalculateAttacksCountOnTriggerPatch {
             private static void Postfix(RuleCalculateAttacksCount __instance) {
                 int num = __instance.Initiator.Stats.BaseAttackBonus;
@@ -4644,7 +4689,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(ItemEntityWeapon), "HoldInTwoHands", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(ItemEntityWeapon), "HoldInTwoHands", MethodType.Getter)]
         private static class ItemEntityWeaponHoldInTwoHandsPatch {
             private static void Postfix(ItemEntityWeapon __instance, ref bool __result) {
                 if (!__result) {
@@ -4657,7 +4702,7 @@ namespace CraftMagicItems {
         }
 #endif
 
-        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
+        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
         private static class DescriptionTemplatesItemItemEnergyPatch {
             private static void Postfix(TooltipData data, bool __result) {
                 if (__result) {
@@ -4668,7 +4713,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnhancement")]
+        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnhancement")]
         private static class DescriptionTemplatesItemItemEnhancementPatch {
             private static void Postfix(TooltipData data) {
                 if (data.Texts.ContainsKey(Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1)) {
@@ -4679,7 +4724,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergyResisit")]
+        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergyResisit")]
         private static class DescriptionTemplatesItemItemEnergyResisitPatch {
             private static bool Prefix(ref bool __result) {
                 __result = false;
@@ -4687,7 +4732,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", HarmonyLib.MethodType.Getter)]
         private static class UnitViewHandSlotDataWeaponScalePatch {
             private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
                 if (__instance.VisibleItem is ItemEntityWeapon weapon && !weapon.Blueprint.AssetGuid.Contains(",visual=")) {
@@ -4707,7 +4752,7 @@ namespace CraftMagicItems {
         }
 
 #if !PATCH21
-        [Harmony12.HarmonyPatch(typeof(ActivatableAbility), "OnEventDidTrigger", new Type[] { typeof(RuleAttackWithWeaponResolve) })]
+        [HarmonyLib.HarmonyPatch(typeof(ActivatableAbility), "OnEventDidTrigger", new Type[] { typeof(RuleAttackWithWeaponResolve) })]
         private static class ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch {
             private static bool Prefix(ActivatableAbility __instance, RuleAttackWithWeaponResolve evt) {
                 if (evt.Damage != null && evt.AttackRoll.IsHit) {

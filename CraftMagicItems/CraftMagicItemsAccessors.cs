@@ -29,115 +29,112 @@ namespace CraftMagicItems {
      * Spacehamster's idea: create reflection-based accessors up front, so the mod fails on startup if the Kingmaker code changes in an incompatible way.
      */
     public class CraftMagicItemsAccessors {
-        public readonly FastGetter<Spellbook, List<BlueprintSpellList>> GetSpellbookSpecialLists =
-            Accessors.CreateGetter<Spellbook, List<BlueprintSpellList>>("m_SpecialLists");
+        public readonly HarmonyLib.AccessTools.FieldRef<Spellbook, List<BlueprintSpellList>> GetSpellbookSpecialLists =
+            Accessors.CreateFieldRef<Spellbook, List<BlueprintSpellList>>("m_SpecialLists");
 
-        public readonly FastGetter<FeatureCollection, List<Fact>> GetFeatureCollectionFacts =
-            Accessors.CreateGetter<FeatureCollection, List<Fact>>("m_Facts");
+        public readonly HarmonyLib.AccessTools.FieldRef<ActionBarManager, bool> GetActionBarManagerNeedReset = Accessors.CreateFieldRef<ActionBarManager, bool>("m_NeedReset");
 
-        public readonly FastGetter<ActionBarManager, bool> GetActionBarManagerNeedReset = Accessors.CreateGetter<ActionBarManager, bool>("m_NeedReset");
+        public readonly HarmonyLib.AccessTools.FieldRef<ActionBarManager, UnitEntityData> GetActionBarManagerSelected =
+            Accessors.CreateFieldRef<ActionBarManager, UnitEntityData>("m_Selected");
 
-        public readonly FastGetter<ActionBarManager, UnitEntityData> GetActionBarManagerSelected =
-            Accessors.CreateGetter<ActionBarManager, UnitEntityData>("m_Selected");
+        public readonly HarmonyLib.AccessTools.FieldRef<Spellbook, List<AbilityData>[]> GetSpellbookKnownSpells =
+            Accessors.CreateFieldRef<Spellbook, List<AbilityData>[]>("m_KnownSpells");
 
-        public readonly FastGetter<Spellbook, List<AbilityData>[]> GetSpellbookKnownSpells =
-            Accessors.CreateGetter<Spellbook, List<AbilityData>[]>("m_KnownSpells");
+        public readonly HarmonyLib.AccessTools.FieldRef<Spellbook, Dictionary<BlueprintAbility, int>> GetSpellbookKnownSpellLevels =
+            Accessors.CreateFieldRef<Spellbook, Dictionary<BlueprintAbility, int>>("m_KnownSpellLevels");
 
-        public readonly FastGetter<Spellbook, Dictionary<BlueprintAbility, int>> GetSpellbookKnownSpellLevels =
-            Accessors.CreateGetter<Spellbook, Dictionary<BlueprintAbility, int>>("m_KnownSpellLevels");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintUnitFact, LocalizedString> SetBlueprintUnitFactDisplayName =
+            Accessors.CreateFieldRef<BlueprintUnitFact, LocalizedString>("m_DisplayName");
 
-        public readonly FastSetter<BlueprintUnitFact, LocalizedString> SetBlueprintUnitFactDisplayName =
-            Accessors.CreateSetter<BlueprintUnitFact, LocalizedString>("m_DisplayName");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintUnitFact, LocalizedString> SetBlueprintUnitFactDescription =
+            Accessors.CreateFieldRef<BlueprintUnitFact, LocalizedString>("m_Description");
 
-        public readonly FastSetter<BlueprintUnitFact, LocalizedString> SetBlueprintUnitFactDescription =
-            Accessors.CreateSetter<BlueprintUnitFact, LocalizedString>("m_Description");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintUnitFact, Sprite> SetBlueprintUnitFactIcon = Accessors.CreateFieldRef<BlueprintUnitFact, Sprite>("m_Icon");
 
-        public readonly FastSetter<BlueprintUnitFact, Sprite> SetBlueprintUnitFactIcon = Accessors.CreateSetter<BlueprintUnitFact, Sprite>("m_Icon");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, List<BlueprintItemEnchantment>> SetBlueprintItemCachedEnchantments =
+            Accessors.CreateFieldRef<BlueprintItem, List<BlueprintItemEnchantment>>("m_CachedEnchantments");
 
-        public readonly FastSetter<BlueprintItemEquipmentUsable, int> SetBlueprintItemEquipmentUsableCost =
-            Accessors.CreateSetter<BlueprintItemEquipmentUsable, int>("m_Cost");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemShield, BlueprintItemArmor> SetBlueprintItemShieldArmorComponent =
+            Accessors.CreateFieldRef<BlueprintItemShield, BlueprintItemArmor>("m_ArmorComponent");
 
-        public readonly FastSetter<BlueprintItem, List<BlueprintItemEnchantment>> SetBlueprintItemCachedEnchantments =
-            Accessors.CreateSetter<BlueprintItem, List<BlueprintItemEnchantment>>("m_CachedEnchantments");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemShield, BlueprintItemWeapon> SetBlueprintItemShieldWeaponComponent =
+            Accessors.CreateFieldRef<BlueprintItemShield, BlueprintItemWeapon>("m_WeaponComponent");
 
-        public readonly FastSetter<BlueprintItemShield, BlueprintItemArmor> SetBlueprintItemShieldArmorComponent =
-            Accessors.CreateSetter<BlueprintItemShield, BlueprintItemArmor>("m_ArmorComponent");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemWeapon, DamageTypeDescription> SetBlueprintItemWeaponDamageType =
+            Accessors.CreateFieldRef<BlueprintItemWeapon, DamageTypeDescription>("m_DamageType");
 
-        public readonly FastSetter<BlueprintItemShield, BlueprintItemWeapon> SetBlueprintItemShieldWeaponComponent =
-            Accessors.CreateSetter<BlueprintItemShield, BlueprintItemWeapon>("m_WeaponComponent");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemWeapon, bool> SetBlueprintItemWeaponOverrideDamageType =
+            Accessors.CreateFieldRef<BlueprintItemWeapon, bool>("m_OverrideDamageType");
 
-        public readonly FastSetter<BlueprintItemWeapon, DamageTypeDescription> SetBlueprintItemWeaponDamageType =
-            Accessors.CreateSetter<BlueprintItemWeapon, DamageTypeDescription>("m_DamageType");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintWeaponType, DiceFormula> SetBlueprintItemBaseDamage =
+            Accessors.CreateFieldRef<BlueprintWeaponType, DiceFormula>("m_BaseDamage");
 
-        public readonly FastSetter<BlueprintItemWeapon, bool> SetBlueprintItemWeaponOverrideDamageType =
-            Accessors.CreateSetter<BlueprintItemWeapon, bool>("m_OverrideDamageType");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, Sprite> SetBlueprintItemIcon = Accessors.CreateFieldRef<BlueprintItem, Sprite>("m_Icon");
 
-        public readonly FastSetter<BlueprintWeaponType, DiceFormula> SetBlueprintItemBaseDamage =
-            Accessors.CreateSetter<BlueprintWeaponType, DiceFormula>("m_BaseDamage");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEquipmentHand, WeaponVisualParameters> SetBlueprintItemEquipmentHandVisualParameters =
+            Accessors.CreateFieldRef<BlueprintItemEquipmentHand, WeaponVisualParameters>("m_VisualParameters");
 
-        public readonly FastSetter<BlueprintItem, Sprite> SetBlueprintItemIcon = Accessors.CreateSetter<BlueprintItem, Sprite>("m_Icon");
+        public readonly HarmonyLib.AccessTools.FieldRef<WeaponVisualParameters, GameObject> SetWeaponVisualParametersModel =
+            Accessors.CreateFieldRef<WeaponVisualParameters, GameObject>("m_WeaponModel");
 
-        public readonly FastSetter<BlueprintItemEquipmentHand, WeaponVisualParameters> SetBlueprintItemEquipmentHandVisualParameters =
-            Accessors.CreateSetter<BlueprintItemEquipmentHand, WeaponVisualParameters>("m_VisualParameters");
+        public readonly HarmonyLib.AccessTools.FieldRef<WeaponVisualParameters, WeaponAnimationStyle> SetBlueprintItemEquipmentWeaponAnimationStyle =
+            Accessors.CreateFieldRef<WeaponVisualParameters, WeaponAnimationStyle>("m_WeaponAnimationStyle");
 
-        public readonly FastSetter<WeaponVisualParameters, GameObject> SetWeaponVisualParametersModel =
-            Accessors.CreateSetter<WeaponVisualParameters, GameObject>("m_WeaponModel");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemArmor, ArmorVisualParameters> SetBlueprintItemArmorVisualParameters =
+            Accessors.CreateFieldRef<BlueprintItemArmor, ArmorVisualParameters>("m_VisualParameters");
 
-        public readonly FastSetter<WeaponVisualParameters, WeaponAnimationStyle> SetBlueprintItemEquipmentWeaponAnimationStyle =
-            Accessors.CreateSetter<WeaponVisualParameters, WeaponAnimationStyle>("m_WeaponAnimationStyle");
+        //public readonly SetterHandler<BlueprintBuff, int> SetBlueprintBuffFlags = Accessors.CreateSetter<BlueprintBuff, int>("m_Flags");
+        public void SetBlueprintBuffFlags(BlueprintBuff buff, int flags) {
+            HarmonyLib.AccessTools.Field(typeof(BlueprintBuff), "m_Flags").SetValue(buff, flags);
+        }
 
-        public readonly FastSetter<BlueprintItemArmor, ArmorVisualParameters> SetBlueprintItemArmorVisualParameters =
-            Accessors.CreateSetter<BlueprintItemArmor, ArmorVisualParameters>("m_VisualParameters");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, LocalizedString> SetBlueprintItemDisplayNameText =
+            Accessors.CreateFieldRef<BlueprintItem, LocalizedString>("m_DisplayNameText");
 
-        public readonly FastSetter<BlueprintBuff, int> SetBlueprintBuffFlags = Accessors.CreateSetter<BlueprintBuff, int>("m_Flags");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, LocalizedString> SetBlueprintItemDescriptionText =
+            Accessors.CreateFieldRef<BlueprintItem, LocalizedString>("m_DescriptionText");
 
-        public readonly FastSetter<BlueprintItem, LocalizedString> SetBlueprintItemDisplayNameText =
-            Accessors.CreateSetter<BlueprintItem, LocalizedString>("m_DisplayNameText");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, LocalizedString> SetBlueprintItemFlavorText =
+            Accessors.CreateFieldRef<BlueprintItem, LocalizedString>("m_FlavorText");
 
-        public readonly FastSetter<BlueprintItem, LocalizedString> SetBlueprintItemDescriptionText =
-            Accessors.CreateSetter<BlueprintItem, LocalizedString>("m_DescriptionText");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, int> SetBlueprintItemCost = Accessors.CreateFieldRef<BlueprintItem, int>("m_Cost");
 
-        public readonly FastSetter<BlueprintItem, LocalizedString> SetBlueprintItemFlavorText =
-            Accessors.CreateSetter<BlueprintItem, LocalizedString>("m_FlavorText");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, bool> SetBlueprintItemIsStackable = Accessors.CreateFieldRef<BlueprintItem, bool>("m_IsStackable");
 
-        public readonly FastSetter<BlueprintItem, int> SetBlueprintItemCost = Accessors.CreateSetter<BlueprintItem, int>("m_Cost");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentEnchantName =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
 
-        public readonly FastSetter<BlueprintItem, bool> SetBlueprintItemIsStackable = Accessors.CreateSetter<BlueprintItem, bool>("m_IsStackable");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentEnchantName =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
 
-        public readonly FastGetter<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentEnchantName =
-            Accessors.CreateGetter<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentDescription =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_Description");
 
-        public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentEnchantName =
-            Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_EnchantName");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentDescription =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_Description");
 
-        public readonly FastGetter<BlueprintItemEnchantment, LocalizedString> GetBlueprintItemEnchantmentDescription =
-            Accessors.CreateGetter<BlueprintItemEnchantment, LocalizedString>("m_Description");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentPrefix =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_Prefix");
 
-        public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentDescription =
-            Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_Description");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentSuffix =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, LocalizedString>("m_Suffix");
 
-        public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentPrefix =
-            Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_Prefix");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, int> SetBlueprintItemEnchantmentEnchantmentCost =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, int>("m_EnchantmentCost");
 
-        public readonly FastSetter<BlueprintItemEnchantment, LocalizedString> SetBlueprintItemEnchantmentSuffix =
-            Accessors.CreateSetter<BlueprintItemEnchantment, LocalizedString>("m_Suffix");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemEnchantment, int> SetBlueprintItemEnchantmentEnchantmentIdentifyDC =
+            Accessors.CreateFieldRef<BlueprintItemEnchantment, int>("m_IdentifyDC");
 
-        public readonly FastSetter<BlueprintItemEnchantment, int> SetBlueprintItemEnchantmentEnchantmentCost =
-            Accessors.CreateSetter<BlueprintItemEnchantment, int>("m_EnchantmentCost");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintScriptableObject, string> SetBlueprintScriptableObjectAssetGuid =
+            Accessors.CreateFieldRef<BlueprintScriptableObject, string>("m_AssetGuid");
 
-        public readonly FastSetter<BlueprintItemEnchantment, int> SetBlueprintItemEnchantmentEnchantmentIdentifyDC =
-            Accessors.CreateSetter<BlueprintItemEnchantment, int>("m_IdentifyDC");
+        public readonly HarmonyLib.AccessTools.FieldRef<LootItemsPackFixed, LootItem> SetLootItemsPackFixedItem = Accessors.CreateFieldRef<LootItemsPackFixed, LootItem>("m_Item");
 
-        public readonly FastSetter<BlueprintScriptableObject, string> SetBlueprintScriptableObjectAssetGuid =
-            Accessors.CreateSetter<BlueprintScriptableObject, string>("m_AssetGuid");
-
-        public readonly FastSetter<LootItemsPackFixed, LootItem> SetLootItemsPackFixedItem = Accessors.CreateSetter<LootItemsPackFixed, LootItem>("m_Item");
-
-        public readonly FastSetter<LootItem, BlueprintItem> SetLootItemItem = Accessors.CreateSetter<LootItem, BlueprintItem>("m_Item");
+        public readonly HarmonyLib.AccessTools.FieldRef<LootItem, BlueprintItem> SetLootItemItem = Accessors.CreateFieldRef<LootItem, BlueprintItem>("m_Item");
 
         public readonly FastSetter<RuleDealDamage, int> SetRuleDealDamageDamage = Accessors.CreateSetter<RuleDealDamage, int>("Damage");
 
-        public readonly FastSetter<BlueprintItem, float> SetBlueprintItemWeight = Accessors.CreateSetter<BlueprintItem, float>("m_Weight");
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItem, float> SetBlueprintItemWeight = Accessors.CreateFieldRef<BlueprintItem, float>("m_Weight");
 
         public readonly FastStaticInvoker<ItemEntity, string> CallUIUtilityItemGetQualities =
             Accessors.CreateStaticInvoker<ItemEntity, string>(typeof(UIUtilityItem), "GetQualities");

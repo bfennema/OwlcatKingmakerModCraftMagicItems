@@ -37,74 +37,39 @@ namespace CraftMagicItems {
     public delegate TResult FastStaticInvoker<in T1, in T2, in T3, out TResult>(T1 arg1, T2 arg2, T3 arg3);
 
     public class Accessors {
-        public static Harmony12.AccessTools.FieldRef<TClass, TResult> CreateFieldRef<TClass, TResult>(string name) {
+        public static HarmonyLib.AccessTools.FieldRef<TClass, TResult> CreateFieldRef<TClass, TResult>(string name) {
             var classType = typeof(TClass);
             var resultType = typeof(TResult);
-            var fieldInfo = Harmony12.AccessTools.Field(classType, name);
+            var fieldInfo = HarmonyLib.AccessTools.Field(classType, name);
             if (fieldInfo == null) {
                 throw new Exception($"{classType} does not contain field {name}");
             }
 
-            if (!resultType.IsAssignableFrom(fieldInfo.FieldType)) {
+            if (!resultType.IsAssignableFrom(fieldInfo.FieldType) && (!fieldInfo.FieldType.IsEnum || resultType != typeof(int))) {
                 throw new InvalidCastException($"Cannot cast field type {resultType} as {fieldInfo.FieldType} for class {classType} field {name}");
             }
 
-            var fieldRef = Harmony12.AccessTools.FieldRefAccess<TClass, TResult>(name);
+            var fieldRef = HarmonyLib.AccessTools.FieldRefAccess<TClass, TResult>(name);
             return fieldRef;
-        }
-
-        public static FastGetter CreateGetter(Type classType, Type resultType, string name) {
-            var fieldInfo = Harmony12.AccessTools.Field(classType, name);
-            var propInfo = Harmony12.AccessTools.Property(classType, name);
-            if (fieldInfo == null && propInfo == null) {
-                throw new Exception($"{classType} does not contain field or property {name}");
-            }
-
-            bool isProp = propInfo != null;
-            Type memberType = isProp ? propInfo.PropertyType : fieldInfo.FieldType;
-            string memberTypeName = isProp ? "property" : "field";
-            if (!resultType.IsAssignableFrom(memberType)) {
-                throw new InvalidCastException($"Cannot cast field type {resultType} as {memberType} for class {classType} {memberTypeName} {name}");
-            }
-
-            var handler = isProp ? Harmony12.FastAccess.CreateGetterHandler(propInfo) : Harmony12.FastAccess.CreateGetterHandler(fieldInfo);
-            return new FastGetter(handler);
-        }
-
-        public static FastGetter<TClass, TResult> CreateGetter<TClass, TResult>(string name) {
-            var classType = typeof(TClass);
-            var resultType = typeof(TResult);
-            var handler = CreateGetter(classType, resultType, name);
-            return instance => (TResult) handler.Invoke(instance);
-        }
-
-        public static FastSetter CreateSetter(Type classType, Type valueType, string name) {
-            var propertyInfo = Harmony12.AccessTools.Property(classType, name);
-            var fieldInfo = Harmony12.AccessTools.Field(classType, name);
-            if (propertyInfo == null && fieldInfo == null) {
-                throw new Exception($"{classType} does not contain a field or property {name}");
-            }
-
-            var isProperty = propertyInfo != null;
-            var memberType = isProperty ? propertyInfo.PropertyType : fieldInfo.FieldType;
-            var memberTypeName = isProperty ? "property" : "field";
-            if (!valueType.IsAssignableFrom(memberType) && (!memberType.IsEnum || valueType != typeof(int))) {
-                throw new Exception($"Cannot cast property type {valueType} as {memberType} for class {classType} {memberTypeName} {name}");
-            }
-
-            var handler = isProperty ? Harmony12.FastAccess.CreateSetterHandler(propertyInfo) : Harmony12.FastAccess.CreateSetterHandler(fieldInfo);
-            return new FastSetter(handler);
         }
 
         public static FastSetter<TClass, TValue> CreateSetter<TClass, TValue>(string name) {
             var classType = typeof(TClass);
+            var propertySetter = HarmonyLib.AccessTools.PropertySetter(classType, name);
+            if (propertySetter == null) {
+                throw new Exception($"{classType} does not contain a field or property {name}");
+            }
+            var propertyInfo = HarmonyLib.AccessTools.Property(classType, name);
+            var memberType = propertyInfo.PropertyType;
             var valueType = typeof(TValue);
-            var handler = CreateSetter(classType, valueType, name);
-            return (instance, value) => handler.Invoke(instance, value);
+            if (!valueType.IsAssignableFrom(memberType) && (!memberType.IsEnum || valueType != typeof(int))) {
+                throw new Exception($"Cannot cast property type {valueType} as {memberType} for class {classType} property {name}");
+            }
+            return new FastSetter<TClass, TValue>(HarmonyLib.AccessTools.MethodDelegate<Action<TClass, TValue>>(propertySetter));
         }
 
         private static MethodInfo GetMethodInfoValidated(Type classType, string name, Type resultType, Type[] args, Type[] typeArgs) {
-            var methodInfo = Harmony12.AccessTools.Method(classType, name, args, typeArgs);
+            var methodInfo = HarmonyLib.AccessTools.Method(classType, name, args, typeArgs);
             if (methodInfo == null) {
                 var argString = string.Join(", ", args.Select(t => t.ToString()));
                 throw new Exception($"{classType} does not contain method {name} with arguments {argString}");
@@ -119,7 +84,7 @@ namespace CraftMagicItems {
 
         private static FastInvoker CreateInvoker(Type classType, string name, Type resultType, Type[] args, Type[] typeArgs = null) {
             var methodInfo = GetMethodInfoValidated(classType, name, resultType, args, typeArgs);
-            return new FastInvoker(Harmony12.MethodInvoker.GetHandler(methodInfo));
+            return new FastInvoker(HarmonyLib.MethodInvoker.GetHandler(methodInfo));
         }
 
         public static FastInvoker<TClass, TResult> CreateInvoker<TClass, TResult>(string name) {
@@ -156,9 +121,9 @@ namespace CraftMagicItems {
 
         private class StaticFastInvokeHandler {
             private readonly Type classType;
-            private readonly Harmony12.FastInvokeHandler invoker;
+            private readonly HarmonyLib.FastInvokeHandler invoker;
 
-            public StaticFastInvokeHandler(Type classType, Harmony12.FastInvokeHandler invoker) {
+            public StaticFastInvokeHandler(Type classType, HarmonyLib.FastInvokeHandler invoker) {
                 this.classType = classType;
                 this.invoker = invoker;
             }
@@ -170,7 +135,7 @@ namespace CraftMagicItems {
 
         private static FastStaticInvoker CreateStaticInvoker(Type classType, string name, Type resultType, Type[] args, Type[] typeArgs = null) {
             var methodInfo = GetMethodInfoValidated(classType, name, resultType, args, typeArgs);
-            return new StaticFastInvokeHandler(classType, Harmony12.MethodInvoker.GetHandler(methodInfo)).Invoke;
+            return new StaticFastInvokeHandler(classType, HarmonyLib.MethodInvoker.GetHandler(methodInfo)).Invoke;
         }
 
         public static FastStaticInvoker<TResult> CreateStaticInvoker<TResult>(Type classType, string name) {

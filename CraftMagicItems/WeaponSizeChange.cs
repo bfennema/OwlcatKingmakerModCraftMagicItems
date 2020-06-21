@@ -1,8 +1,6 @@
 using Kingmaker.Blueprints;
-using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Enums;
-using Kingmaker.PubSubSystem;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 
@@ -11,7 +9,7 @@ namespace CraftMagicItems {
     public class WeaponSizeChange : GameLogicComponent {
         public int SizeCategoryChange;
 
-        [Harmony12.HarmonyPatch(typeof(BlueprintItemWeapon), "BaseDamage", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "BaseDamage", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponBaseDamage {
             private static void Postfix(BlueprintItemWeapon __instance, ref DiceFormula __result) {
@@ -25,7 +23,7 @@ namespace CraftMagicItems {
             }
         }
 
-        [Harmony12.HarmonyPatch(typeof(RuleCalculateWeaponStats), "WeaponSize", Harmony12.MethodType.Getter)]
+        [HarmonyLib.HarmonyPatch(typeof(RuleCalculateWeaponStats), "WeaponSize", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class RuleCalculateWeaponStatsWeaponSizePatch {
             private static void Prefix(RuleCalculateWeaponStats __instance, ref int ___m_SizeShift, ref int __state, ref Size __result) {
