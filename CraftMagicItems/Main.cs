@@ -177,6 +177,14 @@ namespace CraftMagicItems {
             CheatsSection
         }
 
+        private enum ItemLocationFilter
+        {
+            All,
+            Avaliable,
+            Inventory,
+            Stash
+        }
+
         struct IkPatch {
             public IkPatch(string uuid, float x, float y, float z) {
                 m_uuid = uuid;
@@ -577,7 +585,7 @@ namespace CraftMagicItems {
                     .Where(item => item.Blueprint is BlueprintItemEquipment blueprint
                                    && DoesBlueprintMatchSlot(blueprint, selectedSlot)
                                    && CanEnchant(item)
-                                   && CanRemove(blueprint)
+                                   && CanRemove(item)
                                    && (bondedComponent == null || (bondedComponent.ownerItem != item && bondedComponent.everyoneElseItem != item))
                                    && item.Wielder == caster.Descriptor)
                     .OrderBy(item => item.Name)
@@ -969,12 +977,9 @@ namespace CraftMagicItems {
                    || IsMasterwork(item.Blueprint);
         }
 
-        private static bool CanRemove(BlueprintItemEquipment blueprint) {
-            return !blueprint.IsNonRemovable
-                   // Also, can't remove Amiri's Ginormous Sword
-                   && !blueprint.AssetGuid.Contains("2e3280bf21ec832418f51bee5136ec7a")
-                   && !blueprint.AssetGuid.Contains("b60252a8ae028ba498340199f48ead67")
-                   && !blueprint.AssetGuid.Contains("fb379e61500421143b52c739823b4082");
+        private static bool CanRemove(ItemEntity item) {
+            return !(item.Blueprint is BlueprintItemEquipment blueprint && blueprint.IsNonRemovable)
+                && (item.HoldingSlot == null || item.HoldingSlot.Lock.Count == 0);
         }
 
         private static bool IsMetalArmor(BlueprintArmorType armorType) {
@@ -1113,6 +1118,33 @@ namespace CraftMagicItems {
             return recipe.CostFactor * level + recipe.CostAdjustment;
         }
 
+        private static bool DoesItemMatchLocationFilter(ItemEntity item, UnitEntityData caster, bool playerInCapital, ItemLocationFilter filter) {
+            switch (filter) {
+                case ItemLocationFilter.All: return true;
+                case ItemLocationFilter.Avaliable:
+                    if ((!playerInCapital && Game.Instance.Player.Inventory.Contains(item))
+                        || (playerInCapital && Game.Instance.Player.SharedStash.Contains(item))
+                        || item.Wielder?.Unit == caster) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case ItemLocationFilter.Inventory:
+                    if (Game.Instance.Player.Inventory.Contains(item) || item.Wielder?.Unit == caster) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case ItemLocationFilter.Stash:
+                    if (Game.Instance.Player.SharedStash.Contains(item) || item.Wielder?.Unit == caster) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+            }
+            return false;
+        }
+
         private static void RenderRecipeBasedCrafting(UnitEntityData caster, RecipeBasedItemCraftingData craftingData, ItemEntity upgradeItem = null) {
             ItemsFilter.ItemType selectedSlot;
             if (upgradeItem != null) {
@@ -1129,17 +1161,23 @@ namespace CraftMagicItems {
                     selectedItemSlotIndex = RenderSelection("Item type", names, 10, ref selectedCustomName);
                 }
 
+                var locationFilter = ItemLocationFilter.All;
+                var locationNames = Enum.GetNames(typeof(ItemLocationFilter));
+                locationFilter = (ItemLocationFilter)RenderSelection("Item location", locationNames, locationNames.Length, ref selectedCustomName);
+
                 selectedSlot = craftingData.Slots[selectedItemSlotIndex];
                 var playerInCapital = IsPlayerInCapital();
                 // Choose an existing or in-progress item of that type, or create a new one (if allowed).
                 var items = Game.Instance.Player.Inventory
                     .Concat(ItemCreationProjects.Select(project => project.ResultItem))
+                    .Concat(playerInCapital ? Game.Instance.Player.SharedStash : new ItemsCollection())
                     .Where(item => item.Blueprint is BlueprintItemEquipment blueprint
+                                   && DoesItemMatchLocationFilter(item, caster, playerInCapital, locationFilter)
                                    && DoesBlueprintMatchSlot(blueprint, selectedSlot)
                                    && DoesBlueprintMatchRestrictions(blueprint, selectedSlot, craftingData.SlotRestrictions)
                                    && CanEnchant(item)
                                    && !IsAnotherCastersBondedItem(item, caster)
-                                   && CanRemove(blueprint)
+                                   && CanRemove(item)
                                    && (item.Wielder == null
                                        || playerInCapital
                                        || Game.Instance.Player.PartyCharacters.Contains(item.Wielder.Unit)))
@@ -2179,7 +2217,9 @@ namespace CraftMagicItems {
                     .ToArray();
                 selectedSpellcasterIndex = RenderSelection(label, partyNames, 8, ref upgradingBlueprint);
             }
-
+            if (selectedSpellcasterIndex >= characters.Length) {
+                selectedSpellcasterIndex = 0;
+            }
             return characters[selectedSpellcasterIndex];
         }
 
@@ -2334,11 +2374,21 @@ namespace CraftMagicItems {
             using (new DisableBattleLog(!ModSettings.CraftingTakesNoTime)) {
                 var holdingSlot = upgradeItem?.HoldingSlot;
                 var slotIndex = upgradeItem?.InventorySlotIndex;
+                var inventory = true;
                 if (upgradeItem != null) {
-                    Game.Instance.Player.Inventory.Remove(upgradeItem);
+                    if (Game.Instance.Player.Inventory.Contains(upgradeItem)) {
+                        Game.Instance.Player.Inventory.Remove(upgradeItem);
+                    } else {
+                        Game.Instance.Player.SharedStash.Remove(upgradeItem);
+                        inventory = false;
+                    }
                 }
                 if (holdingSlot == null) {
-                    Game.Instance.Player.Inventory.Add(resultItem);
+                    if (inventory) {
+                        Game.Instance.Player.Inventory.Add(resultItem);
+                    } else {
+                        Game.Instance.Player.SharedStash.Add(resultItem);
+                    }
                     if (slotIndex is int value) {
                         resultItem.SetSlotIndex(value);
                     }
@@ -3574,21 +3624,28 @@ namespace CraftMagicItems {
             foreach (var project in timer.CraftingProjects.ToList()) {
                 if (project.UpgradeItem != null) {
                     // Check if the item has been dropped and picked up again, which apparently creates a new object with the same blueprint.
-                    if (project.UpgradeItem.Collection != Game.Instance.Player.Inventory) {
-                        var itemInInventory = Game.Instance.Player.Inventory.FirstOrDefault(item => item.Blueprint == project.UpgradeItem.Blueprint);
-                        if (itemInInventory != null) {
+                    if (project.UpgradeItem.Collection != Game.Instance.Player.Inventory && project.UpgradeItem.Collection != Game.Instance.Player.SharedStash) {
+                        var itemInStash = Game.Instance.Player.SharedStash.FirstOrDefault(item => item.Blueprint == project.UpgradeItem.Blueprint);
+                        if (itemInStash != null) {
                             ItemUpgradeProjects.Remove(project.UpgradeItem);
-                            ItemUpgradeProjects[itemInInventory] = project;
-                            project.UpgradeItem = itemInInventory;
+                            ItemUpgradeProjects[itemInStash] = project;
+                            project.UpgradeItem = itemInStash;
+                        } else {
+                            var itemInInventory = Game.Instance.Player.Inventory.FirstOrDefault(item => item.Blueprint == project.UpgradeItem.Blueprint);
+                            if (itemInInventory != null) {
+                                ItemUpgradeProjects.Remove(project.UpgradeItem);
+                                ItemUpgradeProjects[itemInInventory] = project;
+                                project.UpgradeItem = itemInInventory;
+                            }
                         }
                     }
 
                     // Check that the caster can get at the item they're upgrading... it must be in the party inventory, and either un-wielded, or the crafter
                     // must be with the wielder (together in the capital or out in the party together).
-                    if (project.UpgradeItem.Collection != Game.Instance.Player.Inventory || !(project.UpgradeItem.Wielder == null
-                                                                                              || (playerInCapital && !returningToCapital) ||
-                                                                                              withPlayer == Game.Instance.Player.PartyCharacters.Contains(
-                                                                                                  project.UpgradeItem.Wielder.Unit))) {
+                    var wieldedInParty = (project.UpgradeItem.Wielder == null || Game.Instance.Player.PartyCharacters.Contains(project.UpgradeItem.Wielder.Unit));
+                    if ((!playerInCapital || returningToCapital)
+                        && (project.UpgradeItem.Collection != Game.Instance.Player.SharedStash || withPlayer)
+                        && (project.UpgradeItem.Collection != Game.Instance.Player.Inventory || ((!withPlayer || !wieldedInParty) && (withPlayer || wieldedInParty)))) {
                         project.AddMessage(L10NFormat("craftMagicItems-logMessage-missing-upgrade-item", project.UpgradeItem.Blueprint.Name));
                         AddBattleLogMessage(project.LastMessage);
                         continue;

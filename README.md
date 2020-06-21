@@ -16,10 +16,7 @@ For details, see the mod page here: https://www.nexusmods.com/pathfinderkingmake
 
 
 * Enchantments with restrictions (such as Celestial "minimum +3") should be displayed in the UI.
-* Make characters in town work from the "stash" (and their own equipment) rather than from the party inventory.
 * Trailblazer's Helm can cast two different spells!
-* Perhaps crafting projects for characters in your party should be advanced at the adventuring rate when you first enter
-        the capital, to account things more accurately?
 * Enchanting mundane belts, rings, amulets, necklaces?
 * Request: Is it possible to add the option for bonus spell slots, for ring of wizardry.
 * Perhaps put the "Mod disabled" text into Strings_enGB.json anyway, so it can be translated?  Load manually?
