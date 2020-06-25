@@ -341,6 +341,7 @@ namespace CraftMagicItems {
 
                 GetSelectedCrafter(true);
 
+                //render toggleable views in the main functionality of the mod
                 if (RenderToggleSection(ref currentSection, OpenSection.CraftMagicItemsSection, "Craft Magic Items")) {
                     RenderCraftMagicItemsSection();
                 }
@@ -465,12 +466,14 @@ namespace CraftMagicItems {
             return bondedItemBuff.SelectComponents<BondedItemComponent>().First();
         }
 
+        /// <summary>Renders the crafting menu (by selected character)</summary>
         private static void RenderCraftMagicItemsSection() {
             var caster = GetSelectedCrafter(false);
             if (caster == null) {
                 return;
             }
 
+            //can the character have a bonded item?
             var hasBondedItemFeature =
                 caster.Descriptor.Progression.Features.Enumerable.Any(feature => BondedItemFeatures.Contains(feature.Blueprint.AssetGuid));
             var bondedItemData = GetBondedItemComponentForCaster(caster.Descriptor);
@@ -488,6 +491,7 @@ namespace CraftMagicItems {
                 }
             }
 
+            //what crafting options are available (which feats are available for the selected character)
             var itemTypes = ItemCraftingData
                 .Where(data => data.FeatGuid != null && (ModSettings.IgnoreCraftingFeats || CharacterHasFeat(caster, data.FeatGuid)))
                 .ToArray();
@@ -496,12 +500,18 @@ namespace CraftMagicItems {
                 return;
             }
 
+            //list the selection items
             var itemTypeNames = itemTypes.Select(data => new L10NString(data.NameId).ToString())
                 .PrependConditional(hasBondedItemFeature, new L10NString("craftMagicItems-bonded-object-name")).ToArray();
+
+            //render whatever the user has selected
             var selectedItemTypeIndex = RenderSelection("Crafting: ", itemTypeNames, 6, ref selectedCustomName, false);
+
+            //render options for actual selection
             if (hasBondedItemFeature && selectedItemTypeIndex == 0) {
                 RenderBondedItemCrafting(caster);
-            } else {
+            }
+            else {
                 var craftingData = itemTypes[hasBondedItemFeature ? selectedItemTypeIndex - 1 : selectedItemTypeIndex];
                 if (craftingData is SpellBasedItemCraftingData spellBased) {
                     RenderSpellBasedCrafting(caster, spellBased);
@@ -510,6 +520,7 @@ namespace CraftMagicItems {
                 }
             }
 
+            //render current cash
             RenderLabel($"Current Money: {Game.Instance.Player.Money}");
         }
 
@@ -1148,13 +1159,17 @@ namespace CraftMagicItems {
 
         private static void RenderRecipeBasedCrafting(UnitEntityData caster, RecipeBasedItemCraftingData craftingData, ItemEntity upgradeItem = null) {
             ItemsFilter.ItemType selectedSlot;
+
+            //specific item
             if (upgradeItem != null) {
                 selectedSlot = upgradeItem.Blueprint.ItemType;
                 while (ItemUpgradeProjects.ContainsKey(upgradeItem)) {
                     upgradeItem = ItemUpgradeProjects[upgradeItem].ResultItem;
                 }
                 RenderLabel($"Enchanting {upgradeItem.Name}");
-            } else {
+            }
+            //slot
+            else {
                 // Choose slot/weapon type.
                 var selectedItemSlotIndex = 0;
                 if (craftingData.Slots.Length > 1) {
