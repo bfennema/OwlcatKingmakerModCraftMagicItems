@@ -29,8 +29,7 @@ namespace CraftMagicItems {
         [JsonProperty] public int CasterLevel;
 
         [JsonProperty] public BlueprintAbility[] SpellPrerequisites;
-        [JsonProperty("FeatPrerequisites", ItemConverterType = typeof(CraftingBlueprintConverter<BlueprintFeature>))]
-        private CraftingBlueprint<BlueprintFeature>[] m_FeatPrerequisites;
+        [JsonProperty] public BlueprintFeature[] FeatPrerequisites;
         [JsonProperty] public bool PrerequisitesMandatory;
 
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
@@ -50,20 +49,6 @@ namespace CraftMagicItems {
 
         [JsonProperty] public ItemEntity UpgradeItem;
 
-        [JsonIgnore] private BlueprintFeature[] m_CachedFeatPrerequisites;
-        [JsonIgnore] public BlueprintFeature[] FeatPrerequisites {
-            get {
-                if (m_CachedFeatPrerequisites == null && m_FeatPrerequisites != null) {
-                    m_CachedFeatPrerequisites = m_FeatPrerequisites.Where(blueprint => blueprint.Blueprint != null).Select(blueprint => blueprint.Blueprint).ToArray();
-                    if (m_CachedFeatPrerequisites.Length == 0) {
-                        m_FeatPrerequisites = null;
-                        m_CachedFeatPrerequisites = null;
-                    }
-                }
-                return m_CachedFeatPrerequisites;
-            }
-        }
-
         public CraftingProjectData(UnitEntityData crafter, int targetCost, int goldSpent, int casterLevel, ItemEntity resultItem, string itemType,
             string recipeName = null, BlueprintAbility[] spellPrerequisites = null, BlueprintFeature[] featPrerequisites = null, bool prerequisitesMandatory = false,
             bool anyPrerequisite = false, ItemEntity upgradeItem = null, CrafterPrerequisiteType[] crafterPrerequisites = null) {
@@ -75,7 +60,7 @@ namespace CraftMagicItems {
             ItemType = itemType.Contains("Armour") ? itemType.Replace("Armour", "Armor") : itemType;
             RecipeName = recipeName;
             SpellPrerequisites = spellPrerequisites;
-            m_FeatPrerequisites = featPrerequisites?.Select(feature => new CraftingBlueprint<BlueprintFeature>(feature)).ToArray();
+            FeatPrerequisites = featPrerequisites;
             PrerequisitesMandatory = prerequisitesMandatory;
             AnyPrerequisite = anyPrerequisite;
             Progress = 0;

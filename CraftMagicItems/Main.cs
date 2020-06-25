@@ -1124,7 +1124,8 @@ namespace CraftMagicItems {
                 case ItemLocationFilter.Avaliable:
                     if ((!playerInCapital && Game.Instance.Player.Inventory.Contains(item))
                         || (playerInCapital && Game.Instance.Player.SharedStash.Contains(item))
-                        || item.Wielder?.Unit == caster) {
+                        || item.Wielder?.Unit == caster
+                        || ItemCreationProjects.Count(project => project.Crafter == caster && project.ResultItem == item) > 0) {
                         return true;
                     } else {
                         return false;
@@ -2605,7 +2606,23 @@ namespace CraftMagicItems {
                 } else {
                     if (itemBlueprint is BlueprintItemWeapon weapon && weapon.DamageType.Physical.Material != 0) {
                         var standardBlueprint = GetStandardItem(itemBlueprint);
-                        recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, standardBlueprint.Cost, standardBlueprint.Weight);
+                        var blueprintCost = standardBlueprint.Cost;
+                        var blueprintWeight = standardBlueprint.Weight;
+                        foreach (var enchantment in itemBlueprint.Enchantments) {
+                            if (enchantment.AssetGuid.StartsWith(OversizedGuid)) {
+                                var weaponBaseSizeChange = enchantment.GetComponent<WeaponBaseSizeChange>();
+                                if (weaponBaseSizeChange != null) {
+                                    var sizeCategoryChange = weaponBaseSizeChange.SizeCategoryChange;
+                                    if (sizeCategoryChange > 0) {
+                                        blueprintCost *= 2;
+                                        blueprintWeight *= 2;
+                                    } else if (sizeCategoryChange < 0) {
+                                        blueprintWeight /= 2.0f;
+                                    }
+                                }
+                            }
+                        }
+                        recipeCost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, blueprintCost, blueprintWeight);
                     }
 
                     if (itemBlueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
