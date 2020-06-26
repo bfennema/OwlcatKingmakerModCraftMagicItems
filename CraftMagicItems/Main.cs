@@ -170,14 +170,6 @@ namespace CraftMagicItems {
             "aa34ca4f3cd5e5d49b2475fcfdf56b24"
         };
 
-        private enum OpenSection {
-            CraftMagicItemsSection,
-            CraftMundaneItemsSection,
-            ProjectsSection,
-            FeatsSection,
-            CheatsSection
-        }
-
         private enum ItemLocationFilter
         {
             All,
