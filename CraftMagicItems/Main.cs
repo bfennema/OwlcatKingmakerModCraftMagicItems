@@ -2231,7 +2231,7 @@ namespace CraftMagicItems {
 
         private static int RenderSelection(string label, string[] options, int xCount) {
             var dummy = "";
-            return RenderSelection(label, options, xCount, ref dummy);
+            return RenderSelection<string>(label, options, xCount, ref dummy);
         }
 
         private static int GetSelectionIndex(string label) {
