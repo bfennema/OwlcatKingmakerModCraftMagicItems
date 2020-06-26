@@ -1421,7 +1421,7 @@ namespace CraftMagicItems {
             } else if (upgradeItem != null) {
                 // Upgrading to a custom blueprint
                 var name = upgradeItemShield?.Blueprint?.Name ?? upgradeItem.Blueprint.Name;
-                RenderCustomNameField(name);
+                selectedCustomName = UmmUiRenderer.RenderCustomNameField(name, selectedCustomName);
                 name = selectedCustomName == name ? null : selectedCustomName;
                 IEnumerable<string> enchantments;
                 string supersededEnchantmentId;
@@ -1456,7 +1456,7 @@ namespace CraftMagicItems {
                 // Crafting a new custom blueprint from scratch.
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
                 var baseBlueprint = selectedBaseBlueprint;
-                RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
+                selectedCustomName = UmmUiRenderer.RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", selectedCustomName);
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint, selectedRecipe).Select(enchantment => enchantment.AssetGuid).ToArray();
                 IEnumerable<string> enchantments;
                 if (selectedRecipe.EnchantmentsCumulative) {
@@ -1655,7 +1655,7 @@ namespace CraftMagicItems {
             string itemGuid;
             if (upgradeItem == null) {
                 // Option to rename item
-                RenderCustomNameField($"{ability.Name} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}");
+                selectedCustomName = UmmUiRenderer.RenderCustomNameField($"{ability.Name} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", selectedCustomName);
                 // Pick random base item
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
                 // Create customised item GUID
@@ -1665,7 +1665,7 @@ namespace CraftMagicItems {
                     ability.AssetGuid, "null", casterLevel: selectedCasterLevel, spellLevel: spellLevel, perDay: selectedCastsPerDay);
             } else {
                 // Option to rename item
-                RenderCustomNameField(upgradeItem.Blueprint.Name);
+                selectedCustomName = UmmUiRenderer.RenderCustomNameField(upgradeItem.Blueprint.Name, selectedCustomName); 
                 // Create customised item GUID
                 itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItem.Blueprint.AssetGuid, new List<string>(), null,
                     selectedCustomName == upgradeItem.Blueprint.Name ? null : selectedCustomName, ability.AssetGuid,
@@ -2276,21 +2276,6 @@ namespace CraftMagicItems {
             GUILayout.Label(label, GUILayout.ExpandWidth(false));
             value = Mathf.RoundToInt(GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(300)));
             GUILayout.Label($"{value}", GUILayout.ExpandWidth(false));
-            GUILayout.EndHorizontal();
-        }
-
-        private static void RenderCustomNameField(string defaultValue) {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Name: ", GUILayout.ExpandWidth(false));
-            if (string.IsNullOrEmpty(selectedCustomName)) {
-                selectedCustomName = defaultValue;
-            }
-
-            selectedCustomName = GUILayout.TextField(selectedCustomName, GUILayout.Width(300));
-            if (selectedCustomName.Trim().Length == 0) {
-                selectedCustomName = null;
-            }
-
             GUILayout.EndHorizontal();
         }
 

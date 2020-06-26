@@ -23,5 +23,28 @@ namespace CraftMagicItems.UI
 
             GUILayout.EndHorizontal();
         }
+
+        /// <summary>Renders a text box on screen in Unity Mod Manager for the item's customized name</summary>
+        /// <param name="defaultValue">Default value for the item's name</param>
+        /// <param name="selectedCustomName">Currently-selected custom name</param>
+        public static string RenderCustomNameField(string defaultValue, string selectedCustomName)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Name: ", GUILayout.ExpandWidth(false));
+            if (string.IsNullOrEmpty(selectedCustomName))
+            {
+                selectedCustomName = defaultValue;
+            }
+
+            selectedCustomName = GUILayout.TextField(selectedCustomName, GUILayout.Width(300));
+            if (selectedCustomName.Trim().Length == 0)
+            {
+                selectedCustomName = null;
+            }
+
+            GUILayout.EndHorizontal();
+
+            return selectedCustomName;
+        }
     }
 }
