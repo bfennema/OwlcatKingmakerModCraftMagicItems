@@ -8,6 +8,7 @@ namespace CraftMagicItems.UI
         /// <summary>Renders a checkbox in Unity Mod Manager</summary>
         /// <param name="value">Currently selected value</param>
         /// <param name="label">Label for the checkbox</param>
+        /// <returns>The inverse of <paramref name="value" /> when the button is clicked, otherwise <paramref name="value" /></returns>
         public static bool RenderCheckbox(bool value, string label)
         {
             GUILayout.BeginHorizontal();
@@ -24,6 +25,7 @@ namespace CraftMagicItems.UI
         /// <summary>Renders a text box on screen in Unity Mod Manager for the item's customized name</summary>
         /// <param name="defaultValue">Default value for the item's name</param>
         /// <param name="selectedCustomName">Currently-selected custom name</param>
+        /// <returns>The updated text as entered by user, otherwise <paramref name="selectedCustomName" /></returns>
         public static string RenderCustomNameField(string defaultValue, string selectedCustomName)
         {
             GUILayout.BeginHorizontal();
@@ -49,7 +51,7 @@ namespace CraftMagicItems.UI
         /// <param name="label">Label for the slider</param>
         /// <param name="min">Minimum possible value</param>
         /// <param name="max">Maximum possible value</param>
-        /// <returns>Returns the initial value, clamped and rounded after rendering controls to the creeen</returns>
+        /// <returns>Returns the value selected by the user, clamped and rounded after rendering controls to the screen</returns>
         public static int RenderIntSlider(int value, string label, int min, int max)
         {
             value = Mathf.Clamp(value, min, max);
