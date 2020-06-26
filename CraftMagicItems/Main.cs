@@ -2147,7 +2147,7 @@ namespace CraftMagicItems {
         }
 
         private static void RenderCheatsSection() {
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftingCostsNoGold, "Crafting costs no gold and no material components.");
+            ModSettings.CraftingCostsNoGold = UmmUiRenderer.RenderCheckbox(ModSettings.CraftingCostsNoGold, "Crafting costs no gold and no material components.");
             if (!ModSettings.CraftingCostsNoGold) {
                 var selectedCustomPriceScaleIndex = RenderSelection(CustomPriceLabel, CraftingPriceStrings, 4);
                 if (selectedCustomPriceScaleIndex == 2) {
@@ -2167,10 +2167,11 @@ namespace CraftMagicItems {
                 }
             }
 
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnoreCraftingFeats, "Crafting does not require characters to take crafting feats.");
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftingTakesNoTime, "Crafting takes no time to complete.");
-            if (!ModSettings.CraftingTakesNoTime) {
-                UmmUiRenderer.RenderCheckbox(ref ModSettings.CustomCraftRate, "Craft at a non-standard rate.");
+            ModSettings.IgnoreCraftingFeats = UmmUiRenderer.RenderCheckbox(ModSettings.IgnoreCraftingFeats, "Crafting does not require characters to take crafting feats.");
+            ModSettings.CraftingTakesNoTime = UmmUiRenderer.RenderCheckbox(ModSettings.CraftingTakesNoTime, "Crafting takes no time to complete.");
+            if (!ModSettings.CraftingTakesNoTime)
+            {
+                ModSettings.CustomCraftRate = UmmUiRenderer.RenderCheckbox(ModSettings.CustomCraftRate, "Craft at a non-standard rate.");
                 if (ModSettings.CustomCraftRate) {
                     var maxMagicRate = ((ModSettings.MagicCraftingRate + 1000) / 1000) * 1000;
                     RenderIntSlider(ref ModSettings.MagicCraftingRate, "Magic Item Crafting Rate", 1, maxMagicRate);
@@ -2181,11 +2182,11 @@ namespace CraftMagicItems {
                     ModSettings.MundaneCraftingRate = Settings.MundaneCraftingProgressPerDay;
                 }
             }
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.CasterLevelIsSinglePrerequisite,
+            ModSettings.CasterLevelIsSinglePrerequisite = UmmUiRenderer.RenderCheckbox(ModSettings.CasterLevelIsSinglePrerequisite,
                 "When crafting, a Caster Level less than the prerequisite counts as a single missing prerequisite.");
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftAtFullSpeedWhileAdventuring, "Characters craft at full speed while adventuring (instead of 25% speed).");
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnorePlusTenItemMaximum, "Ignore the rule that limits arms and armor to a maximum of +10 equivalent.");
-            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnoreFeatCasterLevelRestriction, "Ignore the crafting feat Caster Level prerequisites when learning feats.");
+            ModSettings.CraftAtFullSpeedWhileAdventuring = UmmUiRenderer.RenderCheckbox(ModSettings.CraftAtFullSpeedWhileAdventuring, "Characters craft at full speed while adventuring (instead of 25% speed).");
+            ModSettings.IgnorePlusTenItemMaximum = UmmUiRenderer.RenderCheckbox(ModSettings.IgnorePlusTenItemMaximum, "Ignore the rule that limits arms and armor to a maximum of +10 equivalent.");
+            ModSettings.IgnoreFeatCasterLevelRestriction = UmmUiRenderer.RenderCheckbox(ModSettings.IgnoreFeatCasterLevelRestriction, "Ignore the crafting feat Caster Level prerequisites when learning feats.");
         }
 
         private static void RenderLabel(string label) {
