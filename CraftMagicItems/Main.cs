@@ -582,7 +582,7 @@ namespace CraftMagicItems {
                 UmmUiRenderer.RenderLabel(new L10NString("craftMagicItems-bonded-item-glossary"));
                 UmmUiRenderer.RenderLabel("Choose your bonded item.");
                 var names = BondedItemSlots.Select(slot => new L10NString(GetSlotStringKey(slot, null)).ToString()).ToArray();
-                var selectedItemSlotIndex = RenderSelection("Item type", names, 10);
+                var selectedItemSlotIndex = UmmUiRenderer.RenderSelection("Item type", names, 10, GetSelectionIndex, SetSelectionIndex);
                 var selectedSlot = BondedItemSlots[selectedItemSlotIndex];
                 var items = Game.Instance.Player.Inventory
                     .Where(item => item.Blueprint is BlueprintItemEquipment blueprint
@@ -598,7 +598,7 @@ namespace CraftMagicItems {
                     return;
                 }
                 var itemNames = items.Select(item => item.Name).ToArray();
-                var selectedUpgradeItemIndex = RenderSelection("Item: ", itemNames, 5);
+                var selectedUpgradeItemIndex = UmmUiRenderer.RenderSelection("Item: ", itemNames, 5, GetSelectionIndex, SetSelectionIndex);
                 var selectedItem = items[selectedUpgradeItemIndex];
                 var goldCost = !selectedBondWithNewObject || ModSettings.CraftingCostsNoGold ? 0 : 200 * characterCasterLevel;
                 var canAfford = BuildCostString(out var cost, null, goldCost);
@@ -654,13 +654,13 @@ namespace CraftMagicItems {
             var selectedSpellbookIndex = 0;
             if (spellbooks.Count != 1) {
                 var spellBookNames = spellbooks.Select(book => book.Blueprint.Name.ToString()).ToArray();
-                selectedSpellbookIndex = RenderSelection("Class: ", spellBookNames, 10);
+                selectedSpellbookIndex = UmmUiRenderer.RenderSelection("Class: ", spellBookNames, 10, GetSelectionIndex, SetSelectionIndex);
             }
 
             var spellbook = spellbooks[selectedSpellbookIndex];
             var maxLevel = Math.Min(spellbook.MaxSpellLevel, craftingData.MaxSpellLevel);
             var spellLevelNames = Enumerable.Range(0, maxLevel + 1).Select(index => $"Level {index}").ToArray();
-            var spellLevel = RenderSelection("Spell level: ", spellLevelNames, 10);
+            var spellLevel = UmmUiRenderer.RenderSelection("Spell level: ", spellLevelNames, 10, GetSelectionIndex, SetSelectionIndex);
             if (spellLevel > 0 && !spellbook.Blueprint.Spontaneous) {
                 if (ModSettings.CraftingTakesNoTime) {
                     selectedShowPreparedSpells = true;
@@ -1321,7 +1321,7 @@ namespace CraftMagicItems {
                         counter++;
                         return enchantment.Name.Empty() ? GetBonusString(counter, selectedRecipe) : enchantment.Name;
                     });
-                    selectedEnchantmentIndex = RenderSelection("", enchantmentNames.ToArray(), 6);
+                    selectedEnchantmentIndex = UmmUiRenderer.RenderSelection("", enchantmentNames.ToArray(), 6, GetSelectionIndex, SetSelectionIndex);
                 }
 
                 selectedEnchantment = availableEnchantments[selectedEnchantmentIndex];
@@ -1865,7 +1865,7 @@ namespace CraftMagicItems {
                 itemTypeNames = SubCraftingData[selectedCraftingData.ParentNameId].Select(data => new L10NString(data.NameId).ToString()).ToArray();
                 var label = new L10NString(selectedCraftingData.ParentNameId) + ": ";
                 var selectedItemSubTypeIndex = upgradingBlueprint == null
-                    ? RenderSelection(label, itemTypeNames, 6)
+                    ? UmmUiRenderer.RenderSelection(label, itemTypeNames, 6, GetSelectionIndex, SetSelectionIndex)
                     : GetSelectionIndex(label);
 
                 selectedCraftingData = SubCraftingData[selectedCraftingData.ParentNameId][selectedItemSubTypeIndex];
@@ -2092,9 +2092,9 @@ namespace CraftMagicItems {
                 return;
             }
 
-            UmmUiRenderer.RenderLabel(
-                "Use this section to reassign previous feat choices for this character to crafting feats.  <color=red>Warning:</color> This is a one-way assignment!");
-            var selectedFeatToLearn = RenderSelection("Feat to learn", missingFeats.Select(data => new L10NString(data.NameId).ToString()).ToArray(), 6);
+            UmmUiRenderer.RenderLabel("Use this section to reassign previous feat choices for this character to crafting feats.  <color=red>Warning:</color> This is a one-way assignment!");
+            var featOptions = missingFeats.Select(data => new L10NString(data.NameId).ToString()).ToArray();
+            var selectedFeatToLearn = UmmUiRenderer.RenderSelection("Feat to learn", featOptions, 6, GetSelectionIndex, SetSelectionIndex);
             var learnFeatData = missingFeats[selectedFeatToLearn];
             var learnFeat = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(learnFeatData.FeatGuid);
             if (learnFeat == null) {
@@ -2140,7 +2140,7 @@ namespace CraftMagicItems {
         private static void RenderCheatsSection() {
             ModSettings.CraftingCostsNoGold = UmmUiRenderer.RenderCheckbox("Crafting costs no gold and no material components.", ModSettings.CraftingCostsNoGold);
             if (!ModSettings.CraftingCostsNoGold) {
-                var selectedCustomPriceScaleIndex = RenderSelection(CustomPriceLabel, CraftingPriceStrings, 4);
+                var selectedCustomPriceScaleIndex = UmmUiRenderer.RenderSelection(CustomPriceLabel, CraftingPriceStrings, 4, GetSelectionIndex, SetSelectionIndex);
                 if (selectedCustomPriceScaleIndex == 2) {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Custom Cost Factor: ", GUILayout.ExpandWidth(false));
@@ -2227,11 +2227,6 @@ namespace CraftMagicItems {
                 selectedSpellcasterIndex = 0;
             }
             return characters[selectedSpellcasterIndex];
-        }
-
-        private static int RenderSelection(string label, string[] options, int xCount) {
-            var dummy = "";
-            return UmmUiRenderer.RenderSelection<string>(label, options, xCount, ref dummy, GetSelectionIndex, SetSelectionIndex);
         }
 
         private static int GetSelectionIndex(string label) {
