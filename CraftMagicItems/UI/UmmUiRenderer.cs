@@ -6,10 +6,10 @@ namespace CraftMagicItems.UI
     public class UmmUiRenderer
     {
         /// <summary>Renders a checkbox in Unity Mod Manager</summary>
-        /// <param name="value">Currently selected value</param>
         /// <param name="label">Label for the checkbox</param>
+        /// <param name="value">Currently selected value</param>
         /// <returns>The inverse of <paramref name="value" /> when the button is clicked, otherwise <paramref name="value" /></returns>
-        public static bool RenderCheckbox(bool value, string label)
+        public static bool RenderCheckbox(string label, bool value)
         {
             GUILayout.BeginHorizontal();
             var text = value ? "✔" : "✖";
@@ -49,12 +49,12 @@ namespace CraftMagicItems.UI
         }
 
         /// <summary>Renders an integer selection slider</summary>
-        /// <param name="value">Initial value</param>
         /// <param name="label">Label for the slider</param>
+        /// <param name="value">Initial value</param>
         /// <param name="min">Minimum possible value</param>
         /// <param name="max">Maximum possible value</param>
         /// <returns>Returns the value selected by the user, clamped and rounded after rendering controls to the screen</returns>
-        public static int RenderIntSlider(int value, string label, int min, int max)
+        public static int RenderIntSlider(string label, int value, int min, int max)
         {
             value = Mathf.Clamp(value, min, max);
             GUILayout.BeginHorizontal();
@@ -67,10 +67,10 @@ namespace CraftMagicItems.UI
         }
 
         /// <summary>Renders a toggle-able section selection in Unity Mod Manager for the user to show/hide</summary>
-        /// <param name="value">Flag indicating whether the toggle is active</param>
         /// <param name="label">Label for the toggle</param>
+        /// <param name="value">Flag indicating whether the toggle is active</param>
         /// <returns>Whether the toggle is currently active in Unity Mod Manager</returns>
-        public static bool RenderToggleSection(bool value, string label)
+        public static bool RenderToggleSection(string label, bool value)
         {
             GUILayout.BeginVertical("box");
             GUILayout.BeginHorizontal();
