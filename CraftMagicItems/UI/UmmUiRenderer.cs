@@ -63,5 +63,20 @@ namespace CraftMagicItems.UI
 
             return value;
         }
+
+        /// <summary>Renders a toggle-able section selection in Unity Mod Manager for the user to show/hide</summary>
+        /// <param name="value">Flag indicating whether the toggle is active</param>
+        /// <param name="label">Label for the toggle</param>
+        /// <returns>Whether the toggle is currently active in Unity Mod Manager</returns>
+        public static bool RenderToggleSection(bool value, string label)
+        {
+            GUILayout.BeginVertical("box");
+            GUILayout.BeginHorizontal();
+            bool toggledOn = GUILayout.Toggle(value, " <size=16><b>" + label + "</b></size>");
+
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+            return toggledOn;
+        }
     }
 }
