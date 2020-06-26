@@ -80,5 +80,14 @@ namespace CraftMagicItems.UI
             GUILayout.EndVertical();
             return toggledOn;
         }
+
+        /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
+        /// <param name="label">Text to be displayed</param>
+        public static void RenderLabel(string label)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label);
+            GUILayout.EndHorizontal();
+        }
     }
 }
