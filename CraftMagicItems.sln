@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2050
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftMagicItems", "CraftMagicItems\CraftMagicItems.csproj", "{9379C37F-B226-4F81-893D-372F0CCEAAE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftMagicItemsTests", "CraftMagicItemsTests\CraftMagicItemsTests.csproj", "{FDC2E2FA-48A9-4F1B-9C9B-1B1D43628884}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,6 +18,10 @@ Global
 		{9379C37F-B226-4F81-893D-372F0CCEAAE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9379C37F-B226-4F81-893D-372F0CCEAAE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9379C37F-B226-4F81-893D-372F0CCEAAE5}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FDC2E2FA-48A9-4F1B-9C9B-1B1D43628884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDC2E2FA-48A9-4F1B-9C9B-1B1D43628884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDC2E2FA-48A9-4F1B-9C9B-1B1D43628884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDC2E2FA-48A9-4F1B-9C9B-1B1D43628884}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
