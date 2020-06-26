@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using CraftMagicItems.UI;
 using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
@@ -2146,7 +2147,7 @@ namespace CraftMagicItems {
         }
 
         private static void RenderCheatsSection() {
-            RenderCheckbox(ref ModSettings.CraftingCostsNoGold, "Crafting costs no gold and no material components.");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftingCostsNoGold, "Crafting costs no gold and no material components.");
             if (!ModSettings.CraftingCostsNoGold) {
                 var selectedCustomPriceScaleIndex = RenderSelection(CustomPriceLabel, CraftingPriceStrings, 4);
                 if (selectedCustomPriceScaleIndex == 2) {
@@ -2166,10 +2167,10 @@ namespace CraftMagicItems {
                 }
             }
 
-            RenderCheckbox(ref ModSettings.IgnoreCraftingFeats, "Crafting does not require characters to take crafting feats.");
-            RenderCheckbox(ref ModSettings.CraftingTakesNoTime, "Crafting takes no time to complete.");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnoreCraftingFeats, "Crafting does not require characters to take crafting feats.");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftingTakesNoTime, "Crafting takes no time to complete.");
             if (!ModSettings.CraftingTakesNoTime) {
-                RenderCheckbox(ref ModSettings.CustomCraftRate, "Craft at a non-standard rate.");
+                UmmUiRenderer.RenderCheckbox(ref ModSettings.CustomCraftRate, "Craft at a non-standard rate.");
                 if (ModSettings.CustomCraftRate) {
                     var maxMagicRate = ((ModSettings.MagicCraftingRate + 1000) / 1000) * 1000;
                     RenderIntSlider(ref ModSettings.MagicCraftingRate, "Magic Item Crafting Rate", 1, maxMagicRate);
@@ -2180,11 +2181,11 @@ namespace CraftMagicItems {
                     ModSettings.MundaneCraftingRate = Settings.MundaneCraftingProgressPerDay;
                 }
             }
-            RenderCheckbox(ref ModSettings.CasterLevelIsSinglePrerequisite,
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.CasterLevelIsSinglePrerequisite,
                 "When crafting, a Caster Level less than the prerequisite counts as a single missing prerequisite.");
-            RenderCheckbox(ref ModSettings.CraftAtFullSpeedWhileAdventuring, "Characters craft at full speed while adventuring (instead of 25% speed).");
-            RenderCheckbox(ref ModSettings.IgnorePlusTenItemMaximum, "Ignore the rule that limits arms and armor to a maximum of +10 equivalent.");
-            RenderCheckbox(ref ModSettings.IgnoreFeatCasterLevelRestriction, "Ignore the crafting feat Caster Level prerequisites when learning feats.");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.CraftAtFullSpeedWhileAdventuring, "Characters craft at full speed while adventuring (instead of 25% speed).");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnorePlusTenItemMaximum, "Ignore the rule that limits arms and armor to a maximum of +10 equivalent.");
+            UmmUiRenderer.RenderCheckbox(ref ModSettings.IgnoreFeatCasterLevelRestriction, "Ignore the crafting feat Caster Level prerequisites when learning feats.");
         }
 
         private static void RenderLabel(string label) {
@@ -2288,15 +2289,6 @@ namespace CraftMagicItems {
             selectedCustomName = GUILayout.TextField(selectedCustomName, GUILayout.Width(300));
             if (selectedCustomName.Trim().Length == 0) {
                 selectedCustomName = null;
-            }
-
-            GUILayout.EndHorizontal();
-        }
-
-        private static void RenderCheckbox(ref bool value, string label) {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button($"{(value ? "<color=green><b>✔</b></color>" : "<color=red><b>✖</b></color>")} {label}", GUILayout.ExpandWidth(false))) {
-                value = !value;
             }
 
             GUILayout.EndHorizontal();
