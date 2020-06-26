@@ -96,6 +96,20 @@ namespace CraftMagicItems.UI
         /// <param name="label">Label for the selection</param>
         /// <param name="options">Options for the selection</param>
         /// <param name="horizontalCount">How many elements to fit in the horizontal direction</param>
+        /// <param name="GetSelectionIndex">Used to retrieve the selection index</param>
+        /// <param name="SetSelectionIndex">Used to write the value of the selection index</param>
+        /// <returns>The new index of the selection</returns>
+        public static int RenderSelection(string label, string[] options, int horizontalCount, Func<string, int> GetSelectionIndex, Action<string, int> SetSelectionIndex)
+        {
+            var dummy = "";
+            return RenderSelection(label, options, horizontalCount, ref dummy, GetSelectionIndex, SetSelectionIndex);
+        }
+
+        /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
+        /// <typeparam name="T">Type of item being rendered</typeparam>
+        /// <param name="label">Label for the selection</param>
+        /// <param name="options">Options for the selection</param>
+        /// <param name="horizontalCount">How many elements to fit in the horizontal direction</param>
         /// <param name="emptyOnChange">Value to write to when the indexes do not match</param>
         /// <param name="GetSelectionIndex">Used to retrieve the selection index</param>
         /// <param name="SetSelectionIndex">Used to write the value of the selection index</param>
