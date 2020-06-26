@@ -12,7 +12,9 @@ namespace CraftMagicItems.UI
         public static bool RenderCheckbox(bool value, string label)
         {
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button($"{(value ? "<color=green><b>✔</b></color>" : "<color=red><b>✖</b></color>")} {label}", GUILayout.ExpandWidth(false)))
+            var text = value ? "✔" : "✖";
+            var color = value ? "green" : "red";
+            if (GUILayout.Button($"<color={color}><b>{text}</b></color> {label}", GUILayout.ExpandWidth(false)))
             {
                 value = !value;
             }
