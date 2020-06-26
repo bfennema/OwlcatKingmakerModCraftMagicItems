@@ -312,7 +312,7 @@ namespace CraftMagicItems {
 
         private static void OnGui(UnityModManager.ModEntry modEntry) {
             if (!modEnabled) {
-                RenderLabel("The mod is disabled.  Loading saved games with custom items and feats will cause them to revert to regular versions.");
+                UmmUiRenderer.RenderLabel("The mod is disabled.  Loading saved games with custom items and feats will cause them to revert to regular versions.");
                 return;
             }
 
@@ -324,13 +324,13 @@ namespace CraftMagicItems {
                     && Game.Instance.CurrentMode != GameModeType.EscMode
                     && Game.Instance.CurrentMode != GameModeType.Rest
                     && Game.Instance.CurrentMode != GameModeType.Kingdom) {
-                    RenderLabel("Item crafting is not available in this game state.");
+                    UmmUiRenderer.RenderLabel("Item crafting is not available in this game state.");
                     return;
                 }
 
                 GUILayout.BeginVertical();
 
-                RenderLabel($"Number of custom Craft Magic Items blueprints loaded: {CustomBlueprintBuilder.CustomBlueprintIDs.Count}");
+                UmmUiRenderer.RenderLabel($"Number of custom Craft Magic Items blueprints loaded: {CustomBlueprintBuilder.CustomBlueprintIDs.Count}");
 
                 GetSelectedCrafter(true);
 
@@ -488,7 +488,7 @@ namespace CraftMagicItems {
                 .Where(data => data.FeatGuid != null && (ModSettings.IgnoreCraftingFeats || CharacterHasFeat(caster, data.FeatGuid)))
                 .ToArray();
             if (!Enumerable.Any(itemTypes) && !hasBondedItemFeature) {
-                RenderLabel($"{caster.CharacterName} does not know any crafting feats.");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} does not know any crafting feats.");
                 return;
             }
 
@@ -513,7 +513,7 @@ namespace CraftMagicItems {
             }
 
             //render current cash
-            RenderLabel($"Current Money: {Game.Instance.Player.Money}");
+            UmmUiRenderer.RenderLabel($"Current Money: {Game.Instance.Player.Money}");
         }
 
         private static RecipeBasedItemCraftingData GetBondedItemCraftingData(BondedItemComponent bondedComponent) {
@@ -561,26 +561,26 @@ namespace CraftMagicItems {
             var projects = GetCraftingTimerComponentForCaster(caster.Descriptor);
             var ritualProject = projects == null ? null : projects.CraftingProjects.FirstOrDefault(project => project.ItemType == BondedItemRitual);
             if (ritualProject != null) {
-                RenderLabel($"{caster.CharacterName} is in the process of bonding with {ritualProject.ResultItem.Name}");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} is in the process of bonding with {ritualProject.ResultItem.Name}");
                 return;
             }
             var bondedComponent = GetBondedItemComponentForCaster(caster.Descriptor);
             var characterCasterLevel = CharacterCasterLevel(caster.Descriptor);
             if (bondedComponent == null || bondedComponent.ownerItem == null || selectedBondWithNewObject) {
                 if (selectedBondWithNewObject) {
-                    RenderLabel("You may bond with a different object by performing a special ritual that costs 200 gp per caster level. This ritual takes 8 " +
+                    UmmUiRenderer.RenderLabel("You may bond with a different object by performing a special ritual that costs 200 gp per caster level. This ritual takes 8 " +
                                 "hours to complete. Items replaced in this way do not possess any of the additional enchantments of the previous bonded item, " +
                                 "and the previous bonded item loses any enchantments you added via your bond.");
                     if (GUILayout.Button("Cancel bonding to a new object")) {
                         selectedBondWithNewObject = false;
                     }
                 }
-                RenderLabel(
+                UmmUiRenderer.RenderLabel(
                     "You can enchant additional magic abilities to your bonded item as if you had the required Item Creation Feat, as long as you also " +
                     "meet the caster level prerequisite of the feat.  Abilities added in this fashion function only for you, and no-one else can add " +
                     "enchantments to your bonded item.");
-                RenderLabel(new L10NString("craftMagicItems-bonded-item-glossary"));
-                RenderLabel("Choose your bonded item.");
+                UmmUiRenderer.RenderLabel(new L10NString("craftMagicItems-bonded-item-glossary"));
+                UmmUiRenderer.RenderLabel("Choose your bonded item.");
                 var names = BondedItemSlots.Select(slot => new L10NString(GetSlotStringKey(slot, null)).ToString()).ToArray();
                 var selectedItemSlotIndex = RenderSelection("Item type", names, 10);
                 var selectedSlot = BondedItemSlots[selectedItemSlotIndex];
@@ -594,7 +594,7 @@ namespace CraftMagicItems {
                     .OrderBy(item => item.Name)
                     .ToArray();
                 if (items.Length == 0) {
-                    RenderLabel("You do not have any item of that type currently equipped.");
+                    UmmUiRenderer.RenderLabel("You do not have any item of that type currently equipped.");
                     return;
                 }
                 var itemNames = items.Select(item => item.Name).ToArray();
@@ -604,7 +604,7 @@ namespace CraftMagicItems {
                 var canAfford = BuildCostString(out var cost, null, goldCost);
                 var label = $"Make {selectedItem.Name} your bonded item{(goldCost == 0 ? "" : " for " + cost)}";
                 if (!canAfford) {
-                    RenderLabel(label);
+                    UmmUiRenderer.RenderLabel(label);
                 } else if (GUILayout.Button(label)) {
                     if (goldCost > 0) {
                         Game.Instance.UI.Common.UISound.Play(UISoundType.LootCollectGold);
@@ -634,9 +634,9 @@ namespace CraftMagicItems {
                 var craftingData = GetBondedItemCraftingData(bondedComponent);
                 if (bondedComponent.ownerItem.Wielder != null && !IsPlayerInCapital()
                                                               && !Game.Instance.Player.PartyCharacters.Contains(bondedComponent.ownerItem.Wielder.Unit)) {
-                    RenderLabel($"You cannot enchant {bondedComponent.ownerItem.Name} because you cannot currently access it.");
+                    UmmUiRenderer.RenderLabel($"You cannot enchant {bondedComponent.ownerItem.Name} because you cannot currently access it.");
                 } else if (!ModSettings.IgnoreFeatCasterLevelRestriction && characterCasterLevel < craftingData.MinimumCasterLevel) {
-                    RenderLabel($"You will not be able to enchant your bonded item until your caster level reaches {craftingData.MinimumCasterLevel} " +
+                    UmmUiRenderer.RenderLabel($"You will not be able to enchant your bonded item until your caster level reaches {craftingData.MinimumCasterLevel} " +
                                 $"(currently {characterCasterLevel}).");
                 } else {
                     RenderRecipeBasedCrafting(caster, craftingData, bondedComponent.ownerItem);
@@ -647,7 +647,7 @@ namespace CraftMagicItems {
         private static void RenderSpellBasedCrafting(UnitEntityData caster, SpellBasedItemCraftingData craftingData) {
             var spellbooks = caster.Descriptor.Spellbooks.Where(book => book.CasterLevel > 0).ToList();
             if (spellbooks.Count == 0) {
-                RenderLabel($"{caster.CharacterName} is not yet able to cast spells.");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} is not yet able to cast spells.");
                 return;
             }
 
@@ -681,7 +681,7 @@ namespace CraftMagicItems {
                 // Cantrips/Orisons or Spontaneous spellcaster or showing all known spells
                 if (spellLevel > 0 && spellbook.Blueprint.Spontaneous) {
                     var spontaneousSlots = spellbook.GetSpontaneousSlots(spellLevel);
-                    RenderLabel($"{caster.CharacterName} can cast {spontaneousSlots} more level {spellLevel} spells today.");
+                    UmmUiRenderer.RenderLabel($"{caster.CharacterName} can cast {spontaneousSlots} more level {spellLevel} spells today.");
                     if (spontaneousSlots == 0 && ModSettings.CraftingTakesNoTime) {
                         return;
                     }
@@ -691,7 +691,7 @@ namespace CraftMagicItems {
             }
 
             if (!spellOptions.Any()) {
-                RenderLabel($"{caster.CharacterName} does not know any level {spellLevel} spells.");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} does not know any level {spellLevel} spells.");
             } else {
                 var minCasterLevel = Math.Max(1, 2 * spellLevel - 1);
                 var maxCasterLevel = CharacterCasterLevel(caster.Descriptor, spellbook);
@@ -699,7 +699,7 @@ namespace CraftMagicItems {
                     selectedCasterLevel = UmmUiRenderer.RenderIntSlider(selectedCasterLevel, "Caster level: ", minCasterLevel, maxCasterLevel);
                 } else {
                     selectedCasterLevel = minCasterLevel;
-                    RenderLabel($"Caster level: {selectedCasterLevel}");
+                    UmmUiRenderer.RenderLabel($"Caster level: {selectedCasterLevel}");
                 }
 
                 RenderCraftingSkillInformation(caster, StatType.SkillKnowledgeArcana, 5 + selectedCasterLevel, selectedCasterLevel);
@@ -1158,7 +1158,7 @@ namespace CraftMagicItems {
                 while (ItemUpgradeProjects.ContainsKey(upgradeItem)) {
                     upgradeItem = ItemUpgradeProjects[upgradeItem].ResultItem;
                 }
-                RenderLabel($"Enchanting {upgradeItem.Name}");
+                UmmUiRenderer.RenderLabel($"Enchanting {upgradeItem.Name}");
             }
             //slot
             else {
@@ -1202,7 +1202,7 @@ namespace CraftMagicItems {
                 var itemNames = items.Select(item => item.Name).PrependConditional(canCreateNew, new L10NString("craftMagicItems-label-craft-new-item"))
                     .ToArray();
                 if (itemNames.Length == 0) {
-                    RenderLabel($"{caster.CharacterName} can not access any items of that type.");
+                    UmmUiRenderer.RenderLabel($"{caster.CharacterName} can not access any items of that type.");
                     return;
                 }
 
@@ -1247,9 +1247,9 @@ namespace CraftMagicItems {
                     GUILayout.EndHorizontal();
                 }
                 if (upgradeItemShield != null) {
-                    RenderLabel(BuildItemDescription(upgradeItemShield));
+                    UmmUiRenderer.RenderLabel(BuildItemDescription(upgradeItemShield));
                 } else {
-                    RenderLabel(BuildItemDescription(upgradeItem));
+                    UmmUiRenderer.RenderLabel(BuildItemDescription(upgradeItem));
                 }
             }
 
@@ -1313,7 +1313,7 @@ namespace CraftMagicItems {
                     }
                     return false;
                 }))) {
-                    RenderLabel("This item cannot be further upgraded with this enchantment.");
+                    UmmUiRenderer.RenderLabel("This item cannot be further upgraded with this enchantment.");
                     return;
                 } else if (availableEnchantments.Length > 0 && selectedRecipe.Enchantments.Length > 1) {
                     var counter = selectedRecipe.Enchantments.Length - availableEnchantments.Length;
@@ -1333,10 +1333,10 @@ namespace CraftMagicItems {
                                   : selectedRecipe.Enchantments.FindIndex(e => e == selectedEnchantment) * selectedRecipe.CasterLevelMultiplier);
             if (selectedEnchantment != null) {
                 if (!string.IsNullOrEmpty(selectedEnchantment.Description)) {
-                    RenderLabel(selectedEnchantment.Description);
+                    UmmUiRenderer.RenderLabel(selectedEnchantment.Description);
                 }
                 if (selectedRecipe.CostType == RecipeCostType.EnhancementLevelSquared) {
-                    RenderLabel($"Plus equivalent: +{GetPlusOfRecipe(selectedRecipe, selectedRecipe.Enchantments.FindIndex(e => e == selectedEnchantment) + 1)}");
+                    UmmUiRenderer.RenderLabel($"Plus equivalent: +{GetPlusOfRecipe(selectedRecipe, selectedRecipe.Enchantments.FindIndex(e => e == selectedEnchantment) + 1)}");
                 }
             }
 
@@ -1461,13 +1461,13 @@ namespace CraftMagicItems {
             }
 
             if (!itemToCraft) {
-                RenderLabel($"Error: null custom item from looking up blueprint ID {itemGuid}");
+                UmmUiRenderer.RenderLabel($"Error: null custom item from looking up blueprint ID {itemGuid}");
             } else {
                 if (IsItemLegalEnchantmentLevel(itemToCraft)) {
                     RenderRecipeBasedCraftItemControl(caster, craftingData, selectedRecipe, casterLevel, itemToCraft, upgradeItem);
                 } else {
                     var maxEnchantmentLevel = ItemMaxEnchantmentLevel(itemToCraft);
-                    RenderLabel($"This would result in {itemToCraft.Name} having an equivalent enhancement bonus of more than +{maxEnchantmentLevel}");
+                    UmmUiRenderer.RenderLabel($"This would result in {itemToCraft.Name} having an equivalent enhancement bonus of more than +{maxEnchantmentLevel}");
                 }
             }
         }
@@ -1561,10 +1561,10 @@ namespace CraftMagicItems {
             if (upgradeItem != null) {
                 equipment = upgradeItem.Blueprint as BlueprintItemEquipment;
                 if (equipment == null || equipment.Ability != null && equipment.SpendCharges && !equipment.RestoreChargesOnRest) {
-                    RenderLabel($"{upgradeItem.Name} cannot cast a spell N times a day (this is unexpected - please let the mod author know)");
+                    UmmUiRenderer.RenderLabel($"{upgradeItem.Name} cannot cast a spell N times a day (this is unexpected - please let the mod author know)");
                     return;
                 } else if (equipment.Ability != null && !equipment.Ability.IsSpell) {
-                    RenderLabel($"{equipment.Ability.Name} is not a spell, so cannot be upgraded.");
+                    UmmUiRenderer.RenderLabel($"{equipment.Ability.Name} is not a spell, so cannot be upgraded.");
                     return;
                 }
             }
@@ -1588,7 +1588,7 @@ namespace CraftMagicItems {
                         .OrderBy(spell => spell.Name)
                         .ToArray();
                     if (!spellOptions.Any()) {
-                        RenderLabel($"There are no level {spellLevel} {spellbook.Blueprint.Name} spells");
+                        UmmUiRenderer.RenderLabel($"There are no level {spellLevel} {spellbook.Blueprint.Name} spells");
                         return;
                     }
 
@@ -1611,7 +1611,7 @@ namespace CraftMagicItems {
                         .OrderBy(item => item.Name)
                         .ToArray();
                     if (itemBlueprints.Length == 0) {
-                        RenderLabel("You are not wielding any items that can cast spells.");
+                        UmmUiRenderer.RenderLabel("You are not wielding any items that can cast spells.");
                         return;
                     }
                     var itemNames = itemBlueprints.Select(item => item.Name).ToArray();
@@ -1619,13 +1619,13 @@ namespace CraftMagicItems {
                     var selectedItemBlueprint = itemBlueprints[itemIndex];
                     ability = selectedItemBlueprint.Ability;
                     spellLevel = selectedItemBlueprint.SpellLevel;
-                    RenderLabel($"Spell: {ability.Name}");
+                    UmmUiRenderer.RenderLabel($"Spell: {ability.Name}");
                 }
             } else {
                 ability = equipment.Ability;
                 spellLevel = equipment.SpellLevel;
                 GameLogContext.Count = equipment.Charges;
-                RenderLabel($"Current: {L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
+                UmmUiRenderer.RenderLabel($"Current: {L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
                 GameLogContext.Clear();
             }
 
@@ -1636,7 +1636,7 @@ namespace CraftMagicItems {
             var maxCastsPerDay = equipment == null ? 10 : ((equipment.Charges + 10) / 10) * 10;
             selectedCastsPerDay = UmmUiRenderer.RenderIntSlider(selectedCastsPerDay, "Casts per day: ", equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
             if (equipment != null && ability == equipment.Ability && selectedCasterLevel == equipment.CasterLevel && selectedCastsPerDay == equipment.Charges) {
-                RenderLabel($"No changes made to {equipment.Name}");
+                UmmUiRenderer.RenderLabel($"No changes made to {equipment.Name}");
                 return;
             }
 
@@ -1669,7 +1669,7 @@ namespace CraftMagicItems {
 
             // Render craft button
             GameLogContext.Count = selectedCastsPerDay;
-            RenderLabel(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
+            UmmUiRenderer.RenderLabel(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
             GameLogContext.Clear();
             var recipe = new RecipeData {
                 PrerequisiteSpells = new[] {ability},
@@ -1712,7 +1712,7 @@ namespace CraftMagicItems {
             CrafterPrerequisiteType[] crafterPrerequisites = null,
             bool render = true) {
             if (render) {
-                RenderLabel($"Base Crafting DC: {dc}");
+                UmmUiRenderer.RenderLabel($"Base Crafting DC: {dc}");
             }
             // ReSharper disable once UnusedVariable
             var missing = CheckSpellPrerequisites(prerequisiteSpells, anyPrerequisite, crafter.Descriptor, false, out var missingSpells,
@@ -1727,11 +1727,11 @@ namespace CraftMagicItems {
                 casterLevelShortfall = 0;
             }
             if (missing > 0 && render) {
-                RenderLabel(
+                UmmUiRenderer.RenderLabel(
                     $"{crafter.CharacterName} is unable to meet {missing} of the prerequisites, raising the DC by {MissingPrerequisiteDCModifier * missing}");
             }
             if (casterLevelShortfall > 0 && render) {
-                RenderLabel(L10NFormat("craftMagicItems-logMessage-low-caster-level", casterLevel, MissingPrerequisiteDCModifier * casterLevelShortfall));
+                UmmUiRenderer.RenderLabel(L10NFormat("craftMagicItems-logMessage-low-caster-level", casterLevel, MissingPrerequisiteDCModifier * casterLevelShortfall));
             }
             // Rob's ruling... if you're below the prerequisite caster level, you're considered to be missing a prerequisite for each
             // level you fall short.
@@ -1740,18 +1740,18 @@ namespace CraftMagicItems {
             if (oppositionSchool != SpellSchool.None) {
                 dc += OppositionSchoolDCModifier;
                 if (render) {
-                    RenderLabel(L10NFormat("craftMagicItems-logMessage-opposition-school", LocalizedTexts.Instance.SpellSchoolNames.GetText(oppositionSchool),
+                    UmmUiRenderer.RenderLabel(L10NFormat("craftMagicItems-logMessage-opposition-school", LocalizedTexts.Instance.SpellSchoolNames.GetText(oppositionSchool),
                         OppositionSchoolDCModifier));
                 }
             }
             var skillCheck = 10 + crafter.Stats.GetStat(skill).ModifiedValue;
             if (render) {
-                RenderLabel(L10NFormat("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(skill), skillCheck, dc));
+                UmmUiRenderer.RenderLabel(L10NFormat("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(skill), skillCheck, dc));
             }
 
             var skillMargin = skillCheck - dc;
             if (skillMargin < 0 && render) {
-                RenderLabel(ModSettings.CraftingTakesNoTime
+                UmmUiRenderer.RenderLabel(ModSettings.CraftingTakesNoTime
                     ? $"This project would be too hard for {crafter.CharacterName} if \"Crafting Takes No Time\" cheat was disabled."
                     : $"<color=red>Warning:</color> This project will be too hard for {crafter.CharacterName}");
             }
@@ -1872,7 +1872,7 @@ namespace CraftMagicItems {
             }
 
             if (!(selectedCraftingData is RecipeBasedItemCraftingData craftingData)) {
-                RenderLabel("Unable to find mundane crafting recipe.");
+                UmmUiRenderer.RenderLabel("Unable to find mundane crafting recipe.");
                 return;
             }
 
@@ -1880,7 +1880,7 @@ namespace CraftMagicItems {
 
             if (upgradingBlueprint != null) {
                 baseBlueprint = upgradingBlueprint;
-                RenderLabel($"Applying upgrades to {baseBlueprint.Name}");
+                UmmUiRenderer.RenderLabel($"Applying upgrades to {baseBlueprint.Name}");
             } else {
                 // Choose mundane item of selected type to create
                 var blueprints = craftingData.NewItemBaseIDs
@@ -1890,14 +1890,14 @@ namespace CraftMagicItems {
                     .ToArray();
                 var blueprintNames = blueprints.Select(item => item.Name).ToArray();
                 if (blueprintNames.Length == 0) {
-                    RenderLabel("No known items of that type.");
+                    UmmUiRenderer.RenderLabel("No known items of that type.");
                     return;
                 }
 
                 var selectedUpgradeItemIndex = RenderSelection("Item: ", blueprintNames, 5, ref selectedCustomName);
                 baseBlueprint = blueprints[selectedUpgradeItemIndex];
                 // See existing item details and enchantments.
-                RenderLabel(baseBlueprint.Description);
+                UmmUiRenderer.RenderLabel(baseBlueprint.Description);
             }
 
             // Assume only one slot type per crafting data
@@ -1915,9 +1915,9 @@ namespace CraftMagicItems {
             var selectedRecipe = availableRecipes.Any() ? availableRecipes[selectedRecipeIndex] : null;
             var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0] : null;
             if (selectedRecipe != null && selectedRecipe.Material != 0) {
-                RenderLabel(GetWeaponMaterialDescription(selectedRecipe.Material));
+                UmmUiRenderer.RenderLabel(GetWeaponMaterialDescription(selectedRecipe.Material));
             } else if (selectedEnchantment != null && !string.IsNullOrEmpty(selectedEnchantment.Description)) {
-                RenderLabel(selectedEnchantment.Description);
+                UmmUiRenderer.RenderLabel(selectedEnchantment.Description);
             }
 
             var dc = craftingData.MundaneEnhancementsStackable
@@ -1980,7 +1980,7 @@ namespace CraftMagicItems {
             }
 
             if (!itemToCraft) {
-                RenderLabel($"Error: null custom item from looking up blueprint ID {itemGuid}");
+                UmmUiRenderer.RenderLabel($"Error: null custom item from looking up blueprint ID {itemGuid}");
             } else {
                 if (upgradingBlueprint != null && GUILayout.Button($"Cancel {baseBlueprint.Name}", GUILayout.ExpandWidth(false))) {
                     upgradingBlueprint = null;
@@ -1997,7 +1997,7 @@ namespace CraftMagicItems {
                 }
             }
 
-            RenderLabel($"Current Money: {Game.Instance.Player.Money}");
+            UmmUiRenderer.RenderLabel($"Current Money: {Game.Instance.Player.Money}");
         }
 
         private static string GetWeaponMaterialDescription(PhysicalDamageMaterial material) {
@@ -2051,11 +2051,11 @@ namespace CraftMagicItems {
 
             var timer = GetCraftingTimerComponentForCaster(caster.Descriptor);
             if (timer == null || timer.CraftingProjects.Count == 0) {
-                RenderLabel($"{caster.CharacterName} is not currently working on any crafting projects.");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} is not currently working on any crafting projects.");
                 return;
             }
 
-            RenderLabel($"{caster.CharacterName} currently has {timer.CraftingProjects.Count} crafting projects in progress.");
+            UmmUiRenderer.RenderLabel($"{caster.CharacterName} currently has {timer.CraftingProjects.Count} crafting projects in progress.");
             var firstItem = true;
             foreach (var project in timer.CraftingProjects.ToArray()) {
                 GUILayout.BeginHorizontal();
@@ -2072,8 +2072,8 @@ namespace CraftMagicItems {
                     timer.CraftingProjects.Insert(0, project);
                 }
                 GUILayout.EndHorizontal();
-                RenderLabel($"       {BuildItemDescription(project.ResultItem).Replace("\n", "\n       ")}");
-                RenderLabel($"       {project.LastMessage}");
+                UmmUiRenderer.RenderLabel($"       {BuildItemDescription(project.ResultItem).Replace("\n", "\n       ")}");
+                UmmUiRenderer.RenderLabel($"       {project.LastMessage}");
             }
         }
 
@@ -2088,11 +2088,11 @@ namespace CraftMagicItems {
                 .Where(data => data.FeatGuid != null && !CharacterHasFeat(caster, data.FeatGuid) && data.MinimumCasterLevel <= casterLevel)
                 .ToArray();
             if (missingFeats.Length == 0) {
-                RenderLabel($"{caster.CharacterName} does not currently qualify for any crafting feats.");
+                UmmUiRenderer.RenderLabel($"{caster.CharacterName} does not currently qualify for any crafting feats.");
                 return;
             }
 
-            RenderLabel(
+            UmmUiRenderer.RenderLabel(
                 "Use this section to reassign previous feat choices for this character to crafting feats.  <color=red>Warning:</color> This is a one-way assignment!");
             var selectedFeatToLearn = RenderSelection("Feat to learn", missingFeats.Select(data => new L10NString(data.NameId).ToString()).ToArray(), 6);
             var learnFeatData = missingFeats[selectedFeatToLearn];
@@ -2152,7 +2152,7 @@ namespace CraftMagicItems {
                 }
 
                 if (selectedCustomPriceScaleIndex != 0) {
-                    RenderLabel(
+                    UmmUiRenderer.RenderLabel(
                         "<b>Note:</b> The sale price of custom crafted items will also be scaled by this factor, but vanilla items crafted by this mod" +
                         " will continue to use Owlcat's sale price, creating a price difference between the cost of crafting and sale price.");
                 }
@@ -2183,12 +2183,6 @@ namespace CraftMagicItems {
             ModSettings.IgnoreFeatCasterLevelRestriction = UmmUiRenderer.RenderCheckbox(ModSettings.IgnoreFeatCasterLevelRestriction, "Ignore the crafting feat Caster Level prerequisites when learning feats.");
         }
 
-        private static void RenderLabel(string label) {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(label);
-            GUILayout.EndHorizontal();
-        }
-
         private static bool IsPlayerSomewhereSafe() {
             if (Game.Instance.CurrentlyLoadedArea != null && SafeBlueprintAreaGuids.Contains(Game.Instance.CurrentlyLoadedArea.AssetGuid)) {
                 return true;
@@ -2215,7 +2209,7 @@ namespace CraftMagicItems {
                 .ToArray();
             if (characters.Length == 0) {
                 if (render) {
-                    RenderLabel("No living characters available.");
+                    UmmUiRenderer.RenderLabel("No living characters available.");
                 }
 
                 return null;
