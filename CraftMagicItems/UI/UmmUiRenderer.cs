@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CraftMagicItems.UI
 {
@@ -47,6 +42,24 @@ namespace CraftMagicItems.UI
             GUILayout.EndHorizontal();
 
             return selectedCustomName;
+        }
+
+        /// <summary>Renders an integer selection slider</summary>
+        /// <param name="value">Initial value</param>
+        /// <param name="label">Label for the slider</param>
+        /// <param name="min">Minimum possible value</param>
+        /// <param name="max">Maximum possible value</param>
+        /// <returns>Returns the initial value, clamped and rounded after rendering controls to the creeen</returns>
+        public static int RenderIntSlider(int value, string label, int min, int max)
+        {
+            value = Mathf.Clamp(value, min, max);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, GUILayout.ExpandWidth(false));
+            value = Mathf.RoundToInt(GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(300)));
+            GUILayout.Label($"{value}", GUILayout.ExpandWidth(false));
+            GUILayout.EndHorizontal();
+
+            return value;
         }
     }
 }
