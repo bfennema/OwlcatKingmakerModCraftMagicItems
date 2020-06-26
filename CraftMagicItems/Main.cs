@@ -335,28 +335,40 @@ namespace CraftMagicItems {
                 GetSelectedCrafter(true);
 
                 //render toggleable views in the main functionality of the mod
-                if (RenderToggleSection(ref currentSection, OpenSection.CraftMagicItemsSection, "Craft Magic Items")) {
+                if (UmmUiRenderer.RenderToggleSection(currentSection == OpenSection.CraftMagicItemsSection, "Craft Magic Items"))
+                {
+                    currentSection = OpenSection.CraftMagicItemsSection;
                     RenderCraftMagicItemsSection();
                 }
 
-                if (RenderToggleSection(ref currentSection, OpenSection.CraftMundaneItemsSection, "Craft Mundane Items")) {
+                if (UmmUiRenderer.RenderToggleSection(currentSection == OpenSection.CraftMundaneItemsSection, "Craft Mundane Items"))
+                {
+                    currentSection = OpenSection.CraftMundaneItemsSection;
                     RenderCraftMundaneItemsSection();
                 }
 
-                if (RenderToggleSection(ref currentSection, OpenSection.ProjectsSection, "Work in Progress")) {
+                if (UmmUiRenderer.RenderToggleSection(currentSection == OpenSection.ProjectsSection, "Work in Progress"))
+                {
+                    currentSection = OpenSection.ProjectsSection;
                     RenderProjectsSection();
                 }
 
-                if (RenderToggleSection(ref currentSection, OpenSection.FeatsSection, "Feat Reassignment")) {
+                if (UmmUiRenderer.RenderToggleSection(currentSection == OpenSection.FeatsSection, "Feat Reassignment"))
+                {
+                    currentSection = OpenSection.FeatsSection;
                     RenderFeatReassignmentSection();
                 }
 
-                if (RenderToggleSection(ref currentSection, OpenSection.CheatsSection, "Cheats")) {
+                if (UmmUiRenderer.RenderToggleSection(currentSection == OpenSection.CheatsSection, "Cheats"))
+                {
+                    currentSection = OpenSection.CheatsSection;
                     RenderCheatsSection();
                 }
 
                 GUILayout.EndVertical();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 modEntry.Logger.Error($"Error rendering GUI: {e}");
             }
         }
@@ -372,19 +384,6 @@ namespace CraftMagicItems {
 
         private static string L10NFormat(string key, params object[] args) {
             return L10NFormat(currentCaster ?? GetSelectedCrafter(false), key, args);
-        }
-
-        private static bool RenderToggleSection(ref OpenSection current, OpenSection mySection, string label) {
-            GUILayout.BeginVertical("box");
-            GUILayout.BeginHorizontal();
-            bool toggledOn = GUILayout.Toggle(current == mySection, " <size=16><b>" + label + "</b></size>");
-            if (toggledOn) {
-                current = mySection;
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-            return toggledOn;
         }
 
         public static T ReadJsonFile<T>(string fileName, params JsonConverter[] converters) {
