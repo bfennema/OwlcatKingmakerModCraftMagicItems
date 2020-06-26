@@ -558,7 +558,7 @@ namespace CraftMagicItems {
                 .PrependConditional(hasBondedItemFeature, new L10NString("craftMagicItems-bonded-object-name")).ToArray();
 
             //render whatever the user has selected
-            var selectedItemTypeIndex = RenderSelection("Crafting: ", itemTypeNames, 6, ref selectedCustomName, false);
+            var selectedItemTypeIndex = UmmUiRenderer.RenderSelection("Crafting: ", itemTypeNames, 6, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex, false);
 
             //render options for actual selection
             if (hasBondedItemFeature && selectedItemTypeIndex == 0) {
@@ -1238,12 +1238,12 @@ namespace CraftMagicItems {
                 var selectedItemSlotIndex = 0;
                 if (craftingData.Slots.Length > 1) {
                     var names = craftingData.Slots.Select(slot => new L10NString(GetSlotStringKey(slot, craftingData.SlotRestrictions)).ToString()).ToArray();
-                    selectedItemSlotIndex = RenderSelection("Item type", names, 10, ref selectedCustomName);
+                    selectedItemSlotIndex = UmmUiRenderer.RenderSelection("Item type", names, 10, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                 }
 
                 var locationFilter = ItemLocationFilter.All;
                 var locationNames = Enum.GetNames(typeof(ItemLocationFilter));
-                locationFilter = (ItemLocationFilter)RenderSelection("Item location", locationNames, locationNames.Length, ref selectedCustomName);
+                locationFilter = (ItemLocationFilter)UmmUiRenderer.RenderSelection("Item location", locationNames, locationNames.Length, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
 
                 selectedSlot = craftingData.Slots[selectedItemSlotIndex];
                 var playerInCapital = IsPlayerInCapital();
@@ -1278,7 +1278,7 @@ namespace CraftMagicItems {
                     return;
                 }
 
-                var selectedUpgradeItemIndex = RenderSelection("Item: ", itemNames, 5, ref selectedCustomName);
+                var selectedUpgradeItemIndex = UmmUiRenderer.RenderSelection("Item: ", itemNames, 5, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                 // See existing item details and enchantments.
                 var index = selectedUpgradeItemIndex - (canCreateNew ? 1 : 0);
                 upgradeItem = index < 0 ? null : items[index];
@@ -1340,7 +1340,7 @@ namespace CraftMagicItems {
                     ? new string[0]
                     : new[] {new L10NString("craftMagicItems-label-cast-spell-n-times").ToString()})
                 .ToArray();
-            var selectedRecipeIndex = RenderSelection("Enchantment: ", recipeNames, 5, ref selectedCustomName);
+            var selectedRecipeIndex = UmmUiRenderer.RenderSelection("Enchantment: ", recipeNames, 5, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
             if (selectedRecipeIndex == availableRecipes.Length) {
                 // Cast spell N times
                 RenderCastSpellNTimes(caster, craftingData, upgradeItemShield ?? upgradeItem, selectedSlot);
@@ -1354,7 +1354,7 @@ namespace CraftMagicItems {
                     .OrderBy(recipe => recipe.NameId)
                     .ToArray();
                 recipeNames = availableSubRecipes.Select(recipe => recipe.NameId).ToArray();
-                var selectedSubRecipeIndex = RenderSelection(category + ": ", recipeNames, 5, ref selectedCustomName);
+                var selectedSubRecipeIndex = UmmUiRenderer.RenderSelection(category + ": ", recipeNames, 5, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                 selectedRecipe = availableSubRecipes[selectedSubRecipeIndex];
             }
 
@@ -1649,12 +1649,12 @@ namespace CraftMagicItems {
                 // Choose a spellbook known to the caster
                 var spellbooks = caster.Descriptor.Spellbooks.ToList();
                 var spellBookNames = spellbooks.Select(book => book.Blueprint.Name.ToString()).Concat(Enumerable.Repeat("From Items", 1)).ToArray();
-                var selectedSpellbookIndex = RenderSelection("Source: ", spellBookNames, 10, ref selectedCustomName);
+                var selectedSpellbookIndex = UmmUiRenderer.RenderSelection("Source: ", spellBookNames, 10, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                 if (selectedSpellbookIndex < spellbooks.Count) {
                     var spellbook = spellbooks[selectedSpellbookIndex];
                     // Choose a spell level
                     var spellLevelNames = Enumerable.Range(0, spellbook.Blueprint.MaxSpellLevel + 1).Select(index => $"Level {index}").ToArray();
-                    spellLevel = RenderSelection("Spell level: ", spellLevelNames, 10, ref selectedCustomName);
+                    spellLevel = UmmUiRenderer.RenderSelection("Spell level: ", spellLevelNames, 10, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                     var specialSpellLists = Accessors.GetSpellbookSpecialLists(spellbook);
                     var spellOptions = spellbook.Blueprint.SpellList.GetSpells(spellLevel)
                         .Concat(specialSpellLists.Aggregate(new List<BlueprintAbility>(), (allSpecial, spellList) => spellList.GetSpells(spellLevel)))
@@ -1667,11 +1667,11 @@ namespace CraftMagicItems {
                     }
 
                     var spellNames = spellOptions.Select(spell => spell.Name).ToArray();
-                    var selectedSpellIndex = RenderSelection("Spell: ", spellNames, 4, ref selectedCustomName);
+                    var selectedSpellIndex = UmmUiRenderer.RenderSelection("Spell: ", spellNames, 4, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                     ability = spellOptions[selectedSpellIndex];
                     if (ability.HasVariants && ability.Variants != null) {
                         var selectedVariantIndex =
-                            RenderSelection("Variant: ", ability.Variants.Select(spell => spell.Name).ToArray(), 4, ref selectedCustomName);
+                            UmmUiRenderer.RenderSelection("Variant: ", ability.Variants.Select(spell => spell.Name).ToArray(), 4, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                         ability = ability.Variants[selectedVariantIndex];
                     }
                 } else {
@@ -1689,7 +1689,7 @@ namespace CraftMagicItems {
                         return;
                     }
                     var itemNames = itemBlueprints.Select(item => item.Name).ToArray();
-                    var itemIndex = RenderSelection("Cast from item: ", itemNames, 5, ref selectedCustomName);
+                    var itemIndex = UmmUiRenderer.RenderSelection("Cast from item: ", itemNames, 5, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                     var selectedItemBlueprint = itemBlueprints[itemIndex];
                     ability = selectedItemBlueprint.Ability;
                     spellLevel = selectedItemBlueprint.SpellLevel;
@@ -1935,7 +1935,7 @@ namespace CraftMagicItems {
                 .ToArray();
             var itemTypeNames = itemTypes.Select(data => new L10NString(data.ParentNameId ?? data.NameId).ToString()).ToArray();
             var selectedItemTypeIndex = upgradingBlueprint == null
-                ? RenderSelection("Mundane Crafting: ", itemTypeNames, 6, ref selectedCustomName)
+                ? UmmUiRenderer.RenderSelection("Mundane Crafting: ", itemTypeNames, 6, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex)
                 : GetSelectionIndex("Mundane Crafting: ");
 
             var selectedCraftingData = itemTypes[selectedItemTypeIndex];
@@ -1972,7 +1972,7 @@ namespace CraftMagicItems {
                     return;
                 }
 
-                var selectedUpgradeItemIndex = RenderSelection("Item: ", blueprintNames, 5, ref selectedCustomName);
+                var selectedUpgradeItemIndex = UmmUiRenderer.RenderSelection("Item: ", blueprintNames, 5, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
                 baseBlueprint = blueprints[selectedUpgradeItemIndex];
                 // See existing item details and enchantments.
                 UmmUiRenderer.RenderLabel(baseBlueprint.Description);
@@ -1989,7 +1989,7 @@ namespace CraftMagicItems {
                 .OrderBy(recipe => recipe.NameId)
                 .ToArray();
             var recipeNames = availableRecipes.Select(recipe => recipe.NameId).ToArray();
-            var selectedRecipeIndex = RenderSelection("Craft: ", recipeNames, 6, ref selectedCustomName);
+            var selectedRecipeIndex = UmmUiRenderer.RenderSelection("Craft: ", recipeNames, 6, ref selectedCustomName, GetSelectionIndex, SetSelectionIndex);
             var selectedRecipe = availableRecipes.Any() ? availableRecipes[selectedRecipeIndex] : null;
             var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0] : null;
             if (selectedRecipe != null && selectedRecipe.Material != 0) {
@@ -2299,7 +2299,7 @@ namespace CraftMagicItems {
                 var partyNames = characters.Select(entity => $"{entity.CharacterName}" +
                                                              $"{((GetCraftingTimerComponentForCaster(entity.Descriptor)?.CraftingProjects.Any() ?? false) ? "*" : "")}")
                     .ToArray();
-                selectedSpellcasterIndex = RenderSelection(label, partyNames, 8, ref upgradingBlueprint);
+                selectedSpellcasterIndex = UmmUiRenderer.RenderSelection(label, partyNames, 8, ref upgradingBlueprint, GetSelectionIndex, SetSelectionIndex);
             }
             if (selectedSpellcasterIndex >= characters.Length) {
                 selectedSpellcasterIndex = 0;
@@ -2309,32 +2309,16 @@ namespace CraftMagicItems {
 
         private static int RenderSelection(string label, string[] options, int xCount) {
             var dummy = "";
-            return RenderSelection<string>(label, options, xCount, ref dummy);
+            return UmmUiRenderer.RenderSelection<string>(label, options, xCount, ref dummy, GetSelectionIndex, SetSelectionIndex);
         }
 
         private static int GetSelectionIndex(string label) {
             return SelectedIndex.ContainsKey(label) ? SelectedIndex[label] : 0;
         }
 
-        private static int RenderSelection<T>(string label, string[] options, int xCount, ref T emptyOnChange, bool addSpace = true) {
-            var index = GetSelectionIndex(label);
-            if (index >= options.Length) {
-                index = 0;
-            }
-
-            if (addSpace) {
-                GUILayout.Space(20);
-            }
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            var newIndex = GUILayout.SelectionGrid(index, options, xCount);
-            if (index != newIndex) {
-                emptyOnChange = default(T);
-            }
-
-            GUILayout.EndHorizontal();
-            SelectedIndex[label] = newIndex;
-            return newIndex;
+        private static void SetSelectionIndex(string label, int value)
+        {
+            SelectedIndex[label] = value;
         }
 
         public static void AddItemBlueprintForSpell(UsableItemType itemType, BlueprintItemEquipment itemBlueprint) {
