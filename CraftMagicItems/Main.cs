@@ -705,7 +705,7 @@ namespace CraftMagicItems {
                 var minCasterLevel = Math.Max(1, 2 * spellLevel - 1);
                 var maxCasterLevel = CharacterCasterLevel(caster.Descriptor, spellbook);
                 if (minCasterLevel < maxCasterLevel) {
-                    RenderIntSlider(ref selectedCasterLevel, "Caster level: ", minCasterLevel, maxCasterLevel);
+                    selectedCasterLevel = UmmUiRenderer.RenderIntSlider(selectedCasterLevel, "Caster level: ", minCasterLevel, maxCasterLevel);
                 } else {
                     selectedCasterLevel = minCasterLevel;
                     RenderLabel($"Caster level: {selectedCasterLevel}");
@@ -1640,10 +1640,10 @@ namespace CraftMagicItems {
 
             // Choose a caster level
             var minCasterLevel = Math.Max(equipment == null ? 0 : equipment.CasterLevel, Math.Max(1, 2 * spellLevel - 1));
-            RenderIntSlider(ref selectedCasterLevel, "Caster level: ", minCasterLevel, 20);
+            selectedCasterLevel = UmmUiRenderer.RenderIntSlider(selectedCasterLevel, "Caster level: ", minCasterLevel, 20);
             // Choose number of times per day
             var maxCastsPerDay = equipment == null ? 10 : ((equipment.Charges + 10) / 10) * 10;
-            RenderIntSlider(ref selectedCastsPerDay, "Casts per day: ", equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
+            selectedCastsPerDay = UmmUiRenderer.RenderIntSlider(selectedCastsPerDay, "Casts per day: ", equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
             if (equipment != null && ability == equipment.Ability && selectedCasterLevel == equipment.CasterLevel && selectedCastsPerDay == equipment.Charges) {
                 RenderLabel($"No changes made to {equipment.Name}");
                 return;
@@ -2172,12 +2172,15 @@ namespace CraftMagicItems {
             if (!ModSettings.CraftingTakesNoTime)
             {
                 ModSettings.CustomCraftRate = UmmUiRenderer.RenderCheckbox(ModSettings.CustomCraftRate, "Craft at a non-standard rate.");
-                if (ModSettings.CustomCraftRate) {
+                if (ModSettings.CustomCraftRate)
+                {
                     var maxMagicRate = ((ModSettings.MagicCraftingRate + 1000) / 1000) * 1000;
-                    RenderIntSlider(ref ModSettings.MagicCraftingRate, "Magic Item Crafting Rate", 1, maxMagicRate);
+                    ModSettings.MagicCraftingRate = UmmUiRenderer.RenderIntSlider(ModSettings.MagicCraftingRate, "Magic Item Crafting Rate", 1, maxMagicRate);
                     var maxMundaneRate = ((ModSettings.MundaneCraftingRate + 10) / 10) * 10;
-                    RenderIntSlider(ref ModSettings.MundaneCraftingRate, "Mundane Item Crafting Rate", 1, maxMundaneRate);
-                } else {
+                    ModSettings.MundaneCraftingRate = UmmUiRenderer.RenderIntSlider(ModSettings.MundaneCraftingRate, "Mundane Item Crafting Rate", 1, maxMundaneRate);
+                }
+                else
+                {
                     ModSettings.MagicCraftingRate = Settings.MagicCraftingProgressPerDay;
                     ModSettings.MundaneCraftingRate = Settings.MundaneCraftingProgressPerDay;
                 }
@@ -2269,15 +2272,6 @@ namespace CraftMagicItems {
             GUILayout.EndHorizontal();
             SelectedIndex[label] = newIndex;
             return newIndex;
-        }
-
-        private static void RenderIntSlider(ref int value, string label, int min, int max) {
-            value = Mathf.Clamp(value, min, max);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            value = Mathf.RoundToInt(GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(300)));
-            GUILayout.Label($"{value}", GUILayout.ExpandWidth(false));
-            GUILayout.EndHorizontal();
         }
 
         public static void AddItemBlueprintForSpell(UsableItemType itemType, BlueprintItemEquipment itemBlueprint) {
