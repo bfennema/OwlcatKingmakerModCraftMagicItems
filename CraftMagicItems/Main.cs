@@ -718,16 +718,23 @@ namespace CraftMagicItems {
                     }
                 }
 
-                foreach (var spell in spellOptions.OrderBy(spell => spell.Name).GroupBy(spell => spell.Name).Select(group => group.First())) {
-                    if (spell.MetamagicData != null && spell.MetamagicData.NotEmpty) {
+                foreach (var spell in spellOptions.OrderBy(spell => spell.Name).GroupBy(spell => spell.Name).Select(group => group.First()))
+                {
+                    if (spell.MetamagicData != null && spell.MetamagicData.NotEmpty)
+                    {
                         GUILayout.Label($"Cannot craft {new L10NString(craftingData.NameId)} of {spell.Name} with metamagic applied.");
-                    } else if (spell.Blueprint.Variants != null) {
+                    }
+                    else if (spell.Blueprint.Variants != null)
+                    {
                         // Spells with choices (e.g. Protection from Alignment, which can be Protection from Evil, Good, Chaos or Law)
-                        foreach (var variant in spell.Blueprint.Variants) {
-                            RenderSpellBasedCraftItemControl(caster, craftingData, spell, variant, spellLevel, selectedCasterLevel);
+                        foreach (var variant in spell.Blueprint.Variants)
+                        {
+                            AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, variant, spellLevel, selectedCasterLevel);
                         }
-                    } else {
-                        RenderSpellBasedCraftItemControl(caster, craftingData, spell, spell.Blueprint, spellLevel, selectedCasterLevel);
+                    }
+                    else
+                    {
+                        AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, spell.Blueprint, spellLevel, selectedCasterLevel);
                     }
                 }
             }
@@ -2459,11 +2466,14 @@ namespace CraftMagicItems {
             AddBattleLogMessage(project.LastMessage);
         }
 
-        private static void RenderSpellBasedCraftItemControl(UnitEntityData caster, SpellBasedItemCraftingData craftingData, AbilityData spell,
-            BlueprintAbility spellBlueprint, int spellLevel, int casterLevel) {
+        private static void AttemptSpellBasedCraftItemAndRender(UnitEntityData caster, SpellBasedItemCraftingData craftingData,
+            AbilityData spell, BlueprintAbility spellBlueprint, int spellLevel, int casterLevel)
+        {
             var itemBlueprintList = FindItemBlueprintsForSpell(spellBlueprint, craftingData.UsableItemType);
-            if (itemBlueprintList == null && craftingData.NewItemBaseIDs == null) {
-                GUILayout.Label(L10NFormat("craftMagicItems-label-no-item-exists", new L10NString(craftingData.NamePrefixId), spellBlueprint.Name));
+            if (itemBlueprintList == null && craftingData.NewItemBaseIDs == null)
+            {
+                var message = L10NFormat("craftMagicItems-label-no-item-exists", new L10NString(craftingData.NamePrefixId), spellBlueprint.Name);
+                UmmUiRenderer.RenderLabel(message, false);
                 return;
             }
 
@@ -2475,55 +2485,82 @@ namespace CraftMagicItems {
                 ? new L10NString("craftMagicItems-label-custom").ToString()
                 : "";
             var label = L10NFormat("craftMagicItems-label-craft-spell-item", custom, new L10NString(craftingData.NamePrefixId), spellBlueprint.Name, cost);
-            if (!canAfford) {
-                GUILayout.Label(label);
-            } else if (GUILayout.Button(label, GUILayout.ExpandWidth(false))) {
-                BlueprintItem itemBlueprint;
-                if (itemBlueprintList == null) {
-                    // No items for that spell exist at all - create a custom blueprint with casterLevel, spellLevel and spellId
-                    var blueprintId =
-                        blueprintPatcher.BuildCustomSpellItemGuid(RandomBaseBlueprintId(craftingData).AssetGuid, casterLevel, spellLevel, spellBlueprint.AssetGuid);
-                    itemBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(blueprintId);
-                } else if (existingItemBlueprint == null) {
-                    // No item for this spell & caster level - create a custom blueprint with casterLevel and optionally SpellLevel
-                    var blueprintId = blueprintPatcher.BuildCustomSpellItemGuid(itemBlueprintList[0].AssetGuid, casterLevel,
-                        itemBlueprintList[0].SpellLevel == spellLevel ? -1 : spellLevel);
-                    itemBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(blueprintId);
-                } else {
-                    // Item with matching spell, level and caster level exists.  Use that.
-                    itemBlueprint = existingItemBlueprint;
-                }
 
-                if (itemBlueprint == null) {
-                    throw new Exception(
-                        $"Unable to build blueprint for spellId {spellBlueprint.AssetGuid}, spell level {spellLevel}, caster level {casterLevel}");
-                }
+            //if the player cannot afford the time (not enough gold), alert them
+            if (!canAfford)
+            {
+                UmmUiRenderer.RenderLabel(label, false);
+            }
+            // ... otherwise let them spend their money
+            else if (GUILayout.Button(label, GUILayout.ExpandWidth(false)))
+            {
+                BeginCraftingSpellBasedItem(caster, craftingData, spell, spellBlueprint, spellLevel, casterLevel, itemBlueprintList, existingItemBlueprint, requiredProgress, goldCost, cost);
+            }
+        }
 
-                // Pay gold and material components up front.
-                if (ModSettings.CraftingCostsNoGold) {
-                    goldCost = 0;
-                } else {
-                    Game.Instance.UI.Common.UISound.Play(UISoundType.LootCollectGold);
-                    Game.Instance.Player.SpendMoney(goldCost);
-                    if (spellBlueprint.MaterialComponent.Item != null) {
-                        Game.Instance.Player.Inventory.Remove(spellBlueprint.MaterialComponent.Item,
-                            spellBlueprint.MaterialComponent.Count * craftingData.Charges);
-                    }
-                }
+        private static void BeginCraftingSpellBasedItem(UnitEntityData caster, SpellBasedItemCraftingData craftingData,
+            AbilityData spell, BlueprintAbility spellBlueprint, Int32 spellLevel, Int32 casterLevel,
+            List<BlueprintItemEquipment> itemBlueprintList, BlueprintItemEquipment existingItemBlueprint,
+            Int32 requiredProgress, Int32 goldCost, String cost)
+        {
+            BlueprintItem itemBlueprint;
+            if (itemBlueprintList == null)
+            {
+                // No items for that spell exist at all - create a custom blueprint with casterLevel, spellLevel and spellId
+                var blueprintId = blueprintPatcher.BuildCustomSpellItemGuid(RandomBaseBlueprintId(craftingData).AssetGuid,
+                    casterLevel, spellLevel, spellBlueprint.AssetGuid);
+                itemBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(blueprintId);
+            }
+            else if (existingItemBlueprint == null)
+            {
+                // No item for this spell & caster level - create a custom blueprint with casterLevel and optionally SpellLevel
+                var blueprintId = blueprintPatcher.BuildCustomSpellItemGuid(itemBlueprintList[0].AssetGuid, casterLevel,
+                    itemBlueprintList[0].SpellLevel == spellLevel ? -1 : spellLevel);
+                itemBlueprint = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(blueprintId);
+            }
+            else
+            {
+                // Item with matching spell, level and caster level exists.  Use that.
+                itemBlueprint = existingItemBlueprint;
+            }
 
-                var resultItem = BuildItemEntity(itemBlueprint, craftingData, caster);
-                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
-                if (ModSettings.CraftingTakesNoTime) {
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-expend-spell", spell.Name));
-                    spell.SpendFromSpellbook();
-                    CraftItem(resultItem);
-                } else {
-                    var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, null,
-                        new[] {spellBlueprint});
-                    AddNewProject(caster.Descriptor, project);
-                    CalculateProjectEstimate(project);
-                    currentSection = OpenSection.ProjectsSection;
+            if (itemBlueprint == null)
+            {
+                throw new Exception(
+                    $"Unable to build blueprint for spellId {spellBlueprint.AssetGuid}, spell level {spellLevel}, caster level {casterLevel}");
+            }
+
+            // Pay gold and material components up front.
+            if (ModSettings.CraftingCostsNoGold)
+            {
+                goldCost = 0;
+            }
+            else
+            {
+                Game.Instance.UI.Common.UISound.Play(UISoundType.LootCollectGold);
+                Game.Instance.Player.SpendMoney(goldCost);
+                if (spellBlueprint.MaterialComponent.Item != null)
+                {
+                    Game.Instance.Player.Inventory.Remove(spellBlueprint.MaterialComponent.Item,
+                        spellBlueprint.MaterialComponent.Count * craftingData.Charges);
                 }
+            }
+
+            var resultItem = BuildItemEntity(itemBlueprint, craftingData, caster);
+            AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
+            if (ModSettings.CraftingTakesNoTime)
+            {
+                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-expend-spell", spell.Name));
+                spell.SpendFromSpellbook();
+                CraftItem(resultItem);
+            }
+            else
+            {
+                var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, null,
+                    new[] { spellBlueprint });
+                AddNewProject(caster.Descriptor, project);
+                CalculateProjectEstimate(project);
+                currentSection = OpenSection.ProjectsSection;
             }
         }
 
