@@ -94,6 +94,7 @@
     <Compile Include="Accessors.cs" />
     <Compile Include="BondedItemComponent.cs" />
     <Compile Include="QuiverAbility.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UI\OpenSection.cs" />
     <Compile Include="UI\UmmUiRenderer.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
