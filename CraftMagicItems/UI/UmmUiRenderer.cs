@@ -86,9 +86,25 @@ namespace CraftMagicItems.UI
         /// <param name="label">Text to be displayed</param>
         public static void RenderLabel(string label)
         {
-            GUILayout.BeginHorizontal();
+            RenderLabel(label, true);
+        }
+
+        /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
+        /// <param name="label">Text to be displayed</param>
+        /// <param name="onItsOwnLine">Should the label be rendered on its own horizontal line?</param>
+        public static void RenderLabel(string label, bool onItsOwnLine)
+        {
+            if (onItsOwnLine)
+            {
+                GUILayout.BeginHorizontal();
+            }
+
             GUILayout.Label(label);
-            GUILayout.EndHorizontal();
+
+            if (onItsOwnLine)
+            {
+                GUILayout.EndHorizontal();
+            }
         }
 
         /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
