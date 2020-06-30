@@ -99,6 +99,7 @@
     <Compile Include="UI\BattleLog\IBattleLog.cs" />
     <Compile Include="UI\BattleLog\KingmakerBattleLog.cs" />
     <Compile Include="UI\OpenSection.cs" />
+    <Compile Include="UI\Sections\CheatSectionRenderer.cs" />
     <Compile Include="UI\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
