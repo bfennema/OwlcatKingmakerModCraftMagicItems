@@ -341,7 +341,7 @@ namespace CraftMagicItems {
                 if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
                 {
                     currentSection = OpenSection.CheatsSection;
-                    RenderCheatsSection();
+                    UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(ModSettings, CustomPriceLabel, CraftingPriceStrings, GetSelectionIndex, SetSelectionIndex);
                 }
 
                 GUILayout.EndVertical();
@@ -2121,52 +2121,6 @@ namespace CraftMagicItems {
 
                 removedFeatIndex++;
             }
-        }
-
-        private static void RenderCheatsSection() {
-            ModSettings.CraftingCostsNoGold = UmmUiRenderer.RenderCheckbox("Crafting costs no gold and no material components.", ModSettings.CraftingCostsNoGold);
-            if (!ModSettings.CraftingCostsNoGold) {
-                var selectedCustomPriceScaleIndex = UmmUiRenderer.RenderSelection(CustomPriceLabel, CraftingPriceStrings, 4, GetSelectionIndex, SetSelectionIndex);
-                if (selectedCustomPriceScaleIndex == 2) {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label("Custom Cost Factor: ", GUILayout.ExpandWidth(false));
-                    ModSettings.CraftingPriceScale = GUILayout.HorizontalSlider(ModSettings.CraftingPriceScale * 100, 0, 500, GUILayout.Width(300)) / 100;
-                    GUILayout.Label(Mathf.Round(ModSettings.CraftingPriceScale * 100).ToString(CultureInfo.InvariantCulture));
-                    GUILayout.EndHorizontal();
-                } else {
-                    ModSettings.CraftingPriceScale = 1 + selectedCustomPriceScaleIndex;
-                }
-
-                if (selectedCustomPriceScaleIndex != 0) {
-                    UmmUiRenderer.RenderLabel(
-                        "<b>Note:</b> The sale price of custom crafted items will also be scaled by this factor, but vanilla items crafted by this mod" +
-                        " will continue to use Owlcat's sale price, creating a price difference between the cost of crafting and sale price.");
-                }
-            }
-
-            ModSettings.IgnoreCraftingFeats = UmmUiRenderer.RenderCheckbox("Crafting does not require characters to take crafting feats.", ModSettings.IgnoreCraftingFeats);
-            ModSettings.CraftingTakesNoTime = UmmUiRenderer.RenderCheckbox("Crafting takes no time to complete.", ModSettings.CraftingTakesNoTime);
-            if (!ModSettings.CraftingTakesNoTime)
-            {
-                ModSettings.CustomCraftRate = UmmUiRenderer.RenderCheckbox("Craft at a non-standard rate.", ModSettings.CustomCraftRate);
-                if (ModSettings.CustomCraftRate)
-                {
-                    var maxMagicRate = ((ModSettings.MagicCraftingRate + 1000) / 1000) * 1000;
-                    ModSettings.MagicCraftingRate = UmmUiRenderer.RenderIntSlider("Magic Item Crafting Rate", ModSettings.MagicCraftingRate, 1, maxMagicRate);
-                    var maxMundaneRate = ((ModSettings.MundaneCraftingRate + 10) / 10) * 10;
-                    ModSettings.MundaneCraftingRate = UmmUiRenderer.RenderIntSlider("Mundane Item Crafting Rate", ModSettings.MundaneCraftingRate, 1, maxMundaneRate);
-                }
-                else
-                {
-                    ModSettings.MagicCraftingRate = Settings.MagicCraftingProgressPerDay;
-                    ModSettings.MundaneCraftingRate = Settings.MundaneCraftingProgressPerDay;
-                }
-            }
-            ModSettings.CasterLevelIsSinglePrerequisite = UmmUiRenderer.RenderCheckbox("When crafting, a Caster Level less than the prerequisite counts as a single missing prerequisite.",
-                ModSettings.CasterLevelIsSinglePrerequisite);
-            ModSettings.CraftAtFullSpeedWhileAdventuring = UmmUiRenderer.RenderCheckbox("Characters craft at full speed while adventuring (instead of 25% speed).", ModSettings.CraftAtFullSpeedWhileAdventuring);
-            ModSettings.IgnorePlusTenItemMaximum = UmmUiRenderer.RenderCheckbox("Ignore the rule that limits arms and armor to a maximum of +10 equivalent.", ModSettings.IgnorePlusTenItemMaximum);
-            ModSettings.IgnoreFeatCasterLevelRestriction = UmmUiRenderer.RenderCheckbox("Ignore the crafting feat Caster Level prerequisites when learning feats.", ModSettings.IgnoreFeatCasterLevelRestriction);
         }
 
         private static bool IsPlayerSomewhereSafe() {

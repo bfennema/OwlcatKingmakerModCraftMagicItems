@@ -68,6 +68,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="UI\OpenSection.cs" />
     <Compile Include="UI\UmmUiRenderer.cs" />
+    <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
     <Compile Include="CraftMagicItemsAccessors.cs" />
     <Compile Include="CraftMagicItemsBlueprintPatcher.cs" />
