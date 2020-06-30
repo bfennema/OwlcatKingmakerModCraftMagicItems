@@ -20,7 +20,7 @@ namespace CraftMagicItems.UI
             if (!modSettings.CraftingCostsNoGold)
             {
                 var selectedCustomPriceScaleIndex = UmmUiRenderer.RenderSelection(priceLabel, craftingPriceStrings, 4, GetSelectionIndex, SetSelectionIndex);
-                if (selectedCustomPriceScaleIndex == 2)
+                if (selectedCustomPriceScaleIndex == 2) //if user selected "Custom"
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Custom Cost Factor: ", GUILayout.ExpandWidth(false));
