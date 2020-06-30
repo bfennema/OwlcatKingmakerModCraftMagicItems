@@ -66,6 +66,9 @@
     <Compile Include="BondedItemComponent.cs" />
     <Compile Include="QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="UI\BattleLog\BattleLogFactory.cs" />
+    <Compile Include="UI\BattleLog\IBattleLog.cs" />
+    <Compile Include="UI\BattleLog\KingmakerBattleLog.cs" />
     <Compile Include="UI\OpenSection.cs" />
     <Compile Include="UI\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
@@ -87,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="UI\UnityModManager\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
