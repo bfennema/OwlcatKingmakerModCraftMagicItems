@@ -229,6 +229,11 @@ namespace CraftMagicItems {
         public static CraftMagicItemsAccessors Accessors;
         public static ItemCraftingData[] ItemCraftingData;
         public static CustomLootItem[] CustomLootItems;
+#if PATCH21
+        public static readonly List<LogItemData> PendingLogItems = new List<LogItemData>();
+#else
+        public static readonly List<LogDataManager.LogItemData> PendingLogItems = new List<LogDataManager.LogItemData>();
+#endif
 
         private static bool modEnabled = true;
         private static HarmonyLib.Harmony harmonyInstance;
@@ -255,12 +260,6 @@ namespace CraftMagicItems {
         private static readonly Dictionary<string, List<RecipeData>> EnchantmentIdToRecipe = new Dictionary<string, List<RecipeData>>();
         private static readonly Dictionary<PhysicalDamageMaterial, List<RecipeData>> MaterialToRecipe = new Dictionary<PhysicalDamageMaterial, List<RecipeData>>();
         private static readonly Dictionary<string, int> EnchantmentIdToCost = new Dictionary<string, int>();
-#if PATCH21
-        private static readonly List<LogItemData> PendingLogItems = new List<LogItemData>();
-#else
-        private static readonly List<LogDataManager.LogItemData> PendingLogItems = new List<LogDataManager.LogItemData>();
-
-#endif
         private static readonly Dictionary<ItemEntity, CraftingProjectData> ItemUpgradeProjects = new Dictionary<ItemEntity, CraftingProjectData>();
         private static readonly List<CraftingProjectData> ItemCreationProjects = new List<CraftingProjectData>();
 
