@@ -102,7 +102,7 @@
     <Compile Include="UI\Sections\CheatSectionRenderer.cs" />
     <Compile Include="UI\Sections\CheatSectionRendererFactory.cs" />
     <Compile Include="UI\Sections\ICheatSectionRenderer.cs" />
-    <Compile Include="UI\UmmUiRenderer.cs" />
+    <Compile Include="UI\UnityModManager\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
     <Compile Include="CraftMagicItemsAccessors.cs" />
@@ -122,7 +122,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="UI\UnityModManager\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

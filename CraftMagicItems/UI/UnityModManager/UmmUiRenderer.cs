@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CraftMagicItems.UI
+namespace CraftMagicItems.UI.UnityModManager
 {
     /// <summary>Class that handles the Unity Mod Manager UI rendering</summary>
     public class UmmUiRenderer

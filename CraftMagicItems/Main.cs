@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using CraftMagicItems.UI;
 using CraftMagicItems.UI.Sections;
+using CraftMagicItems.UI.UnityModManager;
 using Kingmaker;
 #if PATCH21
 using Kingmaker.Assets.UI.Context;
