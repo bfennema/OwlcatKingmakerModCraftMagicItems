@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using CraftMagicItems.UI;
 using CraftMagicItems.UI.Sections;
+using CraftMagicItems.UI.UnityModManager;
 using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
