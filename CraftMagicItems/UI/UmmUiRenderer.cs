@@ -83,27 +83,26 @@ namespace CraftMagicItems.UI
 
         /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
         /// <param name="label">Text to be displayed</param>
-        public static void RenderLabel(string label)
+        public static void RenderLabelRow(string label)
         {
-            RenderLabel(label, true);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label);
+            GUILayout.EndHorizontal();
         }
 
         /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
         /// <param name="label">Text to be displayed</param>
-        /// <param name="onItsOwnLine">Should the label be rendered on its own horizontal line?</param>
-        public static void RenderLabel(string label, bool onItsOwnLine)
+        public static void RenderLabel(string label)
         {
-            if (onItsOwnLine)
-            {
-                GUILayout.BeginHorizontal();
-            }
-
             GUILayout.Label(label);
+        }
 
-            if (onItsOwnLine)
-            {
-                GUILayout.EndHorizontal();
-            }
+        /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
+        /// <param name="label">Text to be displayed</param>
+        /// <param name="expandWidth">Should the label be expanded</param>
+        public static void RenderLabel(string label, bool expandWidth)
+        {
+            GUILayout.Label(label, GUILayout.ExpandWidth(expandWidth));
         }
 
         /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
@@ -126,6 +125,18 @@ namespace CraftMagicItems.UI
             GUILayout.EndHorizontal();
 
             return newIndex;
+        }
+
+        /// <summary>In the rendered Unity Mod Manager UI, sets the location of the UI control to the next horizontal alignment</summary>
+        public static void RenderHorizontalStart()
+        {
+            GUILayout.BeginHorizontal();
+        }
+
+        /// <summary>In the rendered Unity Mod Manager UI, sets the end of a horizontal alignment</summary>
+        public static void RenderHorizontalEnd()
+        {
+            GUILayout.EndHorizontal();
         }
     }
 }
