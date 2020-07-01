@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using CraftMagicItems.UI;
+using CraftMagicItems.UI.Sections;
 using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
@@ -340,7 +341,7 @@ namespace CraftMagicItems {
                 if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
                 {
                     currentSection = OpenSection.CheatsSection;
-                    UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(ModSettings, CustomPriceLabel, CraftingPriceStrings);
+                    UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(CheatSectionRendererFactory.GetCheatSectionRenderer(), ModSettings, CustomPriceLabel, CraftingPriceStrings);
                 }
 
                 GUILayout.EndVertical();
