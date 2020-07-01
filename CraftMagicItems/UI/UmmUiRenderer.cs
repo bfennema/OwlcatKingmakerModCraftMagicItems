@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CraftMagicItems.UI
 {
@@ -108,51 +107,24 @@ namespace CraftMagicItems.UI
         }
 
         /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
-        /// <typeparam name="T">Type of item being rendered</typeparam>
         /// <param name="label">Label for the selection</param>
         /// <param name="options">Options for the selection</param>
+        /// <param name="optionsIndex">Index within <paramref name="options" /> to use for current selection</param>
         /// <param name="horizontalCount">How many elements to fit in the horizontal direction</param>
-        /// <param name="GetSelectionIndex">Used to retrieve the selection index</param>
-        /// <param name="SetSelectionIndex">Used to write the value of the selection index</param>
-        /// <returns>The new index of the selection</returns>
-        public static int RenderSelection(string label, string[] options, int horizontalCount, Func<string, int> GetSelectionIndex, Action<string, int> SetSelectionIndex)
-        {
-            var dummy = "";
-            return RenderSelection(label, options, horizontalCount, ref dummy, GetSelectionIndex, SetSelectionIndex);
-        }
-
-        /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
-        /// <typeparam name="T">Type of item being rendered</typeparam>
-        /// <param name="label">Label for the selection</param>
-        /// <param name="options">Options for the selection</param>
-        /// <param name="horizontalCount">How many elements to fit in the horizontal direction</param>
-        /// <param name="emptyOnChange">Value to write to when the indexes do not match</param>
-        /// <param name="GetSelectionIndex">Used to retrieve the selection index</param>
-        /// <param name="SetSelectionIndex">Used to write the value of the selection index</param>
         /// <param name="addSpace">Space the UI by 20 pixels?</param>
         /// <returns>The new index of the selection</returns>
-        public static int RenderSelection<T>(string label, string[] options, int horizontalCount, ref T emptyOnChange, Func<string, int> GetSelectionIndex, Action<string, int> SetSelectionIndex, bool addSpace = true)
+        public static int RenderSelection(string label, string[] options, int optionsIndex, int horizontalCount, bool addSpace)
         {
-            var index = GetSelectionIndex(label);
-            if (index >= options.Length)
-            {
-                index = 0;
-            }
-
             if (addSpace)
             {
                 GUILayout.Space(20);
             }
+
             GUILayout.BeginHorizontal();
             GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            var newIndex = GUILayout.SelectionGrid(index, options, horizontalCount);
-            if (index != newIndex)
-            {
-                emptyOnChange = default(T);
-            }
-
+            var newIndex = GUILayout.SelectionGrid(optionsIndex, options, horizontalCount);
             GUILayout.EndHorizontal();
-            SetSelectionIndex(label, newIndex);
+
             return newIndex;
         }
     }
