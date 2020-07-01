@@ -1,4 +1,6 @@
-﻿namespace CraftMagicItems.UI.Sections
+﻿using CraftMagicItems.UI.UnityModManager;
+
+namespace CraftMagicItems.UI.Sections
 {
     /// <summary>User Interface renderer into Unity Mod Manager for the cheats section</summary>
     public class CheatSectionRenderer : ICheatSectionRenderer
