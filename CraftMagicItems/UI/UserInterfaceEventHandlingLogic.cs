@@ -19,7 +19,7 @@ namespace CraftMagicItems.UI
             modSettings.CraftingCostsNoGold = UmmUiRenderer.RenderCheckbox("Crafting costs no gold and no material components.", modSettings.CraftingCostsNoGold);
             if (!modSettings.CraftingCostsNoGold)
             {
-                var selectedCustomPriceScaleIndex = UmmUiRenderer.RenderSelection(priceLabel, craftingPriceStrings, 4, GetSelectionIndex, SetSelectionIndex);
+                var selectedCustomPriceScaleIndex = Main.DrawSelectionUserInterfaceElements(priceLabel, craftingPriceStrings, 4);
                 if (selectedCustomPriceScaleIndex == 2) //if user selected "Custom"
                 {
                     GUILayout.BeginHorizontal();
