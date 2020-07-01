@@ -7,6 +7,7 @@ namespace CraftMagicItems.UI
     public static class UserInterfaceEventHandlingLogic
     {
         /// <summary>Renders the Cheats section and retrieves the values specified by its rendered UI</summary>
+        /// <param name="renderer"><see cref="ICheatSectionRenderer" /> instance used to render controls and return current values</param>
         /// <param name="modSettings"><see cref="Settings" /> to default to and to read from</param>
         /// <param name="priceLabel">Text to render for the price</param>
         /// <param name="craftingPriceStrings">Collection of <see cref="String" /> containing the display text for various pricing guidelines</param>
