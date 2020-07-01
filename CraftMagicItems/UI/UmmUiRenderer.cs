@@ -57,13 +57,26 @@ namespace CraftMagicItems.UI
         public static int RenderIntSlider(string label, int value, int min, int max)
         {
             value = Mathf.Clamp(value, min, max);
+            var newValue = RenderFloatSlider(label, value, min, max);
+
+            return Mathf.RoundToInt(newValue);
+        }
+
+        /// <summary>Renders an integer selection slider</summary>
+        /// <param name="label">Label for the slider</param>
+        /// <param name="value">Initial value</param>
+        /// <param name="min">Minimum possible value</param>
+        /// <param name="max">Maximum possible value</param>
+        /// <returns>Returns the value selected by the user, clamped and rounded after rendering controls to the screen</returns>
+        public static float RenderFloatSlider(string label, float value, float min, float max)
+        {
             GUILayout.BeginHorizontal();
             GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            value = Mathf.RoundToInt(GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(300)));
-            GUILayout.Label($"{value}", GUILayout.ExpandWidth(false));
+            var newValue = GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(300));
+            GUILayout.Label(newValue.ToString(), GUILayout.ExpandWidth(false));
             GUILayout.EndHorizontal();
 
-            return value;
+            return newValue;
         }
 
         /// <summary>Renders a toggle-able section selection in Unity Mod Manager for the user to show/hide</summary>
