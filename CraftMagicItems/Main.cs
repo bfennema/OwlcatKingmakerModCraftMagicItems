@@ -3159,9 +3159,10 @@ namespace CraftMagicItems {
                 var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(ItemQualityBlueprints.WeaponHeavyShieldGuid);
                 Accessors.SetBlueprintItemBaseDamage(heavyShield, new DiceFormula(1, DiceType.D4));
 
-                for (int i = 0; i < EnchantmentBlueprints.ItemEnchantmentGuids.Length; i += 2) {
-                    var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i]);
-                    var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i + 1]);
+                for (int i = 0; i < EnchantmentBlueprints.ItemEnchantmentGuids.Length; i++)
+                {
+                    var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i].WeaponEnchantmentGuid);
+                    var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i].UnarmedEnchantmentGuid);
                     Accessors.SetBlueprintItemEnchantmentEnchantName(dest, Accessors.GetBlueprintItemEnchantmentEnchantName(source));
                     Accessors.SetBlueprintItemEnchantmentDescription(dest, Accessors.GetBlueprintItemEnchantmentDescription(source));
                 }
