@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="BondedItemComponent.cs" />
+    <Compile Include="Constants\EnchantmentBlueprints.cs" />
     <Compile Include="Constants\ItemQualityBlueprints.cs" />
     <Compile Include="QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
