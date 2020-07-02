@@ -8,538 +8,542 @@ using Moq;
 namespace CraftMagicItemsTests.UI
 {
     /// <summary>Test class for <see cref="UserInterfaceEventHandlingLogic" /></summary>
-    [TestClass]
     public class UserInterfaceEventHandlingLogicTests
     {
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CraftingCostsNoGold()
+        /// <summary>Test class for <see cref="UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings" /></summary>
+        [TestClass]
+        public class RenderCheatsSectionAndUpdateSettingsTests
         {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CraftingCostsNoGold = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(true, settings.CraftingCostsNoGold);
-
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CraftingCostsNoGold = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(false, settings.CraftingCostsNoGold);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_DoesNotRead_CraftingPriceScale_When_CraftingCostsNoGold()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-            int initial = -10000000;
-
-            //control
-            Settings settings = new Settings
+            [TestMethod]
+            public void Reads_CraftingCostsNoGold()
             {
-                CraftingPriceScale = initial,
-            };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CraftingCostsNoGold = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(initial, settings.CraftingPriceScale);
-        }
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_DoesNotInvoke_WarningAboutCustomItemVanillaItemCostDisparity_When_CraftingCostsNoGold()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //validation
+                Assert.AreEqual(true, settings.CraftingCostsNoGold);
 
-            //control
-            bool invokedWarning = false;
-            Action setInvoked = () => { invokedWarning = true; };
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CraftingCostsNoGold = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
 
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
-            renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
+                //validation
+                Assert.AreEqual(false, settings.CraftingCostsNoGold);
+            }
 
-            //validation
-            Assert.AreEqual(false, invokedWarning);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CraftingCostSelection()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            //control
-            bool invokedWarning = false;
-            Action setInvoked = () => { invokedWarning = true; };
-
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Callback(setInvoked);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(true, invokedWarning);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CustomCraftingCostSlider()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            //control
-            Settings settings = new Settings { CraftingPriceScale = -4 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(2);
-            renderer.Setup(r => r.Evaluate_CustomCraftingCostSlider(It.IsAny<float>())).Returns(4000);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(4000, settings.CraftingPriceScale);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CraftingPriceScale_From_CraftingCostSelection()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CraftingPriceScale = -4 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(1);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(2, settings.CraftingPriceScale);
-
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CraftingPriceScale = -4 };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(0);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(1, settings.CraftingPriceScale);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Invokes_WarningAboutCustomItemVanillaItemCostDisparity_When_CraftingCostsGold()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            //control
-            bool invokedWarning = false;
-            Action setInvoked = () => { invokedWarning = true; };
-
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(-1);
-            renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(true, invokedWarning);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_IgnoreCraftingFeats()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { IgnoreCraftingFeats = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(true);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(true, settings.IgnoreCraftingFeats);
-
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { IgnoreCraftingFeats = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(false);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(false, settings.IgnoreCraftingFeats);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CraftingTakesNoTime()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CraftingTakesNoTime = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(true, settings.CraftingTakesNoTime);
-
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CraftingTakesNoTime = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
-
-            //validation
-            Assert.AreEqual(false, settings.CraftingTakesNoTime);
-        }
-
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_DoesNotRead_CustomCraftRate_When_CraftingTakesNoTime()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
-            int initialMagicCraftRate = -10000000;
-            int initialMundaneCraftRate = 9348458;
-            bool initialCustomCraftRate = true;
-
-            //control
-            Settings settings = new Settings
+            [TestMethod]
+            public void DoesNotRead_CraftingPriceScale_When_CraftingCostsNoGold()
             {
-                MagicCraftingRate = initialMagicCraftRate,
-                MundaneCraftingRate = initialMundaneCraftRate,
-                CustomCraftRate = initialCustomCraftRate,
-            };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                int initial = -10000000;
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //control
+                Settings settings = new Settings
+                {
+                    CraftingPriceScale = initial,
+                };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(initialMagicCraftRate, settings.MagicCraftingRate);
-            Assert.AreEqual(initialMundaneCraftRate, settings.MundaneCraftingRate);
-            Assert.AreEqual(initialCustomCraftRate, settings.CustomCraftRate);
-        }
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CustomCraftRate()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //validation
+                Assert.AreEqual(initial, settings.CraftingPriceScale);
+            }
 
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CustomCraftRate = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
+            [TestMethod]
+            public void DoesNotInvoke_WarningAboutCustomItemVanillaItemCostDisparity_When_CraftingCostsNoGold()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //control
+                bool invokedWarning = false;
+                Action setInvoked = () => { invokedWarning = true; };
 
-            //validation
-            Assert.AreEqual(true, settings.CustomCraftRate);
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
+                renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
 
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CustomCraftRate = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //validation
+                Assert.AreEqual(false, invokedWarning);
+            }
 
-            //validation
-            Assert.AreEqual(false, settings.CustomCraftRate);
-        }
+            [TestMethod]
+            public void Reads_CraftingCostSelection()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_MagicCraftingRate()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //control
+                bool invokedWarning = false;
+                Action setInvoked = () => { invokedWarning = true; };
 
-            //control
-            Settings settings = new Settings { MagicCraftingRate = -8 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
-            renderer.Setup(r => r.Evaluate_MagicCraftingRateSlider(It.IsAny<int>())).Returns(7);
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Callback(setInvoked);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(7, settings.MagicCraftingRate);
-        }
+                //validation
+                Assert.AreEqual(true, invokedWarning);
+            }
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_MundaneCraftingRate()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+            [TestMethod]
+            public void Reads_CustomCraftingCostSlider()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //control
-            Settings settings = new Settings { MundaneCraftingRate = -23412345 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
-            renderer.Setup(r => r.Evaluate_MundaneCraftingRateSlider(It.IsAny<int>())).Returns(12);
+                //control
+                Settings settings = new Settings { CraftingPriceScale = -4 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(2);
+                renderer.Setup(r => r.Evaluate_CustomCraftingCostSlider(It.IsAny<float>())).Returns(4000);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(12, settings.MundaneCraftingRate);
-        }
+                //validation
+                Assert.AreEqual(4000, settings.CraftingPriceScale);
+            }
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Defaults_MagicCraftingRate()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+            [TestMethod]
+            public void Reads_CraftingPriceScale_From_CraftingCostSelection()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //control
-            Settings settings = new Settings { MagicCraftingRate = -8 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CraftingPriceScale = -4 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(1);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(Settings.MagicCraftingProgressPerDay, settings.MagicCraftingRate);
-        }
+                //validation
+                Assert.AreEqual(2, settings.CraftingPriceScale);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Defaults_MundaneCraftingRate()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CraftingPriceScale = -4 };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(0);
 
-            //control
-            Settings settings = new Settings { MundaneCraftingRate = -23412345 };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
-            renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //validation
+                Assert.AreEqual(1, settings.CraftingPriceScale);
+            }
 
-            //validation
-            Assert.AreEqual(Settings.MundaneCraftingProgressPerDay, settings.MundaneCraftingRate);
-        }
+            [TestMethod]
+            public void Invokes_WarningAboutCustomItemVanillaItemCostDisparity_When_CraftingCostsGold()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CasterLevelIsSinglePrerequisite()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //control
+                bool invokedWarning = false;
+                Action setInvoked = () => { invokedWarning = true; };
 
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CasterLevelIsSinglePrerequisite = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(true);
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(-1);
+                renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(true, settings.CasterLevelIsSinglePrerequisite);
+                //validation
+                Assert.AreEqual(true, invokedWarning);
+            }
 
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CasterLevelIsSinglePrerequisite = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(false);
+            [TestMethod]
+            public void Reads_IgnoreCraftingFeats()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { IgnoreCraftingFeats = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(false, settings.CasterLevelIsSinglePrerequisite);
-        }
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_CraftAtFullSpeedWhileAdventuring()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //validation
+                Assert.AreEqual(true, settings.IgnoreCraftingFeats);
 
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { CraftAtFullSpeedWhileAdventuring = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(true);
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { IgnoreCraftingFeats = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(false);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(true, settings.CraftAtFullSpeedWhileAdventuring);
+                //validation
+                Assert.AreEqual(false, settings.IgnoreCraftingFeats);
+            }
 
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { CraftAtFullSpeedWhileAdventuring = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(false);
+            [TestMethod]
+            public void Reads_CraftingTakesNoTime()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CraftingTakesNoTime = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(false, settings.CraftAtFullSpeedWhileAdventuring);
-        }
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_IgnorePlusTenItemMaximum()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //validation
+                Assert.AreEqual(true, settings.CraftingTakesNoTime);
 
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { IgnorePlusTenItemMaximum = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(true);
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CraftingTakesNoTime = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            //validation
-            Assert.AreEqual(true, settings.IgnorePlusTenItemMaximum);
+                //validation
+                Assert.AreEqual(false, settings.CraftingTakesNoTime);
+            }
 
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { IgnorePlusTenItemMaximum = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(false);
+            [TestMethod]
+            public void DoesNotRead_CustomCraftRate_When_CraftingTakesNoTime()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                int initialMagicCraftRate = -10000000;
+                int initialMundaneCraftRate = 9348458;
+                bool initialCustomCraftRate = true;
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                //control
+                Settings settings = new Settings
+                {
+                    MagicCraftingRate = initialMagicCraftRate,
+                    MundaneCraftingRate = initialMundaneCraftRate,
+                    CustomCraftRate = initialCustomCraftRate,
+                };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(false, settings.IgnorePlusTenItemMaximum);
-        }
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-        [TestMethod]
-        public void RenderCheatsSectionAndUpdateSettings_Reads_IgnoreFeatCasterLevelRestriction()
-        {
-            string priceLabel = "irrelevant";
-            string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+                //validation
+                Assert.AreEqual(initialMagicCraftRate, settings.MagicCraftingRate);
+                Assert.AreEqual(initialMundaneCraftRate, settings.MundaneCraftingRate);
+                Assert.AreEqual(initialCustomCraftRate, settings.CustomCraftRate);
+            }
 
-            /************
-            *   Test 1  *
-            ************/
-            //control
-            Settings settings = new Settings { IgnoreFeatCasterLevelRestriction = false };
-            Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(true);
+            [TestMethod]
+            public void Reads_CustomCraftRate()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CustomCraftRate = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
 
-            //validation
-            Assert.AreEqual(true, settings.IgnoreFeatCasterLevelRestriction);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
 
-            /************
-            *   Test 2  *
-            ************/
-            //control
-            settings = new Settings { IgnoreFeatCasterLevelRestriction = true };
-            renderer = new Mock<ICheatSectionRenderer>();
-            renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(false);
+                //validation
+                Assert.AreEqual(true, settings.CustomCraftRate);
 
-            //invocation
-            UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CustomCraftRate = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
 
-            //validation
-            Assert.AreEqual(false, settings.IgnoreFeatCasterLevelRestriction);
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(false, settings.CustomCraftRate);
+            }
+
+            [TestMethod]
+            public void Reads_MagicCraftingRate()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                //control
+                Settings settings = new Settings { MagicCraftingRate = -8 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
+                renderer.Setup(r => r.Evaluate_MagicCraftingRateSlider(It.IsAny<int>())).Returns(7);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(7, settings.MagicCraftingRate);
+            }
+
+            [TestMethod]
+            public void Reads_MundaneCraftingRate()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                //control
+                Settings settings = new Settings { MundaneCraftingRate = -23412345 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
+                renderer.Setup(r => r.Evaluate_MundaneCraftingRateSlider(It.IsAny<int>())).Returns(12);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(12, settings.MundaneCraftingRate);
+            }
+
+            [TestMethod]
+            public void Defaults_MagicCraftingRate()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                //control
+                Settings settings = new Settings { MagicCraftingRate = -8 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(Settings.MagicCraftingProgressPerDay, settings.MagicCraftingRate);
+            }
+
+            [TestMethod]
+            public void Defaults_MundaneCraftingRate()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                //control
+                Settings settings = new Settings { MundaneCraftingRate = -23412345 };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
+                renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(Settings.MundaneCraftingProgressPerDay, settings.MundaneCraftingRate);
+            }
+
+            [TestMethod]
+            public void Reads_CasterLevelIsSinglePrerequisite()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CasterLevelIsSinglePrerequisite = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(true);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(true, settings.CasterLevelIsSinglePrerequisite);
+
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CasterLevelIsSinglePrerequisite = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(false, settings.CasterLevelIsSinglePrerequisite);
+            }
+
+            [TestMethod]
+            public void Reads_CraftAtFullSpeedWhileAdventuring()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { CraftAtFullSpeedWhileAdventuring = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(true);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(true, settings.CraftAtFullSpeedWhileAdventuring);
+
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { CraftAtFullSpeedWhileAdventuring = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(false, settings.CraftAtFullSpeedWhileAdventuring);
+            }
+
+            [TestMethod]
+            public void Reads_IgnorePlusTenItemMaximum()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { IgnorePlusTenItemMaximum = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(true);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(true, settings.IgnorePlusTenItemMaximum);
+
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { IgnorePlusTenItemMaximum = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(false, settings.IgnorePlusTenItemMaximum);
+            }
+
+            [TestMethod]
+            public void Reads_IgnoreFeatCasterLevelRestriction()
+            {
+                string priceLabel = "irrelevant";
+                string[] priceOptions = new[] { String.Empty, String.Empty, String.Empty };
+
+                /************
+                *   Test 1  *
+                ************/
+                //control
+                Settings settings = new Settings { IgnoreFeatCasterLevelRestriction = false };
+                Mock<ICheatSectionRenderer> renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(true);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(true, settings.IgnoreFeatCasterLevelRestriction);
+
+                /************
+                *   Test 2  *
+                ************/
+                //control
+                settings = new Settings { IgnoreFeatCasterLevelRestriction = true };
+                renderer = new Mock<ICheatSectionRenderer>();
+                renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(false);
+
+                //invocation
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+
+                //validation
+                Assert.AreEqual(false, settings.IgnoreFeatCasterLevelRestriction);
+            }
         }
     }
 }
