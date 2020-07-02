@@ -103,19 +103,36 @@ namespace CraftMagicItems.UI.UnityModManager
             GUILayout.EndHorizontal();
         }
 
-        /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
+        /// <summary>Renders a Label control in Unity Mod Manager</summary>
         /// <param name="label">Text to be displayed</param>
         public static void RenderLabel(string label)
         {
             GUILayout.Label(label);
         }
 
-        /// <summary>Renders a Label control as its own line in Unity Mod Manager</summary>
+        /// <summary>Renders a Label control in Unity Mod Manager</summary>
         /// <param name="label">Text to be displayed</param>
         /// <param name="expandWidth">Should the label be expanded</param>
         public static void RenderLabel(string label, bool expandWidth)
         {
             GUILayout.Label(label, GUILayout.ExpandWidth(expandWidth));
+        }
+
+        /// <summary>Renders a button control in Unity Mod Manager</summary>
+        /// <param name="label">Text to be displayed on the control</param>
+        /// <returns>True if the button is clicked, otherwise false</returns>
+        public static bool RenderButton(string label)
+        {
+            return GUILayout.Button(label);
+        }
+
+        /// <summary>Renders a button control in Unity Mod Manager</summary>
+        /// <param name="label">Text to be displayed on the control</param>
+        /// <param name="expandWidth">Should the control be expanded</param>
+        /// <returns>True if the button is clicked, otherwise false</returns>
+        public static bool RenderButton(string label, bool expandWidth)
+        {
+            return GUILayout.Button(label, GUILayout.ExpandWidth(expandWidth));
         }
 
         /// <summary>Renders a selection of <typeparamref name="T" /> to Unity Mod Manager</summary>
