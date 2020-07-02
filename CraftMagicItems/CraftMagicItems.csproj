@@ -103,6 +103,7 @@
     <Compile Include="UI\Sections\CheatSectionRendererFactory.cs" />
     <Compile Include="UI\Sections\FeatReassignmentSectionRenderer.cs" />
     <Compile Include="UI\Sections\ICheatSectionRenderer.cs" />
+    <Compile Include="UI\Sections\IFeatReassignmentSectionRenderer.cs" />
     <Compile Include="UI\UnityModManager\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
