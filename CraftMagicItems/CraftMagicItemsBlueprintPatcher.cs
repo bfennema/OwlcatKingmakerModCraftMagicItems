@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using CraftMagicItems.Constants;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items;
@@ -442,7 +443,7 @@ namespace CraftMagicItems {
                         skipped.Add(enchantment);
                     }
                     enchantmentsForDescription.Add(enchantment);
-                    if (blueprint is BlueprintItemArmor && guid == Main.MithralArmorEnchantmentGuid) {
+                    if (blueprint is BlueprintItemArmor && guid == ItemQualityBlueprints.MithralArmorEnchantmentGuid) {
                         // Mithral equipment has half weight
                         accessors.SetBlueprintItemWeight(blueprint, blueprint.Weight / 2);
                     }

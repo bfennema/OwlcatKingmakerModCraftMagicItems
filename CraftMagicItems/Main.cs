@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using CraftMagicItems.Constants;
 using CraftMagicItems.UI;
 using CraftMagicItems.UI.Sections;
 using CraftMagicItems.UI.UnityModManager;
@@ -84,9 +85,6 @@ namespace CraftMagicItems {
         };
 
         public static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
-        private const string MasterworkGuid = "6b38844e2bffbac48b63036b66e735be";
-        public const string MithralArmorEnchantmentGuid = "7b95a819181574a4799d93939aa99aff";
-        private const string OversizedGuid = "d8e1ebc1062d8cc42abff78783856b0d";
         private const string AlchemistProgressionGuid = "efd55ff9be2fda34981f5b9c83afe4f1";
         private const string AlchemistGrenadierArchetypeGuid = "6af888a7800b3e949a40f558ff204aae";
         private const string ScrollSavantArchetypeGuid = "f43c78692a4e10d43a38bd6aedf53c1b";
@@ -96,8 +94,6 @@ namespace CraftMagicItems {
         private const string ProdigiousTwoWeaponFightingGuid = "ddba046d03074037be18ad33ea462028";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
         private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
-        private const string WeaponLightShieldGuid = "1fd965e522502fe479fdd423cca07684";
-        private const string WeaponHeavyShieldGuid = "be9b6408e6101cb4997a8996484baf19";
 
         private static readonly string[] SafeBlueprintAreaGuids = {
             "141f6999dada5a842a46bb3f029c287a", // Dire Narlmarches village
@@ -829,7 +825,7 @@ namespace CraftMagicItems {
 
                 // Special case - enchanting a masterwork item supersedes the masterwork quality
                 if (IsMasterwork(blueprint)) {
-                    return MasterworkGuid;
+                    return ItemQualityBlueprints.MasterworkGuid;
                 }
             }
 
@@ -928,11 +924,11 @@ namespace CraftMagicItems {
         }
 
         private static bool IsMasterwork(BlueprintItem blueprint) {
-            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == MasterworkGuid);
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == ItemQualityBlueprints.MasterworkGuid);
         }
 
         private static bool IsOversized(BlueprintItem blueprint) {
-            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(OversizedGuid));
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid));
         }
 
         // Use instead of UIUtility.IsMagicItem.
@@ -1946,7 +1942,7 @@ namespace CraftMagicItems {
                     if (shield.WeaponComponent != null) {
                         PhysicalDamageMaterial material = selectedRecipe.Material;
                         if ((shield.WeaponComponent.DamageType.Physical.Form & PhysicalDamageForm.Bludgeoning) != 0
-                            && selectedEnchantment != null && selectedEnchantment.AssetGuid == MithralArmorEnchantmentGuid) {
+                            && selectedEnchantment != null && selectedEnchantment.AssetGuid == ItemQualityBlueprints.MithralArmorEnchantmentGuid) {
                             material = PhysicalDamageMaterial.Silver;
                         }
                         var weaponEnchantments = selectedEnchantment != null && selectedRecipe.Restrictions.Contains(ItemRestrictions.ShieldWeapon) ?
@@ -2502,7 +2498,7 @@ namespace CraftMagicItems {
                         var blueprintCost = standardBlueprint.Cost;
                         var blueprintWeight = standardBlueprint.Weight;
                         foreach (var enchantment in itemBlueprint.Enchantments) {
-                            if (enchantment.AssetGuid.StartsWith(OversizedGuid)) {
+                            if (enchantment.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid)) {
                                 var weaponBaseSizeChange = enchantment.GetComponent<WeaponBaseSizeChange>();
                                 if (weaponBaseSizeChange != null) {
                                     var sizeCategoryChange = weaponBaseSizeChange.SizeCategoryChange;
@@ -2792,9 +2788,9 @@ namespace CraftMagicItems {
             var mithralArmorEnchantmentGuid = false;
             var cost = 0;
             foreach (var enchantment in blueprint.Enchantments) {
-                if (enchantment.AssetGuid == MithralArmorEnchantmentGuid) {
+                if (enchantment.AssetGuid == ItemQualityBlueprints.MithralArmorEnchantmentGuid) {
                     mithralArmorEnchantmentGuid = true;
-                } else if (enchantment.AssetGuid.StartsWith(OversizedGuid)) {
+                } else if (enchantment.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid)) {
                     var weaponBaseSizeChange = enchantment.GetComponent<WeaponBaseSizeChange>();
                     if (weaponBaseSizeChange != null) {
                         var sizeCategoryChange = weaponBaseSizeChange.SizeCategoryChange;
@@ -3168,9 +3164,9 @@ namespace CraftMagicItems {
                     }
                 }
 
-                var lightShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponLightShieldGuid);
+                var lightShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(ItemQualityBlueprints.WeaponLightShieldGuid);
                 Accessors.SetBlueprintItemBaseDamage(lightShield, new DiceFormula(1, DiceType.D3));
-                var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(WeaponHeavyShieldGuid);
+                var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(ItemQualityBlueprints.WeaponHeavyShieldGuid);
                 Accessors.SetBlueprintItemBaseDamage(heavyShield, new DiceFormula(1, DiceType.D4));
 
                 for (int i = 0; i < ItemEnchantmentGuids.Length; i += 2) {
@@ -4481,7 +4477,7 @@ namespace CraftMagicItems {
         private static class UnitViewHandSlotDataWeaponScalePatch {
             private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
                 if (__instance.VisibleItem is ItemEntityWeapon weapon && !weapon.Blueprint.AssetGuid.Contains(",visual=")) {
-                    var enchantment = GetEnchantments(weapon.Blueprint).FirstOrDefault(e => e.AssetGuid.StartsWith(OversizedGuid));
+                    var enchantment = GetEnchantments(weapon.Blueprint).FirstOrDefault(e => e.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid));
                     if (enchantment != null) {
                         var component = enchantment.GetComponent<WeaponBaseSizeChange>();
                         if (component != null) {
