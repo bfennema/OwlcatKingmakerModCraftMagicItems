@@ -83,7 +83,7 @@ namespace CraftMagicItems {
             "Custom"
         };
 
-        private static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
+        public static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
         private const string MasterworkGuid = "6b38844e2bffbac48b63036b66e735be";
         public const string MithralArmorEnchantmentGuid = "7b95a819181574a4799d93939aa99aff";
         private const string OversizedGuid = "d8e1ebc1062d8cc42abff78783856b0d";
@@ -336,7 +336,7 @@ namespace CraftMagicItems {
                 if (UmmUiRenderer.RenderToggleSection("Feat Reassignment", currentSection == OpenSection.FeatsSection))
                 {
                     currentSection = OpenSection.FeatsSection;
-                    RenderFeatReassignmentSection();
+                    UserInterfaceEventHandlingLogic.RenderFeatReassignmentSection(new FeatReassignmentSectionRenderer());
                 }
 
                 if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
@@ -2064,66 +2064,6 @@ namespace CraftMagicItems {
             }
         }
 
-        private static void RenderFeatReassignmentSection() {
-            var caster = GetSelectedCrafter(false);
-            if (caster == null) {
-                return;
-            }
-
-            var casterLevel = CharacterCasterLevel(caster.Descriptor);
-            var missingFeats = ItemCraftingData
-                .Where(data => data.FeatGuid != null && !CharacterHasFeat(caster, data.FeatGuid) && data.MinimumCasterLevel <= casterLevel)
-                .ToArray();
-            if (missingFeats.Length == 0) {
-                UmmUiRenderer.RenderLabelRow($"{caster.CharacterName} does not currently qualify for any crafting feats.");
-                return;
-            }
-
-            UmmUiRenderer.RenderLabelRow("Use this section to reassign previous feat choices for this character to crafting feats.  <color=red>Warning:</color> This is a one-way assignment!");
-            var featOptions = missingFeats.Select(data => new L10NString(data.NameId).ToString()).ToArray();
-            var selectedFeatToLearn = DrawSelectionUserInterfaceElements("Feat to learn", featOptions, 6);
-            var learnFeatData = missingFeats[selectedFeatToLearn];
-            var learnFeat = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(learnFeatData.FeatGuid);
-            if (learnFeat == null) {
-                throw new Exception($"Unable to find feat with guid {learnFeatData.FeatGuid}");
-            }
-
-            var removedFeatIndex = 0;
-            foreach (var feature in caster.Descriptor.Progression.Features) {
-                if (!feature.Blueprint.HideInUI && feature.Blueprint.HasGroup(CraftingFeatGroups)
-                                                && (feature.SourceProgression != null || feature.SourceRace != null)) {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label($"Feat: {feature.Name}", GUILayout.ExpandWidth(false));
-                    if (GUILayout.Button($"<- {learnFeat.Name}", GUILayout.ExpandWidth(false))) {
-                        var currentRank = feature.Rank;
-                        caster.Descriptor.Progression.ReplaceFeature(feature.Blueprint, learnFeat);
-                        if (currentRank == 1) {
-                            foreach (var addFact in feature.SelectComponents((AddFacts addFacts) => true)) {
-                                addFact.OnFactDeactivate();
-                            }
-
-                            caster.Descriptor.Progression.Features.RemoveFact(feature);
-                        }
-
-                        var addedFeature = caster.Descriptor.Progression.Features.AddFeature(learnFeat);
-                        addedFeature.Source = feature.Source;
-                        var mFacts = Accessors.GetFeatureCollectionFacts(caster.Descriptor.Progression.Features);
-                        if (removedFeatIndex < mFacts.Count) {
-                            // Move the new feat to the place in the list originally occupied by the removed one.
-                            mFacts.Remove(addedFeature);
-                            mFacts.Insert(removedFeatIndex, addedFeature);
-                        }
-
-                        ActionBarManager.Instance.HandleAbilityRemoved(null);
-                    }
-
-                    GUILayout.EndHorizontal();
-                }
-
-                removedFeatIndex++;
-            }
-        }
-
         private static bool IsPlayerSomewhereSafe() {
             if (Game.Instance.CurrentlyLoadedArea != null && SafeBlueprintAreaGuids.Contains(Game.Instance.CurrentlyLoadedArea.AssetGuid)) {
                 return true;
@@ -2138,7 +2078,7 @@ namespace CraftMagicItems {
                    (Game.Instance.CurrentMode == GameModeType.Kingdom && KingdomTimelineManager.CanAdvanceTime());
         }
 
-        private static UnitEntityData GetSelectedCrafter(bool render) {
+        public static UnitEntityData GetSelectedCrafter(bool render) {
             currentCaster = null;
             // Only allow remote companions if the player is in the capital.
             var remote = IsPlayerInCapital();
@@ -2277,7 +2217,7 @@ namespace CraftMagicItems {
             return EnchantmentIdToItem.ContainsKey(assetGuid) ? EnchantmentIdToItem[assetGuid] : null;
         }
 
-        private static bool CharacterHasFeat(UnitEntityData caster, string featGuid) {
+        public static bool CharacterHasFeat(UnitEntityData caster, string featGuid) {
             return caster.Descriptor.Progression.Features.Enumerable.Any(feat => feat.Blueprint.AssetGuid == featGuid);
         }
 
