@@ -93,7 +93,6 @@ namespace CraftMagicItems {
         private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
         private const string ProdigiousTwoWeaponFightingGuid = "ddba046d03074037be18ad33ea462028";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
-        private const string LongshankBaneGuid = "92a1f5db1a03c5b468828c25dd375806";
 
         private static readonly string[] SafeBlueprintAreaGuids = {
             "141f6999dada5a842a46bb3f029c287a", // Dire Narlmarches village
@@ -108,15 +107,6 @@ namespace CraftMagicItems {
             "653811192a3fcd148816384a9492bd08", // Secluded Lodge
             "fd1b6fa9f788ca24e86bd922a10da080", // Tenebrous Depths start hub
             "c49315fe499f0e5468af6f19242499a2", // Tenebrous Depths start hub (Roguelike)
-        };
-
-        private static readonly string[] ItemEnchantmentGuids = {
-            "d42fc23b92c640846ac137dc26e000d4", "da7d830b3f75749458c2e51524805560", // Enchantment +1
-            "eb2faccc4c9487d43b3575d7e77ff3f5", "49f9befa0e77cd5428ca3b28fd66a54e", // Enchantment +2
-            "80bb8a737579e35498177e1e3c75899b", "bae627dfb77c2b048900f154719ca07b", // Enchantment +3
-            "783d7d496da6ac44f9511011fc5f1979", "a4016a5d78384a94581497d0d135d98b", // Enchantment +4
-            "bdba267e951851449af552aa9f9e3992", "c3ad7f708c573b24082dde91b081ca5f", // Enchantment +5
-            "a36ad92c51789b44fa8a1c5c116a1328", "90316f5801dbe4748a66816a7c00380c", // Agile
         };
 
         private const string CustomPriceLabel = "Crafting Cost: ";
@@ -3169,14 +3159,14 @@ namespace CraftMagicItems {
                 var heavyShield = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(ItemQualityBlueprints.WeaponHeavyShieldGuid);
                 Accessors.SetBlueprintItemBaseDamage(heavyShield, new DiceFormula(1, DiceType.D4));
 
-                for (int i = 0; i < ItemEnchantmentGuids.Length; i += 2) {
-                    var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i]);
-                    var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(ItemEnchantmentGuids[i + 1]);
+                for (int i = 0; i < EnchantmentBlueprints.ItemEnchantmentGuids.Length; i += 2) {
+                    var source = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i]);
+                    var dest = ResourcesLibrary.TryGetBlueprint<BlueprintItemEnchantment>(EnchantmentBlueprints.ItemEnchantmentGuids[i + 1]);
                     Accessors.SetBlueprintItemEnchantmentEnchantName(dest, Accessors.GetBlueprintItemEnchantmentEnchantName(source));
                     Accessors.SetBlueprintItemEnchantmentDescription(dest, Accessors.GetBlueprintItemEnchantmentDescription(source));
                 }
 
-                var longshankBane = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(LongshankBaneGuid);
+                var longshankBane = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponEnchantment>(EnchantmentBlueprints.LongshankBaneGuid);
                 if (longshankBane.ComponentsArray.Length >= 2 && longshankBane.ComponentsArray[1] is WeaponConditionalDamageDice conditional) {
                     for (int i = 0; i < conditional.Conditions.Conditions.Length; i++) {
                         if (conditional.Conditions.Conditions[i] is Kingmaker.Designers.EventConditionActionSystem.Conditions.HasFact condition) {
