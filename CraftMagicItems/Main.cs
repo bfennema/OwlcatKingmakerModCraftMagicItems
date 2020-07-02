@@ -336,7 +336,7 @@ namespace CraftMagicItems {
                 if (UmmUiRenderer.RenderToggleSection("Feat Reassignment", currentSection == OpenSection.FeatsSection))
                 {
                     currentSection = OpenSection.FeatsSection;
-                    UserInterfaceEventHandlingLogic.RenderFeatReassignmentSection(new FeatReassignmentSectionRenderer());
+                    UserInterfaceEventHandlingLogic.RenderFeatReassignmentSection(FeatReassignmentSectionRendererFactory.GetFeatReassignmentSectionRenderer());
                 }
 
                 if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
