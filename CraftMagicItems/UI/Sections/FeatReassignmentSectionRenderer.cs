@@ -3,7 +3,7 @@
 namespace CraftMagicItems.UI.Sections
 {
     /// <summary>User Interface renderer into Unity Mod Manager for the feat reassignment section</summary>
-    public class FeatReassignmentSectionRenderer
+    public class FeatReassignmentSectionRenderer : IFeatReassignmentSectionRenderer
     {
         /// <summary>Renders a warning that the current character does not qualify for any crafting feats</summary>
         /// <param name="characterName">Name of character currently being evaluated</param>
