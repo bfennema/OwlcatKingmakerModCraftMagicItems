@@ -62,8 +62,8 @@ namespace CraftMagicItems.UI
         }
 
         /// <summary>Renders the section for feat reassignment and handles user selections</summary>
-        /// <param name="renderer"><see cref="FeatReassignmentSectionRenderer" /> instance that handles rendering of controls</param>
-        public static void RenderFeatReassignmentSection(FeatReassignmentSectionRenderer renderer)
+        /// <param name="renderer"><see cref="IFeatReassignmentSectionRenderer" /> instance that handles rendering of controls</param>
+        public static void RenderFeatReassignmentSection(IFeatReassignmentSectionRenderer renderer)
         {
             var caster = Main.GetSelectedCrafter(false);
             if (caster == null)
