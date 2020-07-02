@@ -65,7 +65,8 @@
     <Compile Include="MainRenderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactoryTests.cs" />
-    <Compile Include="UI\Sections\CheatSectionFactoryTests.cs" />
+    <Compile Include="UI\Sections\FeatReassignmentSectionRendererFactoryTests.cs" />
+    <Compile Include="UI\Sections\CheatSectionRendererFactoryTests.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogicTests.cs" />
   </ItemGroup>
   <ItemGroup>
