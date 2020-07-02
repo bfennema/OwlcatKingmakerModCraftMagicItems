@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CraftMagicItems.UI.UnityModManager;
+﻿using CraftMagicItems.UI.UnityModManager;
 
 namespace CraftMagicItems.UI.Sections
 {
+    /// <summary>User Interface renderer into Unity Mod Manager for the feat reassignment section</summary>
     public class FeatReassignmentSectionRenderer
     {
         /// <summary>Renders a warning that the current character does not qualify for any crafting feats</summary>
@@ -31,7 +27,7 @@ namespace CraftMagicItems.UI.Sections
         }
 
         /// <summary>Renders a label and button on their own line for selecting a current feat to be replaced by the selected replacement crafting feat</summary>
-        /// <param name="existingFeat">Name of the existing feat to potentially replace</param>
+        /// <param name="existingFeat">Name of the existing feat to potentially be replaced</param>
         /// <param name="replacementFeat">Name of the feat to potentially replace <paramref name="existingFeat" /></param>
         /// <returns>True if the button is clicked, otherwise false</returns>
         public bool Evaluate_LearnFeatButton(string existingFeat, string replacementFeat)
