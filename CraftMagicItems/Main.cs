@@ -93,9 +93,6 @@ namespace CraftMagicItems {
         };
 
         public static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
-        private const string AlchemistProgressionGuid = "efd55ff9be2fda34981f5b9c83afe4f1";
-        private const string AlchemistGrenadierArchetypeGuid = "6af888a7800b3e949a40f558ff204aae";
-        private const string ScrollSavantArchetypeGuid = "f43c78692a4e10d43a38bd6aedf53c1b";
         private const string MartialWeaponProficiencies = "203992ef5b35c864390b4e4a1e200629";
         private const string ChannelEnergyFeatureGuid = "a79013ff4bcd4864cb669622a29ddafb";
         private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
@@ -3111,8 +3108,8 @@ namespace CraftMagicItems {
                 // Alchemists get Brew Potion as a bonus 1st level feat, except for Grenadier archetype alchemists.
                 var brewPotionData = ItemCraftingData.First(data => data.Name == "Potion");
                 var brewPotion = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(brewPotionData.FeatGuid);
-                var alchemistProgression = ResourcesLibrary.TryGetBlueprint<BlueprintProgression>(AlchemistProgressionGuid);
-                var grenadierArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(AlchemistGrenadierArchetypeGuid);
+                var alchemistProgression = ResourcesLibrary.TryGetBlueprint<BlueprintProgression>(ClassBlueprints.AlchemistProgressionGuid);
+                var grenadierArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(ClassBlueprints.AlchemistGrenadierArchetypeGuid);
                 if (brewPotion != null && alchemistProgression != null && grenadierArchetype != null) {
                     var firstLevelIndex = alchemistProgression.LevelEntries.FindIndex((levelEntry) => (levelEntry.Level == 1));
                     alchemistProgression.LevelEntries[firstLevelIndex].Features.Add(brewPotion);
@@ -3132,7 +3129,7 @@ namespace CraftMagicItems {
                 // Scroll Savant should get Scribe Scroll as a bonus 1st level feat.
                 var scribeScrollData = ItemCraftingData.First(data => data.Name == "Scroll");
                 var scribeScroll = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(scribeScrollData.FeatGuid);
-                var scrollSavantArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(ScrollSavantArchetypeGuid);
+                var scrollSavantArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(ClassBlueprints.ScrollSavantArchetypeGuid);
                 if (scribeScroll != null && scrollSavantArchetype != null) {
                     var firstLevelAdd = scrollSavantArchetype.AddFeatures.First((levelEntry) => (levelEntry.Level == 1));
                     firstLevelAdd.Features.Add(scribeScroll);
