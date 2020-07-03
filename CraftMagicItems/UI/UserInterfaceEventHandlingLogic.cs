@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CraftMagicItems.Constants;
 using CraftMagicItems.UI.Sections;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
@@ -94,7 +95,7 @@ namespace CraftMagicItems.UI
             var removedFeatIndex = 0;
             foreach (var feature in caster.Descriptor.Progression.Features)
             {
-                if (!feature.Blueprint.HideInUI && feature.Blueprint.HasGroup(Main.CraftingFeatGroups)
+                if (!feature.Blueprint.HideInUI && feature.Blueprint.HasGroup(Features.CraftingFeatGroups)
                                                 && (feature.SourceProgression != null || feature.SourceRace != null))
                 {
                     if (renderer.Evaluate_LearnFeatButton(feature.Name, learnFeat.Name))

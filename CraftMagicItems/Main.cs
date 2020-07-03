@@ -92,10 +92,6 @@ namespace CraftMagicItems {
             "Custom"
         };
 
-        public static readonly FeatureGroup[] CraftingFeatGroups = {FeatureGroup.Feat, FeatureGroup.WizardFeat};
-        private const string MartialWeaponProficiencies = "203992ef5b35c864390b4e4a1e200629";
-        private const string ChannelEnergyFeatureGuid = "a79013ff4bcd4864cb669622a29ddafb";
-        private const string ShieldMasterGuid = "dbec636d84482944f87435bd31522fcc";
         private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
 
         private static readonly string[] SafeBlueprintAreaGuids = {
@@ -490,7 +486,7 @@ namespace CraftMagicItems {
 
             //can the character have a bonded item?
             var hasBondedItemFeature =
-                caster.Descriptor.Progression.Features.Enumerable.Any(feature => BondedItemFeatures.Contains(feature.Blueprint.AssetGuid));
+                caster.Descriptor.Progression.Features.Enumerable.Any(feature => Features.BondedItemFeatures.Contains(feature.Blueprint.AssetGuid));
             var bondedItemData = GetBondedItemComponentForCaster(caster.Descriptor);
 
             if (!hasBondedItemFeature && bondedItemData && bondedItemData.ownerItem != null) {
@@ -1865,7 +1861,7 @@ namespace CraftMagicItems {
                     return dc + shield.ArmorComponent.ArmorBonus;
                 case BlueprintItemWeapon weapon:
                     if (weapon.Category.HasSubCategory(WeaponSubCategory.Exotic)) {
-                        var martialWeaponProficiencies = ResourcesLibrary.TryGetBlueprint(MartialWeaponProficiencies);
+                        var martialWeaponProficiencies = ResourcesLibrary.TryGetBlueprint(Features.MartialWeaponProficiencies);
                         if (martialWeaponProficiencies != null && martialWeaponProficiencies.GetComponents<AddProficiencies>()
                                 .Any(addProficiencies => addProficiencies.RaceRestriction != null
                                                          && addProficiencies.RaceRestriction == crafter.Progression.Race
@@ -3077,7 +3073,7 @@ namespace CraftMagicItems {
                 foreach (var levelEntry in progression.LevelEntries) {
                     foreach (var featureBase in levelEntry.Features) {
                         var selection = featureBase as BlueprintFeatureSelection;
-                        if (selection != null && (CraftingFeatGroups.Contains(selection.Group) || CraftingFeatGroups.Contains(selection.Group2))) {
+                        if (selection != null && (Features.CraftingFeatGroups.Contains(selection.Group) || Features.CraftingFeatGroups.Contains(selection.Group2))) {
                             // Use ObjectIDGenerator to detect which shared lists we've added the feats to.
                             idGenerator.GetId(selection.AllFeatures, out var firstTime);
                             if (firstTime) {
@@ -3239,7 +3235,7 @@ namespace CraftMagicItems {
             }
 
             private static void PatchBlueprints() {
-                var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ShieldMasterGuid);
+                var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(Features.ShieldMasterGuid);
                 var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
                 TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.ShieldMaster = shieldMaster;
                 Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting) = new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921");
@@ -3602,7 +3598,7 @@ namespace CraftMagicItems {
                     || prerequisite == CrafterPrerequisiteType.AlignmentChaotic && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Chaotic) == 0
                     || prerequisite == CrafterPrerequisiteType.AlignmentEvil && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Evil) == 0
                     || prerequisite == CrafterPrerequisiteType.FeatureChannelEnergy &&
-                    caster.GetFeature(ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ChannelEnergyFeatureGuid)) == null
+                    caster.GetFeature(ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(Features.ChannelEnergyFeatureGuid)) == null
                 ));
             }
 
