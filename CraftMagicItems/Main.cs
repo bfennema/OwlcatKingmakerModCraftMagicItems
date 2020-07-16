@@ -92,8 +92,6 @@ namespace CraftMagicItems {
             "Custom"
         };
 
-        private const string TwoWeaponFightingBasicMechanicsGuid = "6948b379c0562714d9f6d58ccbfa8faa";
-
         private const string CustomPriceLabel = "Crafting Cost: ";
         private static readonly LocalizedString CasterLevelLocalized = new L10NString("dfb34498-61df-49b1-af18-0a84ce47fc98");
         private static readonly LocalizedString CharacterUsedItemLocalized = new L10NString("be7942ed-3af1-4fc7-b20b-41966d2f80b7");
@@ -3221,7 +3219,7 @@ namespace CraftMagicItems {
 
             private static void PatchBlueprints() {
                 var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(Features.ShieldMasterGuid);
-                var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
+                var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(MechanicsBlueprints.TwoWeaponFightingBasicMechanicsGuid);
                 TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.ShieldMaster = shieldMaster;
                 Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting) = new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921");
 
