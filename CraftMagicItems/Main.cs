@@ -3235,13 +3235,13 @@ namespace CraftMagicItems {
 
             private static void PatchIk() {
                 foreach (var patch in VisualAdjustmentPatches.IkPatchList) {
-                    var weapon = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(patch.m_uuid);
+                    var weapon = ResourcesLibrary.TryGetBlueprint<BlueprintWeaponType>(patch.BlueprintId);
                     if (weapon != null) {
                         var model = weapon.VisualParameters.Model;
                         var equipmentOffsets = model.GetComponent<EquipmentOffsets>();
                         var locator = new GameObject();
                         locator.transform.SetParent(model.transform);
-                        locator.transform.localPosition = new Vector3(patch.m_x, patch.m_y, patch.m_z);
+                        locator.transform.localPosition = new Vector3(patch.X, patch.Y, patch.Z);
                         locator.transform.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
                         locator.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
                         equipmentOffsets.IkTargetLeftHand = locator.transform;

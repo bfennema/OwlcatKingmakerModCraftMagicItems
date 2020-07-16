@@ -10,14 +10,14 @@
         /// <param name="z">Z-axis adjustment</param>
         public IkPatch(string uuid, float x, float y, float z)
         {
-            m_uuid = uuid;
-            m_x = x;
-            m_y = y;
-            m_z = z;
+            BlueprintId = uuid;
+            X = x;
+            Y = y;
+            Z = z;
         }
 
-        public string m_uuid;
+        public string BlueprintId;
         
-        public float m_x, m_y, m_z;
+        public float X, Y, Z;
     }
 }
