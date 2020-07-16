@@ -79,12 +79,6 @@ namespace CraftMagicItems {
     public static class Main {
         private const string BondedItemRitual = "bondedItemRitual";
 
-        private static readonly string[] CraftingPriceStrings = {
-            "100% (Owlcat prices)",
-            "200% (Tabletop prices)",
-            "Custom"
-        };
-
         private const string CustomPriceLabel = "Crafting Cost: ";
 
         private static readonly WeaponCategory[] AmmunitionWeaponCategories = {
@@ -327,7 +321,7 @@ namespace CraftMagicItems {
                 if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
                 {
                     currentSection = OpenSection.CheatsSection;
-                    UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(CheatSectionRendererFactory.GetCheatSectionRenderer(), ModSettings, CustomPriceLabel, CraftingPriceStrings);
+                    UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(CheatSectionRendererFactory.GetCheatSectionRenderer(), ModSettings, CustomPriceLabel);
                 }
 
                 GUILayout.EndVertical();

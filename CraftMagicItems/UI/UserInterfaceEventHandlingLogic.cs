@@ -12,17 +12,24 @@ namespace CraftMagicItems.UI
     /// <summary>Class that performs User Interface rendering and takes the results freom such and performs logical operations based on the UI state</summary>
     public static class UserInterfaceEventHandlingLogic
     {
+        /// <param name="CraftingPriceStrings">Collection of <see cref="String" /> containing the display text for various pricing guidelines</param>
+        private static readonly string[] CraftingPriceStrings =
+        {
+            "100% (Owlcat prices)",
+            "200% (Tabletop prices)",
+            "Custom"
+        };
+
         /// <summary>Renders the Cheats section and retrieves the values specified by its rendered UI</summary>
         /// <param name="renderer"><see cref="ICheatSectionRenderer" /> instance used to render controls and return current values</param>
         /// <param name="modSettings"><see cref="Settings" /> to default to and to read from</param>
         /// <param name="priceLabel">Text to render for the price</param>
-        /// <param name="craftingPriceStrings">Collection of <see cref="String" /> containing the display text for various pricing guidelines</param>
-        public static void RenderCheatsSectionAndUpdateSettings(ICheatSectionRenderer renderer, Settings modSettings, string priceLabel, string[] craftingPriceStrings)
+        public static void RenderCheatsSectionAndUpdateSettings(ICheatSectionRenderer renderer, Settings modSettings, string priceLabel)
         {
             modSettings.CraftingCostsNoGold = renderer.Evaluate_CraftingCostsNoGold(modSettings.CraftingCostsNoGold);
             if (!modSettings.CraftingCostsNoGold)
             {
-                var selectedCustomPriceScaleIndex = renderer.Evaluate_CraftingCostSelection(priceLabel, craftingPriceStrings);
+                var selectedCustomPriceScaleIndex = renderer.Evaluate_CraftingCostSelection(priceLabel, CraftingPriceStrings);
                 if (selectedCustomPriceScaleIndex == 2) //if user selected "Custom"
                 {
                     modSettings.CraftingPriceScale = renderer.Evaluate_CustomCraftingCostSlider(modSettings.CraftingPriceScale);
