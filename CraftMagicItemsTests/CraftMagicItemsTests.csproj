@@ -81,6 +81,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\VisualAdjustmentPatchesTests.cs" />
     <Compile Include="MainRenderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactoryTests.cs" />
