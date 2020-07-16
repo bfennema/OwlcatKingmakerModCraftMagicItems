@@ -114,11 +114,6 @@ namespace CraftMagicItems {
             ItemsFilter.ItemType.Neck
         };
 
-        private static readonly string[] BondedItemFeatures = {
-            "2fb5e65bd57caa943b45ee32d825e9b9",
-            "aa34ca4f3cd5e5d49b2475fcfdf56b24"
-        };
-
         private enum ItemLocationFilter
         {
             All,
