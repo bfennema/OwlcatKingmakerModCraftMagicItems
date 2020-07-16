@@ -12,6 +12,9 @@
         /// <summary>Cost of applying adamantine</summary>
         public const int Adamantine = 3000;
 
+        /// <summary>Cost of applying mithral per pound</summary>
+        public const int MithralPerPound = 500;
+
         /// <summary>Default cost for adding a +N enchantment to a weapon</summary>
         public const int WeaponPlusCost = 2000;
 

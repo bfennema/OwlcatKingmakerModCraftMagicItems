@@ -2797,7 +2797,8 @@ namespace CraftMagicItems {
                     // double weapon
                     return baseCost + (enhancementLevel > 0 ? DefaultCosts.WeaponPlusCost : 0);
                 case PhysicalDamageMaterial.Silver:
-                    // PhysicalDamageMaterial.Silver is really Mithral.  Non-armor Mithral items cost 500 gp per pound of the original, non-Mithral item, which
+                    // PhysicalDamageMaterial.Silver is really Mithral.
+                    // Non-armor Mithral items cost 500 gp per pound of the original, non-Mithral item, which
                     // translates to 1000 gp per pound of Mithral.  See https://paizo.com/paizo/faq/v5748nruor1fm#v5748eaic9r9u
                     // Only charge for weight on the primary half
 
@@ -2809,7 +2810,7 @@ namespace CraftMagicItems {
                     //      Heavy armor	    +9,000 gp
                     //      Shield	        +1,000 gp
                     //      Other items	    +500 gp/lb.
-                    return (int)(500 * weight) - DefaultCosts.WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of mithral
+                    return (int)(DefaultCosts.MithralPerPound * weight) - DefaultCosts.WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of mithral
                 default:
                     return 0;
             }
