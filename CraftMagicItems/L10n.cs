@@ -15,6 +15,7 @@ namespace CraftMagicItems {
         [JsonProperty] public string Value;
     }
 
+    /// <remarks>Localization is sometimes written in English as l10n, where 10 is the number of letters in the English word between 'l' and 'n'</remarks>
     class L10n {
         private static readonly Dictionary<string, string> ModifiedL10NStrings = new Dictionary<string, string>();
 
