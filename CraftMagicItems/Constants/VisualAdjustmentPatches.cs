@@ -7,7 +7,7 @@ namespace CraftMagicItems.Constants
     public static class VisualAdjustmentPatches
     {
         /// <summary>Collection of <see cref="" /> patches for visual adjustments to displayed items</summary>
-        public static IEnumerable<IkPatch> IkPatchList
+        public static IEnumerable<IkPatch> LeftHandedWeaponPatchList
         {
             get
             {

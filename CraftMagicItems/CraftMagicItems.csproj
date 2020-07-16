@@ -105,6 +105,7 @@
     <Compile Include="Constants\UnarmedStrikeEnchantment.cs" />
     <Compile Include="Constants\VisualAdjustmentPatches.cs" />
     <Compile Include="Patches\IkPatch.cs" />
+    <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />
     <Compile Include="QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactory.cs" />
