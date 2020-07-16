@@ -95,6 +95,7 @@
     <Compile Include="BondedItemComponent.cs" />
     <Compile Include="Constants\Areas.cs" />
     <Compile Include="Constants\ClassBlueprints.cs" />
+    <Compile Include="Constants\DefaultCosts.cs" />
     <Compile Include="Constants\EnchantmentBlueprints.cs" />
     <Compile Include="Constants\Features.cs" />
     <Compile Include="Constants\ItemQualityBlueprints.cs" />

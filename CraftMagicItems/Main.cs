@@ -79,11 +79,6 @@ namespace CraftMagicItems {
         private const int MissingPrerequisiteDCModifier = 5;
         private const int OppositionSchoolDCModifier = 4;
         private const int AdventuringProgressPenalty = 4;
-        private const int WeaponMasterworkCost = 300;
-        private const int WeaponPlusCost = 2000;
-        private const int ArmorMasterworkCost = 150;
-        private const int ArmorPlusCost = 1000;
-        private const int UnarmedPlusCost = 4000;
         private const string BondedItemRitual = "bondedItemRitual";
 
         private static readonly string[] CraftingPriceStrings = {
@@ -2795,17 +2790,17 @@ namespace CraftMagicItems {
         private static int GetSpecialMaterialCost(PhysicalDamageMaterial material, BlueprintItemWeapon weapon, int baseCost, float weight) {
             switch (material) {
                 case PhysicalDamageMaterial.Adamantite:
-                    return 3000 - WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of adamantite
+                    return DefaultCosts.Adamantine - DefaultCosts.WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of adamantite
                 case PhysicalDamageMaterial.ColdIron:
                     var enhancementLevel = ItemPlusEquivalent(weapon);
                     // Cold Iron weapons cost double, excluding the masterwork component and 2000 extra for enchanting the first +1
                     // double weapon
-                    return baseCost + (enhancementLevel > 0 ? WeaponPlusCost : 0);
+                    return baseCost + (enhancementLevel > 0 ? DefaultCosts.WeaponPlusCost : 0);
                 case PhysicalDamageMaterial.Silver:
                     // PhysicalDamageMaterial.Silver is really Mithral.  Non-armor Mithral items cost 500 gp per pound of the original, non-Mithral item, which
                     // translates to 1000 gp per pound of Mithral.  See https://paizo.com/paizo/faq/v5748nruor1fm#v5748eaic9r9u
                     // Only charge for weight on the primary half
-                    return (int)(500 * weight) - WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of mithral
+                    return (int)(500 * weight) - DefaultCosts.WeaponMasterworkCost; // Cost of masterwork is subsumed by the cost of mithral
                 default:
                     return 0;
             }
@@ -2876,18 +2871,18 @@ namespace CraftMagicItems {
                 var enhancementLevel = ItemPlusEquivalent(blueprint);
                 if (blueprint is BlueprintItemWeapon weapon) {
                     if (enhancementLevel > 0) {
-                        cost += WeaponMasterworkCost;
+                        cost += DefaultCosts.WeaponMasterworkCost;
                     }
                     if (weapon.DamageType.Physical.Material != 0) {
                         cost += GetSpecialMaterialCost(weapon.DamageType.Physical.Material, weapon, baseCost, weight);
                     }
                 } else if (blueprint is BlueprintItemArmor) {
                     if (enhancementLevel > 0 && !mithralArmorEnchantmentGuid) {
-                        cost += ArmorMasterworkCost;
+                        cost += DefaultCosts.ArmorMasterworkCost;
                     }
                 }
 
-                var factor = blueprint is BlueprintItemWeapon ? WeaponPlusCost : ArmorPlusCost;
+                var factor = blueprint is BlueprintItemWeapon ? DefaultCosts.WeaponPlusCost : DefaultCosts.ArmorPlusCost;
                 cost += enhancementLevel * enhancementLevel * factor;
                 if (blueprint is BlueprintItemWeapon doubleWeapon && doubleWeapon.Double) {
                     return baseCost + cost + RulesRecipeItemCost(doubleWeapon.SecondWeapon, 0, 0.0f);
@@ -2897,7 +2892,7 @@ namespace CraftMagicItems {
 
             if (ItemPlusEquivalent(blueprint) > 0) {
                 var enhancementLevel = ItemPlusEquivalent(blueprint);
-                var enhancementCost = enhancementLevel * enhancementLevel * UnarmedPlusCost;
+                var enhancementCost = enhancementLevel * enhancementLevel * DefaultCosts.UnarmedPlusCost;
                 cost += enhancementCost;
                 if (mostExpensiveEnchantmentCost < enhancementCost) {
                     mostExpensiveEnchantmentCost = enhancementCost;
