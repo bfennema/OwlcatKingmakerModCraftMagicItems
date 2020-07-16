@@ -96,9 +96,11 @@
     <Compile Include="Constants\Areas.cs" />
     <Compile Include="Constants\ClassBlueprints.cs" />
     <Compile Include="Constants\DefaultCosts.cs" />
+    <Compile Include="Constants\DifficultyClass.cs" />
     <Compile Include="Constants\EnchantmentBlueprints.cs" />
     <Compile Include="Constants\Features.cs" />
     <Compile Include="Constants\ItemQualityBlueprints.cs" />
+    <Compile Include="Constants\LocalizedStringBlueprints.cs" />
     <Compile Include="Constants\MechanicsBlueprints.cs" />
     <Compile Include="Constants\UnarmedStrikeEnchantment.cs" />
     <Compile Include="QuiverAbility.cs" />
