@@ -320,19 +320,6 @@ namespace CraftMagicItems {
             }
         }
 
-        public static string L10NFormat(UnitEntityData sourceUnit, string key, params object[] args) {
-            // Set GameLogContext so the caster will be used when generating localized strings.
-            GameLogContext.SourceUnit = sourceUnit;
-            var template = new L10NString(key);
-            var result = string.Format(template.ToString(), args);
-            GameLogContext.Clear();
-            return result;
-        }
-
-        private static string L10NFormat(string key, params object[] args) {
-            return L10NFormat(Selections.CurrentCaster ?? GetSelectedCrafter(false), key, args);
-        }
-
         public static T ReadJsonFile<T>(string fileName, params JsonConverter[] converters) {
             try {
                 var serializer = new JsonSerializer();
@@ -561,7 +548,7 @@ namespace CraftMagicItems {
                         Selections.SelectedBondWithNewObject = false;
                         if (!ModSettings.CraftingTakesNoTime) {
                             // Create project
-                            AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-ritual-bonded-item", cost, selectedItem.Name));
+                            AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-begin-ritual-bonded-item", cost, selectedItem.Name));
                             var project = new CraftingProjectData(caster, ModSettings.MagicCraftingRate, goldCost, 0, selectedItem, BondedItemRitual);
                             AddNewProject(caster.Descriptor, project);
                             CalculateProjectEstimate(project);
@@ -891,7 +878,7 @@ namespace CraftMagicItems {
             }
 
             var key = or ? "craftMagicItems-logMessage-comma-list-or" : "craftMagicItems-logMessage-comma-list-and";
-            return L10NFormat(key, commaList, array[array.Length - 1]);
+            return LocalizationHelper.FormatLocalizedString(key, commaList, array[array.Length - 1]);
         }
 
         private static bool IsMasterwork(BlueprintItem blueprint) {
@@ -1319,7 +1306,7 @@ namespace CraftMagicItems {
             }
 
             if (selectedRecipe.CrafterPrerequisites != null) {
-                prerequisites += "; " + L10NFormat("craftMagicItems-crafter-prerequisite-required", selectedRecipe.CrafterPrerequisites
+                prerequisites += "; " + LocalizationHelper.FormatLocalizedString("craftMagicItems-crafter-prerequisite-required", selectedRecipe.CrafterPrerequisites
                                      .Select(prerequisite => new L10NString($"craftMagicItems-crafter-prerequisite-{prerequisite}").ToString())
                                      .BuildCommaList(false));
             }
@@ -1592,7 +1579,7 @@ namespace CraftMagicItems {
                 ability = equipment.Ability;
                 spellLevel = equipment.SpellLevel;
                 GameLogContext.Count = equipment.Charges;
-                UmmUiRenderer.RenderLabelRow($"Current: {L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
+                UmmUiRenderer.RenderLabelRow($"Current: {LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
                 GameLogContext.Clear();
             }
 
@@ -1636,7 +1623,7 @@ namespace CraftMagicItems {
 
             // Render craft button
             GameLogContext.Count = Selections.SelectedCastsPerDay;
-            UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, Selections.SelectedCasterLevel));
+            UmmUiRenderer.RenderLabelRow(LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details", ability.Name, Selections.SelectedCasterLevel));
             GameLogContext.Clear();
             var recipe = new RecipeData {
                 PrerequisiteSpells = new[] {ability},
@@ -1702,7 +1689,7 @@ namespace CraftMagicItems {
                     $"{crafter.CharacterName} is unable to meet {missing} of the prerequisites, raising the DC by {DifficultyClass.MissingPrerequisiteDCModifier * missing}");
             }
             if (casterLevelShortfall > 0 && render) {
-                UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-logMessage-low-caster-level", casterLevel, DifficultyClass.MissingPrerequisiteDCModifier * casterLevelShortfall));
+                UmmUiRenderer.RenderLabelRow(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-low-caster-level", casterLevel, DifficultyClass.MissingPrerequisiteDCModifier * casterLevelShortfall));
             }
             // Rob's ruling... if you're below the prerequisite caster level, you're considered to be missing a prerequisite for each
             // level you fall short.
@@ -1711,13 +1698,13 @@ namespace CraftMagicItems {
             if (oppositionSchool != SpellSchool.None) {
                 dc += DifficultyClass.OppositionSchoolDCModifier;
                 if (render) {
-                    UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-logMessage-opposition-school", LocalizedTexts.Instance.SpellSchoolNames.GetText(oppositionSchool),
+                    UmmUiRenderer.RenderLabelRow(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-opposition-school", LocalizedTexts.Instance.SpellSchoolNames.GetText(oppositionSchool),
                         DifficultyClass.OppositionSchoolDCModifier));
                 }
             }
             var skillCheck = 10 + crafter.Stats.GetStat(skill).ModifiedValue;
             if (render) {
-                UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(skill), skillCheck, dc));
+                UmmUiRenderer.RenderLabelRow(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(skill), skillCheck, dc));
             }
 
             var skillMargin = skillCheck - dc;
@@ -1765,7 +1752,7 @@ namespace CraftMagicItems {
                     }
                 }
 
-                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-crafting-cancelled", project.ResultItem.Name, cost));
+                AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-crafting-cancelled", project.ResultItem.Name, cost));
             }
 
             var timer = GetCraftingTimerComponentForCaster(project.Crafter.Descriptor);
@@ -2270,7 +2257,7 @@ namespace CraftMagicItems {
             } else {
                 canAfford = (Game.Instance.Player.Money >= goldCost);
                 var notAffordGold = canAfford ? "" : new L10NString("craftMagicItems-label-cost-gold-too-much");
-                cost = L10NFormat("craftMagicItems-label-cost-gold", goldCost, notAffordGold);
+                cost = LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cost-gold", goldCost, notAffordGold);
                 var itemTotals = new Dictionary<BlueprintItem, int>();
                 if (spellBlueprintArray != null) {
                     foreach (var spellBlueprint in spellBlueprintArray) {
@@ -2295,7 +2282,7 @@ namespace CraftMagicItems {
                         notAffordItems = new L10NString("craftMagicItems-label-cost-items-too-much");
                     }
 
-                    cost += L10NFormat("craftMagicItems-label-cost-gold-and-items", pair.Value, pair.Key.Name, notAffordItems);
+                    cost += LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cost-gold-and-items", pair.Value, pair.Key.Name, notAffordItems);
                 }
             }
 
@@ -2343,7 +2330,7 @@ namespace CraftMagicItems {
                 var adventuringDayCount = (project.TargetCost + progressPerDayAdventuring - 1) / progressPerDayAdventuring;
                 project.AddMessage(adventuringDayCount == 1
                     ? new L10NString("craftMagicItems-time-estimate-one-day")
-                    : L10NFormat("craftMagicItems-time-estimate-adventuring-capital", adventuringDayCount));
+                    : LocalizationHelper.FormatLocalizedString("craftMagicItems-time-estimate-adventuring-capital", adventuringDayCount));
             }
             GameLogContext.Clear();
 
@@ -2356,7 +2343,7 @@ namespace CraftMagicItems {
             var itemBlueprintList = FindItemBlueprintsForSpell(spellBlueprint, craftingData.UsableItemType);
             if (itemBlueprintList == null && craftingData.NewItemBaseIDs == null)
             {
-                var message = L10NFormat("craftMagicItems-label-no-item-exists", new L10NString(craftingData.NamePrefixId), spellBlueprint.Name);
+                var message = LocalizationHelper.FormatLocalizedString("craftMagicItems-label-no-item-exists", new L10NString(craftingData.NamePrefixId), spellBlueprint.Name);
                 UmmUiRenderer.RenderLabel(message);
                 return;
             }
@@ -2368,7 +2355,7 @@ namespace CraftMagicItems {
             var custom = existingItemBlueprint == null || existingItemBlueprint.AssetGuid.Contains(CraftMagicItemsBlueprintPatcher.BlueprintPrefix)
                 ? new L10NString("craftMagicItems-label-custom").ToString()
                 : "";
-            var label = L10NFormat("craftMagicItems-label-craft-spell-item", custom, new L10NString(craftingData.NamePrefixId), spellBlueprint.Name, cost);
+            var label = LocalizationHelper.FormatLocalizedString("craftMagicItems-label-craft-spell-item", custom, new L10NString(craftingData.NamePrefixId), spellBlueprint.Name, cost);
 
             //if the player cannot afford the time (not enough gold), alert them
             if (!canAfford)
@@ -2431,10 +2418,10 @@ namespace CraftMagicItems {
             }
 
             var resultItem = BuildItemEntity(itemBlueprint, craftingData, caster);
-            AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
+            AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
             if (ModSettings.CraftingTakesNoTime)
             {
-                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-expend-spell", spell.Name));
+                AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-expend-spell", spell.Name));
                 spell.SpendFromSpellbook();
                 CraftItem(resultItem);
             }
@@ -2519,10 +2506,10 @@ namespace CraftMagicItems {
                 ? new L10NString("craftMagicItems-label-custom").ToString()
                 : "";
             var label = upgradeItem == null
-                ? L10NFormat("craftMagicItems-label-craft-item", custom, itemBlueprint.Name, cost)
+                ? LocalizationHelper.FormatLocalizedString("craftMagicItems-label-craft-item", custom, itemBlueprint.Name, cost)
                 : itemBlueprint is BlueprintItemWeapon otherWeapon && otherWeapon.Double
-                ? L10NFormat("craftMagicItems-label-upgrade-weapon-double", upgradeItem.Blueprint.Name, custom, itemBlueprint.Name, otherWeapon.SecondWeapon.Name, cost)
-                : L10NFormat("craftMagicItems-label-upgrade-item", upgradeItem.Blueprint.Name, custom, itemBlueprint.Name, cost);
+                ? LocalizationHelper.FormatLocalizedString("craftMagicItems-label-upgrade-weapon-double", upgradeItem.Blueprint.Name, custom, itemBlueprint.Name, otherWeapon.SecondWeapon.Name, cost)
+                : LocalizationHelper.FormatLocalizedString("craftMagicItems-label-upgrade-item", upgradeItem.Blueprint.Name, custom, itemBlueprint.Name, cost);
             if (!canAfford) {
                 GUILayout.Label(label);
             } else if (GUILayout.Button(label, GUILayout.ExpandWidth(false))) {
@@ -2543,7 +2530,7 @@ namespace CraftMagicItems {
                 }
 
                 var resultItem = BuildItemEntity(itemBlueprint, craftingData, caster);
-                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
+                AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
                 if (ModSettings.CraftingTakesNoTime) {
                     CraftItem(resultItem, upgradeItem);
                 } else {
@@ -2589,10 +2576,10 @@ namespace CraftMagicItems {
                     var newBonus = recipe.Enchantments.FindIndex(e => e == enchantment) + 1;
                     var bonusString = GetBonusString(newBonus, recipe);
                     var bonusDescription = recipe.BonusTypeId != null
-                        ? L10NFormat("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), recipe.NameId)
+                        ? LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), recipe.NameId)
                         : recipe.BonusToId != null
-                            ? L10NFormat("craftMagicItems-custom-description-bonus-to", recipe.NameId, new L10NString(recipe.BonusToId))
-                            : L10NFormat("craftMagicItems-custom-description-bonus", recipe.NameId);
+                            ? LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus-to", recipe.NameId, new L10NString(recipe.BonusToId))
+                            : LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus", recipe.NameId);
                     var upgradeFrom = removed.FirstOrDefault(remove => FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
                     var oldBonus = int.MaxValue;
                     if (upgradeFrom != null) {
@@ -2602,12 +2589,12 @@ namespace CraftMagicItems {
                         if (skipped.Contains(enchantment)) {
                             return new L10NString("");
                         } else {
-                            return L10NFormat("craftMagicItems-custom-description-enchantment-template", bonusString, bonusDescription);
+                            return LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-enchantment-template", bonusString, bonusDescription);
                         }
                     } else {
                         removed.Remove(upgradeFrom);
                     }
-                    return L10NFormat("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription,
+                    return LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription,
                         GetBonusString(oldBonus, recipe), bonusString);
                 })
                 .OrderBy(enchantmentDescription => enchantmentDescription)
@@ -2615,8 +2602,8 @@ namespace CraftMagicItems {
                 .Join("");
             if (blueprint is BlueprintItemEquipment equipment && (ability != null && ability != "null" || casterLevel > -1 || perDay > -1)) {
                 GameLogContext.Count = equipment.Charges;
-                extraDescription += "\n* " + (equipment.Charges == 1 ? L10NFormat("craftMagicItems-label-cast-spell-n-times-details-single", equipment.Ability.Name, equipment.CasterLevel) :
-                    L10NFormat("craftMagicItems-label-cast-spell-n-times-details-multiple", equipment.Ability.Name, equipment.CasterLevel, equipment.Charges));
+                extraDescription += "\n* " + (equipment.Charges == 1 ? LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details-single", equipment.Ability.Name, equipment.CasterLevel) :
+                    LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details-multiple", equipment.Ability.Name, equipment.CasterLevel, equipment.Charges));
                 GameLogContext.Clear();
             }
 
@@ -3497,7 +3484,7 @@ namespace CraftMagicItems {
         private static int CheckCrafterPrerequisites(CraftingProjectData project, UnitDescriptor caster) {
             var missing = GetMissingCrafterPrerequisites(project.CrafterPrerequisites, caster);
             foreach (var prerequisite in missing) {
-                AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-crafter-prerequisite",
+                AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-crafter-prerequisite",
                     new L10NString($"craftMagicItems-crafter-prerequisite-{prerequisite}"), DifficultyClass.MissingPrerequisiteDCModifier));
             }
 
@@ -3546,7 +3533,7 @@ namespace CraftMagicItems {
             var daysAvailableToCraft = (int) Math.Ceiling(interval.TotalDays);
             if (daysAvailableToCraft <= 0) {
                 if (isAdventuring) {
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-not-full-day"));
+                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-not-full-day"));
                 }
 
                 return;
@@ -3581,7 +3568,7 @@ namespace CraftMagicItems {
                     if ((!playerInCapital || returningToCapital)
                         && (project.UpgradeItem.Collection != Game.Instance.Player.SharedStash || withPlayer)
                         && (project.UpgradeItem.Collection != Game.Instance.Player.Inventory || ((!withPlayer || !wieldedInParty) && (withPlayer || wieldedInParty)))) {
-                        project.AddMessage(L10NFormat("craftMagicItems-logMessage-missing-upgrade-item", project.UpgradeItem.Blueprint.Name));
+                        project.AddMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-upgrade-item", project.UpgradeItem.Blueprint.Name));
                         AddBattleLogMessage(project.LastMessage);
                         continue;
                     }
@@ -3610,20 +3597,20 @@ namespace CraftMagicItems {
                 if (missing > 0) {
                     var missingSpellNames = missingSpells.Select(ability => ability.Name).BuildCommaList(project.AnyPrerequisite);
                     if (craftingData.PrerequisitesMandatory || project.PrerequisitesMandatory) {
-                        project.AddMessage(L10NFormat("craftMagicItems-logMessage-missing-prerequisite",
+                        project.AddMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-prerequisite",
                             project.ResultItem.Name, missingSpellNames));
                         AddBattleLogMessage(project.LastMessage);
                         // If the item type has mandatory prerequisites and some are missing, move on to the next project.
                         continue;
                     }
 
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-spell", missingSpellNames,
+                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-spell", missingSpellNames,
                         DifficultyClass.MissingPrerequisiteDCModifier * missing));
                 }
                 var missing2 = CheckFeatPrerequisites(project, caster, out var missingFeats);
                 if (missing2 > 0) {
                     var missingFeatNames = missingFeats.Select(ability => ability.Name).BuildCommaList(project.AnyPrerequisite);
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-feat", missingFeatNames,
+                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-feat", missingFeatNames,
                         DifficultyClass.MissingPrerequisiteDCModifier * missing2));
                 }
                 missing += missing2;
@@ -3637,19 +3624,19 @@ namespace CraftMagicItems {
                         ? DifficultyClass.MissingPrerequisiteDCModifier
                         : DifficultyClass.MissingPrerequisiteDCModifier * (project.CasterLevel - casterLevel);
                     dc += casterLevelPenalty;
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-low-caster-level", project.CasterLevel, casterLevelPenalty));
+                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-low-caster-level", project.CasterLevel, casterLevelPenalty));
                 }
                 var oppositionSchool = CheckForOppositionSchool(caster, project.SpellPrerequisites);
                 if (oppositionSchool != SpellSchool.None) {
                     dc += DifficultyClass.OppositionSchoolDCModifier;
-                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-opposition-school",
+                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-opposition-school",
                         LocalizedTexts.Instance.SpellSchoolNames.GetText(oppositionSchool), DifficultyClass.OppositionSchoolDCModifier));
                 }
 
                 var skillCheck = 10 + caster.Stats.GetStat(craftingSkill).ModifiedValue;
                 if (skillCheck < dc) {
                     // Can't succeed by taking 10... move on to the next project.
-                    project.AddMessage(L10NFormat("craftMagicItems-logMessage-dc-too-high", project.ResultItem.Name,
+                    project.AddMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-dc-too-high", project.ResultItem.Name,
                         LocalizedTexts.Instance.Stats.GetText(craftingSkill), skillCheck, dc));
                     AddBattleLogMessage(project.LastMessage);
                     continue;
@@ -3679,15 +3666,15 @@ namespace CraftMagicItems {
                                     progressGold -= progressPerDay * (daysCrafting - day);
                                     skillCheck -= DifficultyClass.MissingPrerequisiteDCModifier;
                                     if (craftingData.PrerequisitesMandatory || project.PrerequisitesMandatory) {
-                                        AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-prerequisite", project.ResultItem.Name, spell.Name));
+                                        AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-prerequisite", project.ResultItem.Name, spell.Name));
                                         daysCrafting = day;
                                         break;
                                     }
 
-                                    AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-missing-spell", spell.Name, DifficultyClass.MissingPrerequisiteDCModifier));
+                                    AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-spell", spell.Name, DifficultyClass.MissingPrerequisiteDCModifier));
                                     if (skillCheck < dc) {
                                         // Can no longer make progress
-                                        AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-dc-too-high", project.ResultItem.Name,
+                                        AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-dc-too-high", project.ResultItem.Name,
                                             LocalizedTexts.Instance.Stats.GetText(craftingSkill), skillCheck, dc));
                                         daysCrafting = day;
                                     } else {
@@ -3711,7 +3698,7 @@ namespace CraftMagicItems {
                         }
                     } else if (isAdventuring) {
                         // Actually cast the spells if we're adventuring.
-                        AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-expend-spell", spell.Name));
+                        AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-expend-spell", spell.Name));
                         spell.SpendFromSpellbook();
                     }
                 }
@@ -3719,8 +3706,8 @@ namespace CraftMagicItems {
                 var progressKey = project.ItemType == BondedItemRitual
                     ? "craftMagicItems-logMessage-made-progress-bondedItem"
                     : "craftMagicItems-logMessage-made-progress";
-                var progress = L10NFormat(progressKey, progressGold, project.TargetCost - project.Progress, project.ResultItem.Name);
-                var checkResult = L10NFormat("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(craftingSkill),
+                var progress = LocalizationHelper.FormatLocalizedString(progressKey, progressGold, project.TargetCost - project.Progress, project.ResultItem.Name);
+                var checkResult = LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-made-progress-check", LocalizedTexts.Instance.Stats.GetText(craftingSkill),
                     skillCheck, dc);
                 AddBattleLogMessage(progress, checkResult);
                 daysAvailableToCraft -= daysCrafting;
@@ -3728,10 +3715,10 @@ namespace CraftMagicItems {
                 if (project.Progress >= project.TargetCost) {
                     // Completed the project!
                     if (project.ItemType == BondedItemRitual) {
-                        AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-bonding-ritual-complete", project.ResultItem.Name), project.ResultItem);
+                        AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-bonding-ritual-complete", project.ResultItem.Name), project.ResultItem);
                         BondWithObject(project.Crafter, project.ResultItem);
                     } else {
-                        AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-crafting-complete", project.ResultItem.Name), project.ResultItem);
+                        AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-crafting-complete", project.ResultItem.Name), project.ResultItem);
                         CraftItem(project.ResultItem, project.UpgradeItem);
                     }
                     timer.CraftingProjects.Remove(project);
@@ -3744,7 +3731,7 @@ namespace CraftMagicItems {
                     var completeKey = project.ItemType == BondedItemRitual
                         ? "craftMagicItems-logMessage-made-progress-bonding-ritual-amount-complete"
                         : "craftMagicItems-logMessage-made-progress-amount-complete";
-                    var amountComplete = L10NFormat(completeKey, project.ResultItem.Name, 100 * project.Progress / project.TargetCost);
+                    var amountComplete = LocalizationHelper.FormatLocalizedString(completeKey, project.ResultItem.Name, 100 * project.Progress / project.TargetCost);
                     AddBattleLogMessage(amountComplete, project.ResultItem);
                     project.AddMessage($"{progress} {checkResult}");
                 }
@@ -4138,7 +4125,7 @@ namespace CraftMagicItems {
                 if (__instance.VendorBlueprint != null && __instance.VendorBlueprint.IsCompanion) {
                     foreach (var companion in UIUtility.GetGroup(true)) {
                         if (companion.Blueprint == __instance.VendorBlueprint) {
-                            __result = L10NFormat("craftMagicItems-crafted-source-description", companion.CharacterName);
+                            __result = LocalizationHelper.FormatLocalizedString("craftMagicItems-crafted-source-description", companion.CharacterName);
                             break;
                         }
                     }
@@ -4146,7 +4133,7 @@ namespace CraftMagicItems {
                 }
 #else
                 if (__instance.Vendor != null && __instance.Vendor.IsPlayerFaction) {
-                    __result = L10NFormat("craftMagicItems-crafted-source-description", __instance.Vendor.CharacterName);
+                    __result = LocalizationHelper.FormatLocalizedString("craftMagicItems-crafted-source-description", __instance.Vendor.CharacterName);
                     return false;
                 }
 #endif

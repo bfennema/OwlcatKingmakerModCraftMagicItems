@@ -53,7 +53,7 @@ namespace CraftMagicItems {
                 var bondedComponent = Main.GetBondedItemComponentForCaster(caster.Descriptor);
                 if (bondedComponent != null && bondedComponent.ownerItem != null && bondedComponent.ownerItem.Wielder != caster.Descriptor) {
                     Main.AddBattleLogMessage(
-                        Main.L10NFormat(caster, "craftMagicItems-logMessage-not-wielding-bonded-item", bondedComponent.ownerItem.Name),
+                        LocalizationHelper.FormatLocalizedString(caster, "craftMagicItems-logMessage-not-wielding-bonded-item", bondedComponent.ownerItem.Name),
                         new L10NString("craftMagicItems-bonded-item-glossary"));
                     // Concentration checks have no way of overriding the DC, so contrive some fake damage to give a DC of 20 + spell level.
                     var ruleDamage = new RuleDealDamage(caster, caster, null);
