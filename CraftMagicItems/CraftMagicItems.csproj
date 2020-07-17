@@ -124,7 +124,7 @@
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
     <Compile Include="WeaponBaseSizeChange.cs" />
     <Compile Include="CraftMagicItemsAccessors.cs" />
-    <Compile Include="CraftMagicItemsBlueprintPatcher.cs" />
+    <Compile Include="Patches\CraftMagicItemsBlueprintPatcher.cs" />
     <Compile Include="CraftingTimerComponent.cs" />
     <Compile Include="CraftingTypes.cs" />
     <Compile Include="CustomBlueprintBuilder.cs" />
