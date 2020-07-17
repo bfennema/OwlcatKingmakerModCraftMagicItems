@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using CraftMagicItems.Config;
 using CraftMagicItems.Constants;
 using CraftMagicItems.Patches;
 using CraftMagicItems.UI;
@@ -144,8 +145,13 @@ namespace CraftMagicItems {
                 postfix: new HarmonyLib.HarmonyMethod(typeof(PlayerPostLoadPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static))),
         };
 
-        public static UnityModManager.ModEntry ModEntry;
+        /// <summary>UI selections made within Unity Mod Manager</summary>
+        public static Selections Selections;
+
+        /// <summary>Settings that are saved and managed by Unity Mod Manager</summary>
         public static Settings ModSettings;
+
+        public static UnityModManager.ModEntry ModEntry;
         public static CraftMagicItemsAccessors Accessors;
         public static ItemCraftingData[] ItemCraftingData;
         public static CustomLootItem[] CustomLootItems;
@@ -158,18 +164,6 @@ namespace CraftMagicItems {
         private static bool modEnabled = true;
         private static HarmonyLib.Harmony harmonyInstance;
         private static CraftMagicItemsBlueprintPatcher blueprintPatcher;
-        private static OpenSection currentSection = OpenSection.CraftMagicItemsSection;
-        private static readonly Dictionary<string, int> SelectedIndex = new Dictionary<string, int>();
-        private static int selectedCasterLevel;
-        private static bool selectedShowPreparedSpells;
-        private static bool selectedDoubleWeaponSecondEnd;
-        private static bool selectedShieldWeapon;
-        private static int selectedCastsPerDay;
-        private static BlueprintItemEquipment selectedBaseBlueprint;
-        private static string selectedCustomName;
-        private static BlueprintItem upgradingBlueprint;
-        private static bool selectedBondWithNewObject;
-        private static UnitEntityData currentCaster;
 
         private static readonly Dictionary<UsableItemType, Dictionary<string, List<BlueprintItemEquipment>>> SpellIdToItem =
             new Dictionary<UsableItemType, Dictionary<string, List<BlueprintItemEquipment>>>();
@@ -234,9 +228,10 @@ namespace CraftMagicItems {
         // ReSharper disable once UnusedMember.Local
         private static void Load(UnityModManager.ModEntry modEntry) {
             try {
+                Selections = new Selections();
                 ModEntry = modEntry;
                 ModSettings = UnityModManager.ModSettings.Load<Settings>(modEntry);
-                SelectedIndex[CustomPriceLabel] = Mathf.Abs(ModSettings.CraftingPriceScale - 1f) < 0.001 ? 0 :
+                Selections.SelectedIndex[CustomPriceLabel] = Mathf.Abs(ModSettings.CraftingPriceScale - 1f) < 0.001 ? 0 :
                     Mathf.Abs(ModSettings.CraftingPriceScale - 2f) < 0.001 ? 1 : 2;
                 modEnabled = modEntry.Active;
                 modEntry.OnSaveGUI = OnSaveGui;
@@ -294,33 +289,33 @@ namespace CraftMagicItems {
                 GetSelectedCrafter(true);
 
                 //render toggleable views in the main functionality of the mod
-                if (UmmUiRenderer.RenderToggleSection("Craft Magic Items", currentSection == OpenSection.CraftMagicItemsSection))
+                if (UmmUiRenderer.RenderToggleSection("Craft Magic Items", Selections.CurrentSection == OpenSection.CraftMagicItemsSection))
                 {
-                    currentSection = OpenSection.CraftMagicItemsSection;
+                    Selections.CurrentSection = OpenSection.CraftMagicItemsSection;
                     RenderCraftMagicItemsSection();
                 }
 
-                if (UmmUiRenderer.RenderToggleSection("Craft Mundane Items", currentSection == OpenSection.CraftMundaneItemsSection))
+                if (UmmUiRenderer.RenderToggleSection("Craft Mundane Items", Selections.CurrentSection == OpenSection.CraftMundaneItemsSection))
                 {
-                    currentSection = OpenSection.CraftMundaneItemsSection;
+                    Selections.CurrentSection = OpenSection.CraftMundaneItemsSection;
                     RenderCraftMundaneItemsSection();
                 }
 
-                if (UmmUiRenderer.RenderToggleSection("Work in Progress", currentSection == OpenSection.ProjectsSection))
+                if (UmmUiRenderer.RenderToggleSection("Work in Progress", Selections.CurrentSection == OpenSection.ProjectsSection))
                 {
-                    currentSection = OpenSection.ProjectsSection;
+                    Selections.CurrentSection = OpenSection.ProjectsSection;
                     RenderProjectsSection();
                 }
 
-                if (UmmUiRenderer.RenderToggleSection("Feat Reassignment", currentSection == OpenSection.FeatsSection))
+                if (UmmUiRenderer.RenderToggleSection("Feat Reassignment", Selections.CurrentSection == OpenSection.FeatsSection))
                 {
-                    currentSection = OpenSection.FeatsSection;
+                    Selections.CurrentSection = OpenSection.FeatsSection;
                     UserInterfaceEventHandlingLogic.RenderFeatReassignmentSection(FeatReassignmentSectionRendererFactory.GetFeatReassignmentSectionRenderer());
                 }
 
-                if (UmmUiRenderer.RenderToggleSection("Cheats", currentSection == OpenSection.CheatsSection))
+                if (UmmUiRenderer.RenderToggleSection("Cheats", Selections.CurrentSection == OpenSection.CheatsSection))
                 {
-                    currentSection = OpenSection.CheatsSection;
+                    Selections.CurrentSection = OpenSection.CheatsSection;
                     UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(CheatSectionRendererFactory.GetCheatSectionRenderer(), ModSettings, CustomPriceLabel);
                 }
 
@@ -342,7 +337,7 @@ namespace CraftMagicItems {
         }
 
         private static string L10NFormat(string key, params object[] args) {
-            return L10NFormat(currentCaster ?? GetSelectedCrafter(false), key, args);
+            return L10NFormat(Selections.CurrentCaster ?? GetSelectedCrafter(false), key, args);
         }
 
         public static T ReadJsonFile<T>(string fileName, params JsonConverter[] converters) {
@@ -456,7 +451,7 @@ namespace CraftMagicItems {
                 .PrependConditional(hasBondedItemFeature, new L10NString("craftMagicItems-bonded-object-name")).ToArray();
 
             //render whatever the user has selected
-            var selectedItemTypeIndex = DrawSelectionUserInterfaceElements("Crafting: ", itemTypeNames, 6, ref selectedCustomName, false);
+            var selectedItemTypeIndex = DrawSelectionUserInterfaceElements("Crafting: ", itemTypeNames, 6, ref Selections.SelectedCustomName, false);
 
             //render options for actual selection
             if (hasBondedItemFeature && selectedItemTypeIndex == 0) {
@@ -525,13 +520,13 @@ namespace CraftMagicItems {
             }
             var bondedComponent = GetBondedItemComponentForCaster(caster.Descriptor);
             var characterCasterLevel = CharacterCasterLevel(caster.Descriptor);
-            if (bondedComponent == null || bondedComponent.ownerItem == null || selectedBondWithNewObject) {
-                if (selectedBondWithNewObject) {
+            if (bondedComponent == null || bondedComponent.ownerItem == null || Selections.SelectedBondWithNewObject) {
+                if (Selections.SelectedBondWithNewObject) {
                     UmmUiRenderer.RenderLabelRow("You may bond with a different object by performing a special ritual that costs 200 gp per caster level. This ritual takes 8 " +
                                 "hours to complete. Items replaced in this way do not possess any of the additional enchantments of the previous bonded item, " +
                                 "and the previous bonded item loses any enchantments you added via your bond.");
                     if (GUILayout.Button("Cancel bonding to a new object")) {
-                        selectedBondWithNewObject = false;
+                        Selections.SelectedBondWithNewObject = false;
                     }
                 }
                 UmmUiRenderer.RenderLabelRow(
@@ -559,7 +554,7 @@ namespace CraftMagicItems {
                 var itemNames = items.Select(item => item.Name).ToArray();
                 var selectedUpgradeItemIndex = DrawSelectionUserInterfaceElements("Item: ", itemNames, 5);
                 var selectedItem = items[selectedUpgradeItemIndex];
-                var goldCost = !selectedBondWithNewObject || ModSettings.CraftingCostsNoGold ? 0 : 200 * characterCasterLevel;
+                var goldCost = !Selections.SelectedBondWithNewObject || ModSettings.CraftingCostsNoGold ? 0 : 200 * characterCasterLevel;
                 var canAfford = BuildCostString(out var cost, null, goldCost);
                 var label = $"Make {selectedItem.Name} your bonded item{(goldCost == 0 ? "" : " for " + cost)}";
                 if (!canAfford) {
@@ -569,15 +564,15 @@ namespace CraftMagicItems {
                         Game.Instance.UI.Common.UISound.Play(UISoundType.LootCollectGold);
                         Game.Instance.Player.SpendMoney(goldCost);
                     }
-                    if (selectedBondWithNewObject) {
-                        selectedBondWithNewObject = false;
+                    if (Selections.SelectedBondWithNewObject) {
+                        Selections.SelectedBondWithNewObject = false;
                         if (!ModSettings.CraftingTakesNoTime) {
                             // Create project
                             AddBattleLogMessage(L10NFormat("craftMagicItems-logMessage-begin-ritual-bonded-item", cost, selectedItem.Name));
                             var project = new CraftingProjectData(caster, ModSettings.MagicCraftingRate, goldCost, 0, selectedItem, BondedItemRitual);
                             AddNewProject(caster.Descriptor, project);
                             CalculateProjectEstimate(project);
-                            currentSection = OpenSection.ProjectsSection;
+                            Selections.CurrentSection = OpenSection.ProjectsSection;
                             return;
                         }
                     }
@@ -587,7 +582,7 @@ namespace CraftMagicItems {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label($"<b>Your bonded item</b>: {bondedComponent.ownerItem.Name}");
                 if (GUILayout.Button("Bond with a different item", GUILayout.ExpandWidth(false))) {
-                    selectedBondWithNewObject = true;
+                    Selections.SelectedBondWithNewObject = true;
                 }
                 GUILayout.EndHorizontal();
                 var craftingData = GetBondedItemCraftingData(bondedComponent);
@@ -622,18 +617,18 @@ namespace CraftMagicItems {
             var spellLevel = DrawSelectionUserInterfaceElements("Spell level: ", spellLevelNames, 10);
             if (spellLevel > 0 && !spellbook.Blueprint.Spontaneous) {
                 if (ModSettings.CraftingTakesNoTime) {
-                    selectedShowPreparedSpells = true;
+                    Selections.SelectedShowPreparedSpells = true;
                 } else {
                     GUILayout.BeginHorizontal();
-                    selectedShowPreparedSpells = GUILayout.Toggle(selectedShowPreparedSpells, " Show prepared spells only");
+                    Selections.SelectedShowPreparedSpells = GUILayout.Toggle(Selections.SelectedShowPreparedSpells, " Show prepared spells only");
                     GUILayout.EndHorizontal();
                 }
             } else {
-                selectedShowPreparedSpells = false;
+                Selections.SelectedShowPreparedSpells = false;
             }
 
             List<AbilityData> spellOptions;
-            if (selectedShowPreparedSpells) {
+            if (Selections.SelectedShowPreparedSpells) {
                 // Prepared spellcaster
                 spellOptions = spellbook.GetMemorizedSpells(spellLevel).Where(slot => slot.Available).Select(slot => slot.Spell).ToList();
             } else {
@@ -655,15 +650,15 @@ namespace CraftMagicItems {
                 var minCasterLevel = Math.Max(1, 2 * spellLevel - 1);
                 var maxCasterLevel = CharacterCasterLevel(caster.Descriptor, spellbook);
                 if (minCasterLevel < maxCasterLevel) {
-                    selectedCasterLevel = UmmUiRenderer.RenderIntSlider("Caster level: ", selectedCasterLevel, minCasterLevel, maxCasterLevel);
+                    Selections.SelectedCasterLevel = UmmUiRenderer.RenderIntSlider("Caster level: ", Selections.SelectedCasterLevel, minCasterLevel, maxCasterLevel);
                 } else {
-                    selectedCasterLevel = minCasterLevel;
-                    UmmUiRenderer.RenderLabelRow($"Caster level: {selectedCasterLevel}");
+                    Selections.SelectedCasterLevel = minCasterLevel;
+                    UmmUiRenderer.RenderLabelRow($"Caster level: {Selections.SelectedCasterLevel}");
                 }
 
-                RenderCraftingSkillInformation(caster, StatType.SkillKnowledgeArcana, 5 + selectedCasterLevel, selectedCasterLevel);
+                RenderCraftingSkillInformation(caster, StatType.SkillKnowledgeArcana, 5 + Selections.SelectedCasterLevel, Selections.SelectedCasterLevel);
 
-                if (selectedShowPreparedSpells && spellbook.GetSpontaneousConversionSpells(spellLevel).Any()) {
+                if (Selections.SelectedShowPreparedSpells && spellbook.GetSpontaneousConversionSpells(spellLevel).Any()) {
                     var firstSpell = spellbook.Blueprint.Spontaneous
                         ? spellbook.GetKnownSpells(spellLevel).First(spell => true)
                         : spellbook.GetMemorizedSpells(spellLevel).FirstOrDefault(slot => slot.Available)?.Spell;
@@ -688,12 +683,12 @@ namespace CraftMagicItems {
                         // Spells with choices (e.g. Protection from Alignment, which can be Protection from Evil, Good, Chaos or Law)
                         foreach (var variant in spell.Blueprint.Variants)
                         {
-                            AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, variant, spellLevel, selectedCasterLevel);
+                            AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, variant, spellLevel, Selections.SelectedCasterLevel);
                         }
                     }
                     else
                     {
-                        AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, spell.Blueprint, spellLevel, selectedCasterLevel);
+                        AttemptSpellBasedCraftItemAndRender(caster, craftingData, spell, spell.Blueprint, spellLevel, Selections.SelectedCasterLevel);
                     }
                 }
             }
@@ -1143,12 +1138,12 @@ namespace CraftMagicItems {
                 var selectedItemSlotIndex = 0;
                 if (craftingData.Slots.Length > 1) {
                     var names = craftingData.Slots.Select(slot => new L10NString(GetSlotStringKey(slot, craftingData.SlotRestrictions)).ToString()).ToArray();
-                    selectedItemSlotIndex = DrawSelectionUserInterfaceElements("Item type", names, 10, ref selectedCustomName);
+                    selectedItemSlotIndex = DrawSelectionUserInterfaceElements("Item type", names, 10, ref Selections.SelectedCustomName);
                 }
 
                 var locationFilter = ItemLocationFilter.All;
                 var locationNames = Enum.GetNames(typeof(ItemLocationFilter));
-                locationFilter = (ItemLocationFilter)DrawSelectionUserInterfaceElements("Item location", locationNames, locationNames.Length, ref selectedCustomName);
+                locationFilter = (ItemLocationFilter)DrawSelectionUserInterfaceElements("Item location", locationNames, locationNames.Length, ref Selections.SelectedCustomName);
 
                 selectedSlot = craftingData.Slots[selectedItemSlotIndex];
                 var playerInCapital = IsPlayerInCapital();
@@ -1183,7 +1178,7 @@ namespace CraftMagicItems {
                     return;
                 }
 
-                var selectedUpgradeItemIndex = DrawSelectionUserInterfaceElements("Item: ", itemNames, 5, ref selectedCustomName);
+                var selectedUpgradeItemIndex = DrawSelectionUserInterfaceElements("Item: ", itemNames, 5, ref Selections.SelectedCustomName);
                 // See existing item details and enchantments.
                 var index = selectedUpgradeItemIndex - (canCreateNew ? 1 : 0);
                 upgradeItem = index < 0 ? null : items[index];
@@ -1196,11 +1191,11 @@ namespace CraftMagicItems {
                 if (upgradeItemDoubleWeapon != null && upgradeItemDoubleWeapon.Blueprint.Double) {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label($"{upgradeItem.Name} is a double weapon; enchanting ", GUILayout.ExpandWidth(false));
-                    var label = selectedDoubleWeaponSecondEnd ? "Secondary end" : "Primary end";
+                    var label = Selections.SelectedDoubleWeaponSecondEnd ? "Secondary end" : "Primary end";
                     if (GUILayout.Button(label, GUILayout.ExpandWidth(false))) {
-                        selectedDoubleWeaponSecondEnd = !selectedDoubleWeaponSecondEnd;
+                        Selections.SelectedDoubleWeaponSecondEnd = !Selections.SelectedDoubleWeaponSecondEnd;
                     }
-                    if (selectedDoubleWeaponSecondEnd) {
+                    if (Selections.SelectedDoubleWeaponSecondEnd) {
                         upgradeItem = upgradeItemDoubleWeapon.Second;
                     } else {
                         upgradeItemDoubleWeapon = null;
@@ -1212,18 +1207,18 @@ namespace CraftMagicItems {
                 if (upgradeItemShieldWeapon != null) {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label($"{upgradeItem.Name} is a shield; enchanting ", GUILayout.ExpandWidth(false));
-                    var label = selectedShieldWeapon ? "Shield Bash" : "Shield";
+                    var label = Selections.SelectedShieldWeapon ? "Shield Bash" : "Shield";
                     if (GUILayout.Button(label, GUILayout.ExpandWidth(false))) {
-                        selectedShieldWeapon = !selectedShieldWeapon;
+                        Selections.SelectedShieldWeapon = !Selections.SelectedShieldWeapon;
                     }
-                    if (selectedShieldWeapon) {
+                    if (Selections.SelectedShieldWeapon) {
                         upgradeItem = upgradeItemShieldWeapon;
                     } else {
                         upgradeItem = upgradeItemShieldArmor;
                     }
                     GUILayout.EndHorizontal();
                 } else {
-                    selectedShieldWeapon = false;
+                    Selections.SelectedShieldWeapon = false;
                 }
                 if (upgradeItemShield != null) {
                     UmmUiRenderer.RenderLabelRow(BuildItemDescription(upgradeItemShield));
@@ -1245,7 +1240,7 @@ namespace CraftMagicItems {
                     ? new string[0]
                     : new[] {new L10NString("craftMagicItems-label-cast-spell-n-times").ToString()})
                 .ToArray();
-            var selectedRecipeIndex = DrawSelectionUserInterfaceElements("Enchantment: ", recipeNames, 5, ref selectedCustomName);
+            var selectedRecipeIndex = DrawSelectionUserInterfaceElements("Enchantment: ", recipeNames, 5, ref Selections.SelectedCustomName);
             if (selectedRecipeIndex == availableRecipes.Length) {
                 // Cast spell N times
                 RenderCastSpellNTimes(caster, craftingData, upgradeItemShield ?? upgradeItem, selectedSlot);
@@ -1259,7 +1254,7 @@ namespace CraftMagicItems {
                     .OrderBy(recipe => recipe.NameId)
                     .ToArray();
                 recipeNames = availableSubRecipes.Select(recipe => recipe.NameId).ToArray();
-                var selectedSubRecipeIndex = DrawSelectionUserInterfaceElements(category + ": ", recipeNames, 5, ref selectedCustomName);
+                var selectedSubRecipeIndex = DrawSelectionUserInterfaceElements(category + ": ", recipeNames, 5, ref Selections.SelectedCustomName);
                 selectedRecipe = availableSubRecipes[selectedSubRecipeIndex];
             }
 
@@ -1357,7 +1352,7 @@ namespace CraftMagicItems {
                     DoesItemMatchAllEnchantments(blueprint, null, selectedEnchantment.AssetGuid, upgradeItemDoubleWeapon?.Blueprint as BlueprintItemEquipment, false)
                 );
             } else if (upgradeItemShield != null) {
-                if (selectedShieldWeapon) {
+                if (Selections.SelectedShieldWeapon) {
                     matchingItem = allItemBlueprintsWithEnchantment?.FirstOrDefault(blueprint =>
                         DoesItemMatchAllEnchantments(blueprint, null, selectedEnchantment.AssetGuid, upgradeItemShield?.Blueprint as BlueprintItemEquipment, false)
                     );
@@ -1391,8 +1386,8 @@ namespace CraftMagicItems {
             } else if (upgradeItem != null) {
                 // Upgrading to a custom blueprint
                 var name = upgradeItemShield?.Blueprint?.Name ?? upgradeItem.Blueprint.Name;
-                selectedCustomName = UmmUiRenderer.RenderCustomNameField(name, selectedCustomName);
-                name = selectedCustomName == name ? null : selectedCustomName;
+                Selections.SelectedCustomName = UmmUiRenderer.RenderCustomNameField(name, Selections.SelectedCustomName);
+                name = Selections.SelectedCustomName == name ? null : Selections.SelectedCustomName;
                 IEnumerable<string> enchantments;
                 string supersededEnchantmentId;
                 if (selectedRecipe.EnchantmentsCumulative) {
@@ -1406,7 +1401,7 @@ namespace CraftMagicItems {
                 if (upgradeItemShield != null) {
                     upgradeItem = upgradeItemShield;
                 }
-                if (selectedShieldWeapon) {
+                if (Selections.SelectedShieldWeapon) {
                     itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItemShieldWeapon.Blueprint.AssetGuid, enchantments,
                         supersededEnchantmentId == null ? null : new[] {supersededEnchantmentId});
                     itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItemShield.Blueprint.AssetGuid, Enumerable.Empty<string>(),
@@ -1425,8 +1420,8 @@ namespace CraftMagicItems {
             } else {
                 // Crafting a new custom blueprint from scratch.
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
-                var baseBlueprint = selectedBaseBlueprint;
-                selectedCustomName = UmmUiRenderer.RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", selectedCustomName);
+                var baseBlueprint = Selections.SelectedBaseBlueprint;
+                Selections.SelectedCustomName = UmmUiRenderer.RenderCustomNameField($"{selectedRecipe.NameId} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", Selections.SelectedCustomName);
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint, selectedRecipe).Select(enchantment => enchantment.AssetGuid).ToArray();
                 IEnumerable<string> enchantments;
                 if (selectedRecipe.EnchantmentsCumulative) {
@@ -1434,8 +1429,8 @@ namespace CraftMagicItems {
                 } else {
                     enchantments = new List<string> { selectedEnchantment.AssetGuid };
                 }
-                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseBlueprint.AssetGuid, enchantments, enchantmentsToRemove,
-                    selectedCustomName ?? "[custom item]", "null", "null");
+                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(Selections.SelectedBaseBlueprint.AssetGuid, enchantments, enchantmentsToRemove,
+                    Selections.SelectedCustomName ?? "[custom item]", "null", "null");
                 itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
             }
 
@@ -1523,14 +1518,14 @@ namespace CraftMagicItems {
         }
 
         private static void SelectRandomApplicableBaseGuid(ItemCraftingData craftingData, ItemsFilter.ItemType selectedSlot) {
-            if (selectedBaseBlueprint != null) {
-                var baseBlueprint = selectedBaseBlueprint;
+            if (Selections.SelectedBaseBlueprint != null) {
+                var baseBlueprint = Selections.SelectedBaseBlueprint;
                 if (!baseBlueprint || !DoesBlueprintMatchSlot(baseBlueprint, selectedSlot)) {
-                    selectedBaseBlueprint = null;
+                    Selections.SelectedBaseBlueprint = null;
                 }
             }
 
-            selectedBaseBlueprint = selectedBaseBlueprint ?? RandomBaseBlueprintId(craftingData,
+            Selections.SelectedBaseBlueprint = Selections.SelectedBaseBlueprint ?? RandomBaseBlueprintId(craftingData,
                                    blueprint => DoesBlueprintMatchSlot(blueprint, selectedSlot));
         }
 
@@ -1554,12 +1549,12 @@ namespace CraftMagicItems {
                 // Choose a spellbook known to the caster
                 var spellbooks = caster.Descriptor.Spellbooks.ToList();
                 var spellBookNames = spellbooks.Select(book => book.Blueprint.Name.ToString()).Concat(Enumerable.Repeat("From Items", 1)).ToArray();
-                var selectedSpellbookIndex = DrawSelectionUserInterfaceElements("Source: ", spellBookNames, 10, ref selectedCustomName);
+                var selectedSpellbookIndex = DrawSelectionUserInterfaceElements("Source: ", spellBookNames, 10, ref Selections.SelectedCustomName);
                 if (selectedSpellbookIndex < spellbooks.Count) {
                     var spellbook = spellbooks[selectedSpellbookIndex];
                     // Choose a spell level
                     var spellLevelNames = Enumerable.Range(0, spellbook.Blueprint.MaxSpellLevel + 1).Select(index => $"Level {index}").ToArray();
-                    spellLevel = DrawSelectionUserInterfaceElements("Spell level: ", spellLevelNames, 10, ref selectedCustomName);
+                    spellLevel = DrawSelectionUserInterfaceElements("Spell level: ", spellLevelNames, 10, ref Selections.SelectedCustomName);
                     var specialSpellLists = Accessors.GetSpellbookSpecialLists(spellbook);
                     var spellOptions = spellbook.Blueprint.SpellList.GetSpells(spellLevel)
                         .Concat(specialSpellLists.Aggregate(new List<BlueprintAbility>(), (allSpecial, spellList) => spellList.GetSpells(spellLevel)))
@@ -1572,11 +1567,11 @@ namespace CraftMagicItems {
                     }
 
                     var spellNames = spellOptions.Select(spell => spell.Name).ToArray();
-                    var selectedSpellIndex = DrawSelectionUserInterfaceElements("Spell: ", spellNames, 4, ref selectedCustomName);
+                    var selectedSpellIndex = DrawSelectionUserInterfaceElements("Spell: ", spellNames, 4, ref Selections.SelectedCustomName);
                     ability = spellOptions[selectedSpellIndex];
                     if (ability.HasVariants && ability.Variants != null) {
                         var selectedVariantIndex =
-                            DrawSelectionUserInterfaceElements("Variant: ", ability.Variants.Select(spell => spell.Name).ToArray(), 4, ref selectedCustomName);
+                            DrawSelectionUserInterfaceElements("Variant: ", ability.Variants.Select(spell => spell.Name).ToArray(), 4, ref Selections.SelectedCustomName);
                         ability = ability.Variants[selectedVariantIndex];
                     }
                 } else {
@@ -1594,7 +1589,7 @@ namespace CraftMagicItems {
                         return;
                     }
                     var itemNames = itemBlueprints.Select(item => item.Name).ToArray();
-                    var itemIndex = DrawSelectionUserInterfaceElements("Cast from item: ", itemNames, 5, ref selectedCustomName);
+                    var itemIndex = DrawSelectionUserInterfaceElements("Cast from item: ", itemNames, 5, ref Selections.SelectedCustomName);
                     var selectedItemBlueprint = itemBlueprints[itemIndex];
                     ability = selectedItemBlueprint.Ability;
                     spellLevel = selectedItemBlueprint.SpellLevel;
@@ -1610,51 +1605,51 @@ namespace CraftMagicItems {
 
             // Choose a caster level
             var minCasterLevel = Math.Max(equipment == null ? 0 : equipment.CasterLevel, Math.Max(1, 2 * spellLevel - 1));
-            selectedCasterLevel = UmmUiRenderer.RenderIntSlider("Caster level: ", selectedCasterLevel, minCasterLevel, 20);
+            Selections.SelectedCasterLevel = UmmUiRenderer.RenderIntSlider("Caster level: ", Selections.SelectedCasterLevel, minCasterLevel, 20);
             // Choose number of times per day
             var maxCastsPerDay = equipment == null ? 10 : ((equipment.Charges + 10) / 10) * 10;
-            selectedCastsPerDay = UmmUiRenderer.RenderIntSlider("Casts per day: ", selectedCastsPerDay, equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
-            if (equipment != null && ability == equipment.Ability && selectedCasterLevel == equipment.CasterLevel && selectedCastsPerDay == equipment.Charges) {
+            Selections.SelectedCastsPerDay = UmmUiRenderer.RenderIntSlider("Casts per day: ", Selections.SelectedCastsPerDay, equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
+            if (equipment != null && ability == equipment.Ability && Selections.SelectedCasterLevel == equipment.CasterLevel && Selections.SelectedCastsPerDay == equipment.Charges) {
                 UmmUiRenderer.RenderLabelRow($"No changes made to {equipment.Name}");
                 return;
             }
 
             // Show skill info
-            RenderCraftingSkillInformation(caster, StatType.SkillKnowledgeArcana, 5 + selectedCasterLevel, selectedCasterLevel, new[] {ability});
+            RenderCraftingSkillInformation(caster, StatType.SkillKnowledgeArcana, 5 + Selections.SelectedCasterLevel, Selections.SelectedCasterLevel, new[] {ability});
 
             string itemGuid;
             if (upgradeItem == null) {
                 // Option to rename item
-                selectedCustomName = UmmUiRenderer.RenderCustomNameField($"{ability.Name} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", selectedCustomName);
+                Selections.SelectedCustomName = UmmUiRenderer.RenderCustomNameField($"{ability.Name} {new L10NString(GetSlotStringKey(selectedSlot, craftingData.SlotRestrictions))}", Selections.SelectedCustomName);
                 // Pick random base item
                 SelectRandomApplicableBaseGuid(craftingData, selectedSlot);
                 // Create customised item GUID
-                var baseBlueprint = selectedBaseBlueprint;
+                var baseBlueprint = Selections.SelectedBaseBlueprint;
                 var enchantmentsToRemove = GetEnchantments(baseBlueprint).Select(enchantment => enchantment.AssetGuid).ToArray();
-                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(selectedBaseBlueprint.AssetGuid, new List<string>(), enchantmentsToRemove, selectedCustomName,
-                    ability.AssetGuid, "null", casterLevel: selectedCasterLevel, spellLevel: spellLevel, perDay: selectedCastsPerDay);
+                itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(Selections.SelectedBaseBlueprint.AssetGuid, new List<string>(), enchantmentsToRemove, Selections.SelectedCustomName,
+                    ability.AssetGuid, "null", casterLevel: Selections.SelectedCasterLevel, spellLevel: spellLevel, perDay: Selections.SelectedCastsPerDay);
             } else {
                 // Option to rename item
-                selectedCustomName = UmmUiRenderer.RenderCustomNameField(upgradeItem.Blueprint.Name, selectedCustomName);
+                Selections.SelectedCustomName = UmmUiRenderer.RenderCustomNameField(upgradeItem.Blueprint.Name, Selections.SelectedCustomName);
                 // Create customised item GUID
                 itemGuid = blueprintPatcher.BuildCustomRecipeItemGuid(upgradeItem.Blueprint.AssetGuid, new List<string>(), null,
-                    selectedCustomName == upgradeItem.Blueprint.Name ? null : selectedCustomName, ability.AssetGuid,
-                    casterLevel: selectedCasterLevel == equipment.CasterLevel ? -1 : selectedCasterLevel,
+                    Selections.SelectedCustomName == upgradeItem.Blueprint.Name ? null : Selections.SelectedCustomName, ability.AssetGuid,
+                    casterLevel: Selections.SelectedCasterLevel == equipment.CasterLevel ? -1 : Selections.SelectedCasterLevel,
                     spellLevel: spellLevel == equipment.SpellLevel ? -1 : spellLevel,
-                    perDay: selectedCastsPerDay == equipment.Charges ? -1 : selectedCastsPerDay);
+                    perDay: Selections.SelectedCastsPerDay == equipment.Charges ? -1 : Selections.SelectedCastsPerDay);
             }
 
             var itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
 
             // Render craft button
-            GameLogContext.Count = selectedCastsPerDay;
-            UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
+            GameLogContext.Count = Selections.SelectedCastsPerDay;
+            UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, Selections.SelectedCasterLevel));
             GameLogContext.Clear();
             var recipe = new RecipeData {
                 PrerequisiteSpells = new[] {ability},
                 PrerequisitesMandatory = true
             };
-            RenderRecipeBasedCraftItemControl(caster, craftingData, recipe, selectedCasterLevel, itemToCraft, upgradeItem);
+            RenderRecipeBasedCraftItemControl(caster, craftingData, recipe, Selections.SelectedCasterLevel, itemToCraft, upgradeItem);
         }
 
         public static int CharacterCasterLevel(UnitDescriptor character, Spellbook forSpellbook = null) {
@@ -1839,15 +1834,15 @@ namespace CraftMagicItems {
                                && (data.ParentNameId == null || SubCraftingData[data.ParentNameId][0] == data))
                 .ToArray();
             var itemTypeNames = itemTypes.Select(data => new L10NString(data.ParentNameId ?? data.NameId).ToString()).ToArray();
-            var selectedItemTypeIndex = upgradingBlueprint == null
-                ? DrawSelectionUserInterfaceElements("Mundane Crafting: ", itemTypeNames, 6, ref selectedCustomName)
+            var selectedItemTypeIndex = Selections.UpgradingBlueprint == null
+                ? DrawSelectionUserInterfaceElements("Mundane Crafting: ", itemTypeNames, 6, ref Selections.SelectedCustomName)
                 : GetSelectionIndex("Mundane Crafting: ");
 
             var selectedCraftingData = itemTypes[selectedItemTypeIndex];
             if (selectedCraftingData.ParentNameId != null) {
                 itemTypeNames = SubCraftingData[selectedCraftingData.ParentNameId].Select(data => new L10NString(data.NameId).ToString()).ToArray();
                 var label = new L10NString(selectedCraftingData.ParentNameId) + ": ";
-                var selectedItemSubTypeIndex = upgradingBlueprint == null
+                var selectedItemSubTypeIndex = Selections.UpgradingBlueprint == null
                     ? DrawSelectionUserInterfaceElements(label, itemTypeNames, 6)
                     : GetSelectionIndex(label);
 
@@ -1861,8 +1856,8 @@ namespace CraftMagicItems {
 
             BlueprintItem baseBlueprint;
 
-            if (upgradingBlueprint != null) {
-                baseBlueprint = upgradingBlueprint;
+            if (Selections.UpgradingBlueprint != null) {
+                baseBlueprint = Selections.UpgradingBlueprint;
                 UmmUiRenderer.RenderLabelRow($"Applying upgrades to {baseBlueprint.Name}");
             } else {
                 // Choose mundane item of selected type to create
@@ -1877,7 +1872,7 @@ namespace CraftMagicItems {
                     return;
                 }
 
-                var selectedUpgradeItemIndex = DrawSelectionUserInterfaceElements("Item: ", blueprintNames, 5, ref selectedCustomName);
+                var selectedUpgradeItemIndex = DrawSelectionUserInterfaceElements("Item: ", blueprintNames, 5, ref Selections.SelectedCustomName);
                 baseBlueprint = blueprints[selectedUpgradeItemIndex];
                 // See existing item details and enchantments.
                 UmmUiRenderer.RenderLabelRow(baseBlueprint.Description);
@@ -1894,7 +1889,7 @@ namespace CraftMagicItems {
                 .OrderBy(recipe => recipe.NameId)
                 .ToArray();
             var recipeNames = availableRecipes.Select(recipe => recipe.NameId).ToArray();
-            var selectedRecipeIndex = DrawSelectionUserInterfaceElements("Craft: ", recipeNames, 6, ref selectedCustomName);
+            var selectedRecipeIndex = DrawSelectionUserInterfaceElements("Craft: ", recipeNames, 6, ref Selections.SelectedCustomName);
             var selectedRecipe = availableRecipes.Any() ? availableRecipes[selectedRecipeIndex] : null;
             var selectedEnchantment = selectedRecipe?.Enchantments.Length == 1 ? selectedRecipe.Enchantments[0] : null;
             if (selectedRecipe != null && selectedRecipe.Material != 0) {
@@ -1965,13 +1960,13 @@ namespace CraftMagicItems {
             if (!itemToCraft) {
                 UmmUiRenderer.RenderLabelRow($"Error: null custom item from looking up blueprint ID {itemGuid}");
             } else {
-                if (upgradingBlueprint != null && GUILayout.Button($"Cancel {baseBlueprint.Name}", GUILayout.ExpandWidth(false))) {
-                    upgradingBlueprint = null;
+                if (Selections.UpgradingBlueprint != null && GUILayout.Button($"Cancel {baseBlueprint.Name}", GUILayout.ExpandWidth(false))) {
+                    Selections.UpgradingBlueprint = null;
                 }
 
                 if (craftingData.MundaneEnhancementsStackable) {
                     if (upgradeName != null && GUILayout.Button($"Add {upgradeName} to {baseBlueprint.Name}", GUILayout.ExpandWidth(false))) {
-                        upgradingBlueprint = itemToCraft;
+                        Selections.UpgradingBlueprint = itemToCraft;
                     }
 
                     RenderRecipeBasedCraftItemControl(crafter, craftingData, null, 0, baseBlueprint);
@@ -2075,7 +2070,7 @@ namespace CraftMagicItems {
         }
 
         public static UnitEntityData GetSelectedCrafter(bool render) {
-            currentCaster = null;
+            Selections.CurrentCaster = null;
             // Only allow remote companions if the player is in the capital.
             var remote = IsPlayerInCapital();
             var characters = UIUtility.GetGroup(remote).Where(character => character != null
@@ -2098,7 +2093,7 @@ namespace CraftMagicItems {
                 var partyNames = characters.Select(entity => $"{entity.CharacterName}" +
                                                              $"{((GetCraftingTimerComponentForCaster(entity.Descriptor)?.CraftingProjects.Any() ?? false) ? "*" : "")}")
                     .ToArray();
-                selectedSpellcasterIndex = DrawSelectionUserInterfaceElements(label, partyNames, 8, ref upgradingBlueprint);
+                selectedSpellcasterIndex = DrawSelectionUserInterfaceElements(label, partyNames, 8, ref Selections.UpgradingBlueprint);
             }
             if (selectedSpellcasterIndex >= characters.Length) {
                 selectedSpellcasterIndex = 0;
@@ -2137,13 +2132,14 @@ namespace CraftMagicItems {
             return newIndex;
         }
 
-        private static int GetSelectionIndex(string label) {
-            return SelectedIndex.ContainsKey(label) ? SelectedIndex[label] : 0;
+        private static int GetSelectionIndex(string label)
+        {
+            return Selections.SelectedIndex.ContainsKey(label) ? Selections.SelectedIndex[label] : 0;
         }
 
         private static void SetSelectionIndex(string label, int value)
         {
-            SelectedIndex[label] = value;
+            Selections.SelectedIndex[label] = value;
         }
 
         public static void AddItemBlueprintForSpell(UsableItemType itemType, BlueprintItemEquipment itemBlueprint) {
@@ -2465,7 +2461,7 @@ namespace CraftMagicItems {
                     new[] { spellBlueprint });
                 AddNewProject(caster.Descriptor, project);
                 CalculateProjectEstimate(project);
-                currentSection = OpenSection.ProjectsSection;
+                Selections.CurrentSection = OpenSection.ProjectsSection;
             }
         }
 
@@ -2573,13 +2569,13 @@ namespace CraftMagicItems {
                         recipe?.AnyPrerequisite ?? false, upgradeItem, recipe?.CrafterPrerequisites ?? new CrafterPrerequisiteType[0]);
                     AddNewProject(caster.Descriptor, project);
                     CalculateProjectEstimate(project);
-                    currentSection = OpenSection.ProjectsSection;
+                    Selections.CurrentSection = OpenSection.ProjectsSection;
                 }
 
                 // Reset base blueprint for next item
-                selectedBaseBlueprint = null;
+                Selections.SelectedBaseBlueprint = null;
                 // And stop upgrading the item, if relevant.
-                upgradingBlueprint = null;
+                Selections.UpgradingBlueprint = null;
             }
         }
 
@@ -3545,7 +3541,7 @@ namespace CraftMagicItems {
                 return;
             }
 
-            currentCaster = caster.Unit;
+            Selections.CurrentCaster = caster.Unit;
             var withPlayer = Game.Instance.Player.PartyCharacters.Contains(caster.Unit);
             var playerInCapital = IsPlayerInCapital();
             // Only update characters in the capital when the player is also there.

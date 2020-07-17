@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="BondedItemComponent.cs" />
+    <Compile Include="Config\Selections.cs" />
     <Compile Include="Constants\Areas.cs" />
     <Compile Include="Constants\ClassBlueprints.cs" />
     <Compile Include="Constants\DefaultCosts.cs" />
