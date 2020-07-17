@@ -1,3 +1,4 @@
+using CraftMagicItems.Localization;
 using Kingmaker;
 #if PATCH21
 using Kingmaker.Assets.UI.Context;

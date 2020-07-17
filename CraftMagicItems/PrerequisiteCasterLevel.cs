@@ -1,3 +1,4 @@
+using CraftMagicItems.Localization;
 using Kingmaker.Blueprints.Classes.Prerequisites;
 using Kingmaker.Localization;
 using Kingmaker.UnitLogic;

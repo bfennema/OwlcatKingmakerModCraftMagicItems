@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using CraftMagicItems.Constants;
+using CraftMagicItems.Localization;
 using CraftMagicItems.UI.Sections;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;

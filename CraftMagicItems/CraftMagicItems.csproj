@@ -129,8 +129,8 @@
     <Compile Include="CraftingTypes.cs" />
     <Compile Include="CustomBlueprintBuilder.cs" />
     <Compile Include="Image2Sprite.cs" />
-    <Compile Include="L10n.cs" />
-    <Compile Include="L10NString.cs" />
+    <Compile Include="Localization\L10N.cs" />
+    <Compile Include="Localization\L10NString.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="PrerequisiteCasterLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

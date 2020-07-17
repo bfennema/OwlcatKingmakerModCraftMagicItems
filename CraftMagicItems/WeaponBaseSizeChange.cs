@@ -1,3 +1,4 @@
+using CraftMagicItems.Localization;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.EntitySystem.Stats;

@@ -1,4 +1,5 @@
-﻿using Kingmaker.Localization;
+﻿using CraftMagicItems.Localization;
+using Kingmaker.Localization;
 
 namespace CraftMagicItems.Constants
 {

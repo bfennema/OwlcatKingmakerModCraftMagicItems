@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using CraftMagicItems.Config;
 using CraftMagicItems.Constants;
+using CraftMagicItems.Localization;
 using CraftMagicItems.Patches;
 using CraftMagicItems.UI;
 using CraftMagicItems.UI.Sections;
@@ -3226,7 +3227,7 @@ namespace CraftMagicItems {
             public static void ModEnabledChanged() {
                 if (!mainMenuStarted && ResourcesLibrary.LibraryObject != null) {
                     mainMenuStarted = true;
-                    L10n.SetEnabled(true);
+                    L10N.SetEnabled(true);
                     SustenanceEnchantment.MainMenuStartPatch.Postfix();
                     WildEnchantment.MainMenuStartPatch.Postfix();
                     CreateQuiverAbility.MainMenuStartPatch.Postfix();
@@ -3249,7 +3250,7 @@ namespace CraftMagicItems {
                     PatchAllOrdered();
                     InitialiseMod();
                 }
-                L10n.SetEnabled(modEnabled);
+                L10N.SetEnabled(modEnabled);
             }
         }
 

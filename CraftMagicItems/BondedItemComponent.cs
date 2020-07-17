@@ -1,3 +1,4 @@
+using CraftMagicItems.Localization;
 using Kingmaker;
 using Kingmaker.Items;
 using Kingmaker.Items.Slots;
