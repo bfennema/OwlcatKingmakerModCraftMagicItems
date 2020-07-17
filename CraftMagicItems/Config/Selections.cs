@@ -50,5 +50,22 @@ namespace CraftMagicItems.Config
 
         /// <summary>Blueprint that is currently being upgraded</summary>
         public BlueprintItem UpgradingBlueprint;
+
+
+        /// <summary>Retrieves the select index in <see cref="SelectedIndex" /> matching the key of <paramref name="label" /></summary>
+        /// <param name="label">Label used as a key to search on</param>
+        /// <returns>The selected index value, or 0 if <paramref name="label" /> cannot be found</returns>
+        public int GetSelectionIndex(string label)
+        {
+            return SelectedIndex.ContainsKey(label) ? SelectedIndex[label] : 0;
+        }
+
+        /// <summary>Sets the <see cref="SelectedIndex" /> matching the key of <paramref name="label" /></summary>
+        /// <param name="label">Label used as a key to search on</param>
+        /// <param name="value">Value to assign</param>
+        public void SetSelectionIndex(string label, int value)
+        {
+            SelectedIndex[label] = value;
+        }
     }
 }
