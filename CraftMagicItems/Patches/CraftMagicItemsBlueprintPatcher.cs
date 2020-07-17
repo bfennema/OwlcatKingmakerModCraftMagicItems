@@ -370,7 +370,7 @@ namespace CraftMagicItems.Patches
             var prerequisite = ScriptableObject.CreateInstance<PrerequisiteCasterLevel>();
 #endif
             var featGuid = BuildCustomFeatGuid(blueprint.AssetGuid, feat);
-            var itemData = Main.ItemCraftingData.First(data => data.FeatGuid == featGuid);
+            var itemData = Main.LoadedData.ItemCraftingData.First(data => data.FeatGuid == featGuid);
             prerequisite.SetPrerequisiteCasterLevel(itemData.MinimumCasterLevel);
             blueprint.ComponentsArray = new BlueprintComponent[] { prerequisite };
             return featGuid;

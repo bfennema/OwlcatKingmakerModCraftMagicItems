@@ -32,6 +32,12 @@ namespace CraftMagicItems.Config
         /// <summary>Collection of various enchantment costs, keyed on enchantment blueprint ID</summary>
         public readonly Dictionary<string, int> EnchantmentIdToCost;
 
+        /// <summary>Array of item crafting data read from JSON file</summary>
+        public ItemCraftingData[] ItemCraftingData;
+
+        /// <summary>Array of custom loot data read from JSON file</summary>
+        public CustomLootItem[] CustomLootItems;
+
         /// <summary>Default constructor</summary>
         public DictionaryData()
         {

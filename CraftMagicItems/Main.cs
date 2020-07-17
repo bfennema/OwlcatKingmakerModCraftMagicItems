@@ -156,8 +156,6 @@ namespace CraftMagicItems {
 
         public static UnityModManager.ModEntry ModEntry;
         public static CraftMagicItemsAccessors Accessors;
-        public static ItemCraftingData[] ItemCraftingData;
-        public static CustomLootItem[] CustomLootItems;
 #if PATCH21
         public static readonly List<LogItemData> PendingLogItems = new List<LogItemData>();
 #else
@@ -432,7 +430,7 @@ namespace CraftMagicItems {
             }
 
             //what crafting options are available (which feats are available for the selected character)
-            var itemTypes = ItemCraftingData
+            var itemTypes = LoadedData.ItemCraftingData
                 .Where(data => data.FeatGuid != null && (ModSettings.IgnoreCraftingFeats || CharacterHasFeat(caster, data.FeatGuid)))
                 .ToArray();
             if (!Enumerable.Any(itemTypes) && !hasBondedItemFeature) {
@@ -466,7 +464,7 @@ namespace CraftMagicItems {
 
         private static RecipeBasedItemCraftingData GetBondedItemCraftingData(BondedItemComponent bondedComponent) {
             // Find crafting data relevant to the bonded item
-            return ItemCraftingData.OfType<RecipeBasedItemCraftingData>()
+            return LoadedData.ItemCraftingData.OfType<RecipeBasedItemCraftingData>()
                 .First(data => data.Slots.Contains(bondedComponent.ownerItem.Blueprint.ItemType) && !IsMundaneCraftingData(data));
         }
 
@@ -1754,7 +1752,7 @@ namespace CraftMagicItems {
                 Game.Instance.UI.Common.UISound.Play(UISoundType.LootCollectGold);
                 var goldRefund = project.GoldSpent >= 0 ? project.GoldSpent : project.TargetCost;
                 Game.Instance.Player.GainMoney(goldRefund);
-                var craftingData = ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
+                var craftingData = LoadedData.ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
                 BuildCostString(out var cost, craftingData, goldRefund, project.SpellPrerequisites, project.ResultItem.Blueprint, project.UpgradeItem?.Blueprint);
                 var factor = GetMaterialComponentMultiplier(craftingData, project.ResultItem.Blueprint, project.UpgradeItem?.Blueprint);
                 if (factor > 0) {
@@ -1823,7 +1821,7 @@ namespace CraftMagicItems {
             var crafter = GetSelectedCrafter(false);
 
             // Choose crafting data
-            var itemTypes = ItemCraftingData
+            var itemTypes = LoadedData.ItemCraftingData
                 .Where(data => data.NameId != null && data.FeatGuid == null
                                && (data.ParentNameId == null || LoadedData.SubCraftingData[data.ParentNameId][0] == data))
                 .ToArray();
@@ -2314,7 +2312,7 @@ namespace CraftMagicItems {
         }
 
         private static void CalculateProjectEstimate(CraftingProjectData project) {
-            var craftingData = ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
+            var craftingData = LoadedData.ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
             StatType craftingSkill;
             int dc;
             int progressRate;
@@ -2908,9 +2906,9 @@ namespace CraftMagicItems {
 
             private static void InitialiseCraftingData() {
                 // Read the crafting data now that ResourcesLibrary is loaded.
-                ItemCraftingData = ReadJsonFile<ItemCraftingData[]>($"{ModEntry.Path}/Data/ItemTypes.json", new CraftingTypeConverter());
+                LoadedData.ItemCraftingData = ReadJsonFile<ItemCraftingData[]>($"{ModEntry.Path}/Data/ItemTypes.json", new CraftingTypeConverter());
                 // Initialise lookup tables.
-                foreach (var itemData in ItemCraftingData) {
+                foreach (var itemData in LoadedData.ItemCraftingData) {
                     if (itemData is RecipeBasedItemCraftingData recipeBased) {
                         recipeBased.Recipes = recipeBased.RecipeFileNames.Aggregate(Enumerable.Empty<RecipeData>(),
                             (all, fileName) => all.Concat(ReadJsonFile<RecipeData[]>($"{ModEntry.Path}/Data/{fileName}"))
@@ -2996,7 +2994,8 @@ namespace CraftMagicItems {
                         }
                     }
                 }
-                CustomLootItems = ReadJsonFile<CustomLootItem[]>($"{ModEntry.Path}/Data/LootItems.json");
+
+                LoadedData.CustomLootItems = ReadJsonFile<CustomLootItem[]>($"{ModEntry.Path}/Data/LootItems.json");
             }
 
             private static void AddCraftingFeats(ObjectIDGenerator idGenerator, BlueprintProgression progression) {
@@ -3007,7 +3006,7 @@ namespace CraftMagicItems {
                             // Use ObjectIDGenerator to detect which shared lists we've added the feats to.
                             idGenerator.GetId(selection.AllFeatures, out var firstTime);
                             if (firstTime) {
-                                foreach (var data in ItemCraftingData) {
+                                foreach (var data in LoadedData.ItemCraftingData) {
                                     if (data.FeatGuid != null) {
                                         var featBlueprint = ResourcesLibrary.TryGetBlueprint(data.FeatGuid) as BlueprintFeature;
                                         var list = selection.AllFeatures.ToList();
@@ -3032,7 +3031,7 @@ namespace CraftMagicItems {
                 }
 
                 // Alchemists get Brew Potion as a bonus 1st level feat, except for Grenadier archetype alchemists.
-                var brewPotionData = ItemCraftingData.First(data => data.Name == "Potion");
+                var brewPotionData = LoadedData.ItemCraftingData.First(data => data.Name == "Potion");
                 var brewPotion = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(brewPotionData.FeatGuid);
                 var alchemistProgression = ResourcesLibrary.TryGetBlueprint<BlueprintProgression>(ClassBlueprints.AlchemistProgressionGuid);
                 var grenadierArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(ClassBlueprints.AlchemistGrenadierArchetypeGuid);
@@ -3053,7 +3052,7 @@ namespace CraftMagicItems {
                 }
 
                 // Scroll Savant should get Scribe Scroll as a bonus 1st level feat.
-                var scribeScrollData = ItemCraftingData.First(data => data.Name == "Scroll");
+                var scribeScrollData = LoadedData.ItemCraftingData.First(data => data.Name == "Scroll");
                 var scribeScroll = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(scribeScrollData.FeatGuid);
                 var scrollSavantArchetype = ResourcesLibrary.TryGetBlueprint<BlueprintArchetype>(ClassBlueprints.ScrollSavantArchetypeGuid);
                 if (scribeScroll != null && scrollSavantArchetype != null) {
@@ -3237,7 +3236,7 @@ namespace CraftMagicItems {
 
                 if (!modEnabled) {
                     // Reset everything InitialiseMod initialises
-                    ItemCraftingData = null;
+                    LoadedData.ItemCraftingData = null;
                     LoadedData.SubCraftingData.Clear();
                     LoadedData.SpellIdToItem.Clear();
                     LoadedData.TypeToItem.Clear();
@@ -3587,7 +3586,7 @@ namespace CraftMagicItems {
                     }
                 }
 
-                var craftingData = ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
+                var craftingData = LoadedData.ItemCraftingData.FirstOrDefault(data => data.Name == project.ItemType);
                 StatType craftingSkill;
                 int dc;
                 int progressRate;
@@ -3826,7 +3825,7 @@ namespace CraftMagicItems {
         }
 
         private static void UpgradeSave(Version version) {
-            foreach (var lootItem in CustomLootItems) {
+            foreach (var lootItem in LoadedData.CustomLootItems) {
                 var firstTime = (version == null || version.CompareTo(lootItem.AddInVersion) < 0);
                 var item = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(lootItem.AssetGuid);
                 if (item == null) {
@@ -3856,7 +3855,7 @@ namespace CraftMagicItems {
                         foreach (var project in timer.CraftingProjects) {
                             if (project.ItemBlueprint != null) {
                                 // Migrate all projects using ItemBlueprint to use ResultItem
-                                var craftingData = ItemCraftingData.First(data => data.Name == project.ItemType);
+                                var craftingData = LoadedData.ItemCraftingData.First(data => data.Name == project.ItemType);
                                 project.ResultItem = BuildItemEntity(project.ItemBlueprint, craftingData, character);
                                 project.ItemBlueprint = null;
                             }

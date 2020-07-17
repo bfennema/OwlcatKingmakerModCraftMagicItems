@@ -80,7 +80,7 @@ namespace CraftMagicItems.UI
             }
 
             var casterLevel = Main.CharacterCasterLevel(caster.Descriptor);
-            var missingFeats = Main.ItemCraftingData
+            var missingFeats = Main.LoadedData.ItemCraftingData
                 .Where(data => data.FeatGuid != null && !Main.CharacterHasFeat(caster, data.FeatGuid) && data.MinimumCasterLevel <= casterLevel)
                 .ToArray();
             if (missingFeats.Length == 0)
