@@ -2077,16 +2077,6 @@ namespace CraftMagicItems
             }
         }
 
-        public static void AddRecipeForEnchantment(string enchantmentId, RecipeData recipe) {
-            if (!LoadedData.EnchantmentIdToRecipe.ContainsKey(enchantmentId)) {
-                LoadedData.EnchantmentIdToRecipe.Add(enchantmentId, new List<RecipeData>());
-            }
-
-            if (!LoadedData.EnchantmentIdToRecipe[enchantmentId].Contains(recipe)) {
-                LoadedData.EnchantmentIdToRecipe[enchantmentId].Add(recipe);
-            }
-        }
-
         private static IEnumerable<BlueprintItemEquipment> FindItemBlueprintForEnchantmentId(string assetGuid) {
             return LoadedData.EnchantmentIdToItem.ContainsKey(assetGuid) ? LoadedData.EnchantmentIdToItem[assetGuid] : null;
         }

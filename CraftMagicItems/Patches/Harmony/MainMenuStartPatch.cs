@@ -65,7 +65,7 @@ namespace CraftMagicItems.Patches.Harmony
                         {
                             recipe.ParentNameId = new L10NString(recipe.ParentNameId).ToString();
                         }
-                        recipe.Enchantments.ForEach(enchantment => Main.AddRecipeForEnchantment(enchantment.AssetGuid, recipe));
+                        recipe.Enchantments.ForEach(enchantment => AddRecipeForEnchantment(enchantment.AssetGuid, recipe));
                         if (recipe.Material != 0)
                         {
                             AddRecipeForMaterial(recipe.Material, recipe);
@@ -399,6 +399,19 @@ namespace CraftMagicItems.Patches.Harmony
             if (!Main.LoadedData.MaterialToRecipe[material].Contains(recipe))
             {
                 Main.LoadedData.MaterialToRecipe[material].Add(recipe);
+            }
+        }
+
+        public static void AddRecipeForEnchantment(string enchantmentId, RecipeData recipe)
+        {
+            if (!Main.LoadedData.EnchantmentIdToRecipe.ContainsKey(enchantmentId))
+            {
+                Main.LoadedData.EnchantmentIdToRecipe.Add(enchantmentId, new List<RecipeData>());
+            }
+
+            if (!Main.LoadedData.EnchantmentIdToRecipe[enchantmentId].Contains(recipe))
+            {
+                Main.LoadedData.EnchantmentIdToRecipe[enchantmentId].Add(recipe);
             }
         }
     }
