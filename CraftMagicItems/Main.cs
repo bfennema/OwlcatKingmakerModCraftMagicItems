@@ -655,7 +655,7 @@ namespace CraftMagicItems
             }
         }
 
-        private static string GetBlueprintItemType(BlueprintItem blueprint) {
+        public static string GetBlueprintItemType(BlueprintItem blueprint) {
             string assetGuid = null;
             switch (blueprint) {
                 case BlueprintItemArmor armor:   assetGuid = armor.Type.AssetGuid;  break;
@@ -2056,13 +2056,6 @@ namespace CraftMagicItems
             }
 
             return LoadedData.SpellIdToItem[itemType].ContainsKey(spell.AssetGuid) ? LoadedData.SpellIdToItem[itemType][spell.AssetGuid] : null;
-        }
-
-        public static void AddItemForType(BlueprintItem blueprint) {
-            string assetGuid = GetBlueprintItemType(blueprint);
-            if (!string.IsNullOrEmpty(assetGuid)) {
-                LoadedData.TypeToItem.Add(assetGuid, blueprint);
-            }
         }
 
         private static IEnumerable<BlueprintItemEquipment> FindItemBlueprintForEnchantmentId(string assetGuid) {

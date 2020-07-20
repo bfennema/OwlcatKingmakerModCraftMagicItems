@@ -8,6 +8,7 @@ using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
+using Kingmaker.Blueprints.Items;
 using Kingmaker.Blueprints.Items.Armors;
 using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Equipment;
@@ -89,7 +90,7 @@ namespace CraftMagicItems.Patches.Harmony
                         {
                             if (!blueprint.AssetGuid.Contains("#CraftMagicItems"))
                             {
-                                Main.AddItemForType(blueprint);
+                                AddItemForType(blueprint);
                             }
                         }
                     }
@@ -428,6 +429,15 @@ namespace CraftMagicItems.Patches.Harmony
 
                     Main.LoadedData.EnchantmentIdToItem[enchantment.AssetGuid].Add(itemBlueprint);
                 }
+            }
+        }
+
+        public static void AddItemForType(BlueprintItem blueprint)
+        {
+            string assetGuid = Main.GetBlueprintItemType(blueprint);
+            if (!string.IsNullOrEmpty(assetGuid))
+            {
+                Main.LoadedData.TypeToItem.Add(assetGuid, blueprint);
             }
         }
     }
