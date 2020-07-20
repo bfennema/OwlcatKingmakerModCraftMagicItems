@@ -2567,6 +2567,7 @@ namespace CraftMagicItems
 
             return 0;
         }
+
         private static int ItemMaxEnchantmentLevel(BlueprintItem blueprint) {
             if (blueprint is BlueprintItemWeapon || blueprint is BlueprintItemArmor || blueprint is BlueprintItemShield) {
                 return 10;
@@ -2615,9 +2616,11 @@ namespace CraftMagicItems
             return ItemPlusEquivalent(blueprint) <= ItemMaxEnchantmentLevel(blueprint);
         }
 
-        private static int GetEnchantmentCost(string enchantmentId, BlueprintItem blueprint) {
+        public static int GetEnchantmentCost(string enchantmentId, BlueprintItem blueprint)
+        {
             var recipe = FindSourceRecipe(enchantmentId, blueprint);
-            if (recipe != null) {
+            if (recipe != null)
+            {
                 var index = recipe.Enchantments.FindIndex(enchantment => enchantment.AssetGuid == enchantmentId);
                 var casterLevel = recipe.CasterLevelStart + index * recipe.CasterLevelMultiplier;
                 var epicFactor = casterLevel > 20 ? 2 : 1;
@@ -2763,48 +2766,6 @@ namespace CraftMagicItems
 
             // Usable (belt slot) items cost double.
             return (3 * (baseCost + cost) - mostExpensiveEnchantmentCost) / (blueprint is BlueprintItemEquipmentUsable ? 1 : 2);
-        }
-
-        // Attempt to work out the cost of enchantments which aren't in recipes by checking if blueprint, which contains the enchantment, contains only other
-        // enchantments whose cost is known.
-        public static bool ReverseEngineerEnchantmentCost(BlueprintItemEquipment blueprint, string enchantmentId) {
-            if (blueprint == null || blueprint.IsNotable || blueprint.Ability != null || blueprint.ActivatableAbility != null) {
-                return false;
-            }
-
-            if (blueprint is BlueprintItemShield || blueprint is BlueprintItemWeapon || blueprint is BlueprintItemArmor) {
-                // Cost of enchantments on arms and armor is different, and can be treated as a straight delta.
-                return true;
-            }
-
-            var mostExpensiveEnchantmentCost = 0;
-            var costSum = 0;
-            foreach (var enchantment in blueprint.Enchantments) {
-                if (enchantment.AssetGuid == enchantmentId) {
-                    continue;
-                }
-
-                if (!LoadedData.EnchantmentIdToRecipe.ContainsKey(enchantment.AssetGuid) && !LoadedData.EnchantmentIdToCost.ContainsKey(enchantment.AssetGuid)) {
-                    return false;
-                }
-
-                var enchantmentCost = GetEnchantmentCost(enchantment.AssetGuid, blueprint);
-                costSum += enchantmentCost;
-                if (mostExpensiveEnchantmentCost < enchantmentCost) {
-                    mostExpensiveEnchantmentCost = enchantmentCost;
-                }
-            }
-
-            var remainder = blueprint.Cost - 3 * costSum / 2;
-            if (remainder >= mostExpensiveEnchantmentCost) {
-                // enchantmentId is the most expensive enchantment
-                LoadedData.EnchantmentIdToCost[enchantmentId] = remainder;
-            } else {
-                // mostExpensiveEnchantmentCost is the most expensive enchantment
-                LoadedData.EnchantmentIdToCost[enchantmentId] = (2 * remainder + mostExpensiveEnchantmentCost) / 3;
-            }
-
-            return true;
         }
 
         public static void AddBattleLogMessage(string message, object tooltip = null, Color? color = null) {

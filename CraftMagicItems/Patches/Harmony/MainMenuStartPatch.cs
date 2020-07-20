@@ -8,8 +8,10 @@ using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
+using Kingmaker.Blueprints.Items.Armors;
 using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Blueprints.Items.Equipment;
+using Kingmaker.Blueprints.Items.Shields;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Enums.Damage;
@@ -135,7 +137,7 @@ namespace CraftMagicItems.Patches.Harmony
                     var itemsWithEnchantment = Main.LoadedData.EnchantmentIdToItem[enchantment.AssetGuid];
                     foreach (var item in itemsWithEnchantment)
                     {
-                        if (Main.ReverseEngineerEnchantmentCost(item, enchantment.AssetGuid))
+                        if (ReverseEngineerEnchantmentCost(item, enchantment.AssetGuid))
                         {
                             break;
                         }
@@ -332,6 +334,60 @@ namespace CraftMagicItems.Patches.Harmony
                 InitialiseMod();
             }
             L10N.SetEnabled(Main.modEnabled);
+        }
+
+        /// <summary>
+        ///     Attempt to work out the cost of enchantments which aren't in recipes by checking if blueprint, which contains the enchantment, contains only other
+        ///     enchantments whose cost is known.
+        /// </summary>
+        public static bool ReverseEngineerEnchantmentCost(BlueprintItemEquipment blueprint, string enchantmentId)
+        {
+            if (blueprint == null || blueprint.IsNotable || blueprint.Ability != null || blueprint.ActivatableAbility != null)
+            {
+                return false;
+            }
+
+            if (blueprint is BlueprintItemShield || blueprint is BlueprintItemWeapon || blueprint is BlueprintItemArmor)
+            {
+                // Cost of enchantments on arms and armor is different, and can be treated as a straight delta.
+                return true;
+            }
+
+            var mostExpensiveEnchantmentCost = 0;
+            var costSum = 0;
+            foreach (var enchantment in blueprint.Enchantments)
+            {
+                if (enchantment.AssetGuid == enchantmentId)
+                {
+                    continue;
+                }
+
+                if (!Main.LoadedData.EnchantmentIdToRecipe.ContainsKey(enchantment.AssetGuid) && !Main.LoadedData.EnchantmentIdToCost.ContainsKey(enchantment.AssetGuid))
+                {
+                    return false;
+                }
+
+                var enchantmentCost = Main.GetEnchantmentCost(enchantment.AssetGuid, blueprint);
+                costSum += enchantmentCost;
+                if (mostExpensiveEnchantmentCost < enchantmentCost)
+                {
+                    mostExpensiveEnchantmentCost = enchantmentCost;
+                }
+            }
+
+            var remainder = blueprint.Cost - 3 * costSum / 2;
+            if (remainder >= mostExpensiveEnchantmentCost)
+            {
+                // enchantmentId is the most expensive enchantment
+                Main.LoadedData.EnchantmentIdToCost[enchantmentId] = remainder;
+            }
+            else
+            {
+                // mostExpensiveEnchantmentCost is the most expensive enchantment
+                Main.LoadedData.EnchantmentIdToCost[enchantmentId] = (2 * remainder + mostExpensiveEnchantmentCost) / 3;
+            }
+
+            return true;
         }
     }
 }
