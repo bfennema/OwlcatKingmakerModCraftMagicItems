@@ -2668,67 +2668,6 @@ namespace CraftMagicItems
             }
         }
 
-        public static AbilityData FindCasterSpell(UnitDescriptor caster, BlueprintAbility spellBlueprint, bool mustHavePrepared,
-            IReadOnlyCollection<AbilityData> spellsToCast) {
-            foreach (var spellbook in caster.Spellbooks) {
-                var spellLevel = spellbook.GetSpellLevel(spellBlueprint);
-                if (spellLevel > spellbook.MaxSpellLevel || spellLevel < 0) {
-                    continue;
-                }
-
-                if (mustHavePrepared && spellLevel > 0) {
-                    if (spellbook.Blueprint.Spontaneous) {
-                        // Count how many other spells of this class and level they're going to cast, to ensure they don't double-dip on spell slots.
-                        var toCastCount = spellsToCast.Count(ability => ability.Spellbook == spellbook && spellbook.GetSpellLevel(ability) == spellLevel);
-                        // Spontaneous spellcaster must have enough spell slots of the required level.
-                        if (spellbook.GetSpontaneousSlots(spellLevel) <= toCastCount) {
-                            continue;
-                        }
-                    } else {
-                        // Prepared spellcaster must have memorized the spell...
-                        var spellSlot = spellbook.GetMemorizedSpells(spellLevel).FirstOrDefault(slot =>
-                            slot.Available && (slot.Spell?.Blueprint == spellBlueprint ||
-                                               spellBlueprint.Parent && slot.Spell?.Blueprint == spellBlueprint.Parent));
-                        if (spellSlot == null && (spellbook.GetSpontaneousConversionSpells(spellLevel).Contains(spellBlueprint) ||
-                                                  (spellBlueprint.Parent &&
-                                                   spellbook.GetSpontaneousConversionSpells(spellLevel).Contains(spellBlueprint.Parent)))) {
-                            // ... or be able to convert, in which case any available spell of the given level will do.
-                            spellSlot = spellbook.GetMemorizedSpells(spellLevel).FirstOrDefault(slot => slot.Available);
-                        }
-
-                        if (spellSlot == null) {
-                            continue;
-                        }
-
-                        return spellSlot.Spell;
-                    }
-                }
-
-                return spellbook.GetKnownSpells(spellLevel).Concat(spellbook.GetSpecialSpells(spellLevel))
-                    .First(known => known.Blueprint == spellBlueprint ||
-                                    (spellBlueprint.Parent && known.Blueprint == spellBlueprint.Parent));
-            }
-
-            // Try casting the spell from an item
-            ItemEntity fromItem = null;
-            var fromItemCharges = 0;
-            foreach (var item in caster.Inventory) {
-                // Check (non-potion) items wielded by the caster to see if they can cast the required spell
-                if (item.Wielder == caster && (!(item.Blueprint is BlueprintItemEquipmentUsable usable) || usable.Type != UsableItemType.Potion)
-                                           && (item.Ability?.Blueprint == spellBlueprint ||
-                                               (spellBlueprint.Parent && item.Ability?.Blueprint == spellBlueprint.Parent))) {
-                    // Choose the item with the most available charges, with a multiplier if the item restores charges on rest.
-                    var charges = item.Charges * (((BlueprintItemEquipment) item.Blueprint).RestoreChargesOnRest ? 50 : 1);
-                    if (charges > fromItemCharges) {
-                        fromItem = item;
-                        fromItemCharges = charges;
-                    }
-                }
-            }
-
-            return fromItem?.Ability?.Data;
-        }
-
         public static bool EquipmentEnchantmentValid(ItemEntityWeapon weapon, ItemEntity owner)
         {
             if ((weapon == owner) ||
