@@ -11,6 +11,8 @@ using Kingmaker.Blueprints.Root;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.UI.Log;
 using Kingmaker.UnitLogic;
+using Kingmaker.UnitLogic.Abilities;
+using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.Utility;
 
 namespace CraftMagicItems
@@ -123,7 +125,7 @@ namespace CraftMagicItems
                     progressRate = Main.ModSettings.MagicCraftingRate;
                 }
 
-                var missing = Main.CheckSpellPrerequisites(project, caster, isAdventuring, out var missingSpells, out var spellsToCast);
+                var missing = CheckSpellPrerequisites(project, caster, isAdventuring, out var missingSpells, out var spellsToCast);
                 if (missing > 0)
                 {
                     var missingSpellNames = missingSpells
@@ -351,6 +353,41 @@ namespace CraftMagicItems
             }
 
             return anyPrerequisite ? Math.Min(1, missingFeats.Count) : missingFeats.Count;
+        }
+
+        private static int CheckSpellPrerequisites(CraftingProjectData project, UnitDescriptor caster, bool mustPrepare,
+            out List<BlueprintAbility> missingSpells, out List<AbilityData> spellsToCast)
+        {
+            return CheckSpellPrerequisites(project.SpellPrerequisites, project.AnyPrerequisite, caster, mustPrepare, out missingSpells, out spellsToCast);
+        }
+
+        public static int CheckSpellPrerequisites(BlueprintAbility[] prerequisites, bool anyPrerequisite, UnitDescriptor caster, bool mustPrepare,
+            out List<BlueprintAbility> missingSpells, out List<AbilityData> spellsToCast)
+        {
+            spellsToCast = new List<AbilityData>();
+            missingSpells = new List<BlueprintAbility>();
+            if (prerequisites != null)
+            {
+                foreach (var spellBlueprint in prerequisites)
+                {
+                    var spell = Main.FindCasterSpell(caster, spellBlueprint, mustPrepare, spellsToCast);
+                    if (spell != null)
+                    {
+                        spellsToCast.Add(spell);
+                        if (anyPrerequisite)
+                        {
+                            missingSpells.Clear();
+                            return 0;
+                        }
+                    }
+                    else
+                    {
+                        missingSpells.Add(spellBlueprint);
+                    }
+                }
+            }
+
+            return anyPrerequisite ? Math.Min(1, missingSpells.Count) : missingSpells.Count;
         }
     }
 }

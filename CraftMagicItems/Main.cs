@@ -1590,7 +1590,7 @@ namespace CraftMagicItems
                 UmmUiRenderer.RenderLabelRow($"Base Crafting DC: {dc}");
             }
             // ReSharper disable once UnusedVariable
-            var missing = CheckSpellPrerequisites(prerequisiteSpells, anyPrerequisite, crafter.Descriptor, false, out var missingSpells,
+            var missing = CraftingLogic.CheckSpellPrerequisites(prerequisiteSpells, anyPrerequisite, crafter.Descriptor, false, out var missingSpells,
                 // ReSharper disable once UnusedVariable
                 out var spellsToCast);
             missing += CraftingLogic.CheckFeatPrerequisites(prerequisiteFeats, anyPrerequisite, crafter.Descriptor, out var missingFeats);
@@ -2727,33 +2727,6 @@ namespace CraftMagicItems
             }
 
             return fromItem?.Ability?.Data;
-        }
-
-        public static int CheckSpellPrerequisites(CraftingProjectData project, UnitDescriptor caster, bool mustPrepare,
-            out List<BlueprintAbility> missingSpells, out List<AbilityData> spellsToCast) {
-            return CheckSpellPrerequisites(project.SpellPrerequisites, project.AnyPrerequisite, caster, mustPrepare, out missingSpells, out spellsToCast);
-        }
-
-        private static int CheckSpellPrerequisites(BlueprintAbility[] prerequisites, bool anyPrerequisite, UnitDescriptor caster, bool mustPrepare,
-            out List<BlueprintAbility> missingSpells, out List<AbilityData> spellsToCast) {
-            spellsToCast = new List<AbilityData>();
-            missingSpells = new List<BlueprintAbility>();
-            if (prerequisites != null) {
-                foreach (var spellBlueprint in prerequisites) {
-                    var spell = FindCasterSpell(caster, spellBlueprint, mustPrepare, spellsToCast);
-                    if (spell != null) {
-                        spellsToCast.Add(spell);
-                        if (anyPrerequisite) {
-                            missingSpells.Clear();
-                            return 0;
-                        }
-                    } else {
-                        missingSpells.Add(spellBlueprint);
-                    }
-                }
-            }
-
-            return anyPrerequisite ? Math.Min(1, missingSpells.Count) : missingSpells.Count;
         }
 
         public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster) {
