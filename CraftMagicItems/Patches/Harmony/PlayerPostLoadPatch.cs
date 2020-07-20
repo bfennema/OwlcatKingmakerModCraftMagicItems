@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Linq;
+using Kingmaker;
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
+using Kingmaker.Blueprints.Items;
+using Kingmaker.Blueprints.Loot;
+using Kingmaker.Items;
 using Kingmaker.UI.Common;
+using UnityEngine;
 
 namespace CraftMagicItems.Patches.Harmony
 {
@@ -57,7 +63,7 @@ namespace CraftMagicItems.Patches.Harmony
 
                     if (character.IsMainCharacter)
                     {
-                        Main.UpgradeSave(string.IsNullOrEmpty(timer.Version) ? null : Version.Parse(timer.Version));
+                        UpgradeSave(string.IsNullOrEmpty(timer.Version) ? null : Version.Parse(timer.Version));
                         timer.Version = Main.ModEntry.Version.ToString();
                     }
                 }
@@ -85,6 +91,75 @@ namespace CraftMagicItems.Patches.Harmony
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private static void AddToLootTables(BlueprintItem blueprint, string[] tableNames, bool firstTime)
+        {
+            var tableCount = tableNames.Length;
+            foreach (var loot in ResourcesLibrary.GetBlueprints<BlueprintLoot>())
+            {
+                if (tableNames.Contains(loot.name))
+                {
+                    tableCount--;
+                    if (!loot.Items.Any(entry => entry.Item == blueprint))
+                    {
+                        var lootItems = loot.Items.ToList();
+                        lootItems.Add(new LootEntry { Count = 1, Item = blueprint });
+                        loot.Items = lootItems.ToArray();
+                    }
+                }
+            }
+            foreach (var unitLoot in ResourcesLibrary.GetBlueprints<BlueprintUnitLoot>())
+            {
+                if (tableNames.Contains(unitLoot.name))
+                {
+                    tableCount--;
+                    if (unitLoot is BlueprintSharedVendorTable vendor)
+                    {
+                        if (firstTime)
+                        {
+                            var vendorTable = Game.Instance.Player.SharedVendorTables.GetTable(vendor);
+                            vendorTable.Add(blueprint.CreateEntity());
+                        }
+                    }
+                    else if (!unitLoot.ComponentsArray.Any(component => component is LootItemsPackFixed pack && pack.Item.Item == blueprint))
+                    {
+                        var lootItem = new LootItem();
+                        Main.Accessors.SetLootItemItem(lootItem) = blueprint;
+#if PATCH21_BETA
+                        var lootComponent = SerializedScriptableObject.CreateInstance<LootItemsPackFixed>();
+#else
+                        var lootComponent = ScriptableObject.CreateInstance<LootItemsPackFixed>();
+#endif
+                        Main.Accessors.SetLootItemsPackFixedItem(lootComponent) = lootItem;
+                        Main.blueprintPatcher.EnsureComponentNameUnique(lootComponent, unitLoot.ComponentsArray);
+                        var components = unitLoot.ComponentsArray.ToList();
+                        components.Add(lootComponent);
+                        unitLoot.ComponentsArray = components.ToArray();
+                    }
+                }
+            }
+            if (tableCount > 0)
+            {
+                HarmonyLib.FileLog.Log($"!!! Failed to match all loot table names for {blueprint.Name}.  {tableCount} table names not found.");
+            }
+        }
+
+        public static void UpgradeSave(Version version)
+        {
+            foreach (var lootItem in Main.LoadedData.CustomLootItems)
+            {
+                var firstTime = (version == null || version.CompareTo(lootItem.AddInVersion) < 0);
+                var item = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(lootItem.AssetGuid);
+                if (item == null)
+                {
+                    HarmonyLib.FileLog.Log($"!!! Loot item not created: {lootItem.AssetGuid}");
+                }
+                else
+                {
+                    AddToLootTables(item, lootItem.LootTables, firstTime);
                 }
             }
         }
