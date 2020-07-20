@@ -2071,58 +2071,6 @@ namespace CraftMagicItems
             return blueprintIds[RandomGenerator.Next(blueprintIds.Length)];
         }
 
-        public static void CraftItem(ItemEntity resultItem, ItemEntity upgradeItem = null) {
-            var characters = UIUtility.GetGroup(true).Where(character => character.IsPlayerFaction && !character.Descriptor.IsPet);
-            foreach (var character in characters) {
-                var bondedComponent = GetBondedItemComponentForCaster(character.Descriptor);
-                if (bondedComponent && bondedComponent.ownerItem == upgradeItem) {
-                    bondedComponent.ownerItem = resultItem;
-                }
-            }
-
-            using (new DisableBattleLog(!ModSettings.CraftingTakesNoTime)) {
-                var holdingSlot = upgradeItem?.HoldingSlot;
-                var slotIndex = upgradeItem?.InventorySlotIndex;
-                var inventory = true;
-                if (upgradeItem != null) {
-                    if (Game.Instance.Player.Inventory.Contains(upgradeItem)) {
-                        Game.Instance.Player.Inventory.Remove(upgradeItem);
-                    } else {
-                        Game.Instance.Player.SharedStash.Remove(upgradeItem);
-                        inventory = false;
-                    }
-                }
-                if (holdingSlot == null) {
-                    if (inventory) {
-                        Game.Instance.Player.Inventory.Add(resultItem);
-                    } else {
-                        Game.Instance.Player.SharedStash.Add(resultItem);
-                    }
-                    if (slotIndex is int value) {
-                        resultItem.SetSlotIndex(value);
-                    }
-                } else {
-                    holdingSlot.InsertItem(resultItem);
-                }
-            }
-
-            if (resultItem is ItemEntityUsable usable) {
-                switch (usable.Blueprint.Type) {
-                    case UsableItemType.Scroll:
-                        Game.Instance.UI.Common.UISound.Play(UISoundType.NewInformation);
-                        break;
-                    case UsableItemType.Potion:
-                        Game.Instance.UI.Common.UISound.PlayItemSound(SlotAction.Take, resultItem, false);
-                        break;
-                    default:
-                        Game.Instance.UI.Common.UISound.Play(UISoundType.SettlementBuildStart);
-                        break;
-                }
-            } else {
-                Game.Instance.UI.Common.UISound.Play(UISoundType.SettlementBuildStart);
-            }
-        }
-
         private static int CalculateSpellBasedGoldCost(SpellBasedItemCraftingData craftingData, int spellLevel, int casterLevel) {
             return spellLevel == 0 ? craftingData.BaseItemGoldCost * casterLevel / 8 : craftingData.BaseItemGoldCost * spellLevel * casterLevel / 4;
         }
@@ -2302,7 +2250,7 @@ namespace CraftMagicItems
             {
                 AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-expend-spell", spell.Name));
                 spell.SpendFromSpellbook();
-                CraftItem(resultItem);
+                CraftingLogic.CraftItem(resultItem);
             }
             else
             {
@@ -2407,7 +2355,7 @@ namespace CraftMagicItems
                 var resultItem = BuildItemEntity(itemBlueprint, craftingData, caster);
                 AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-begin-crafting", cost, itemBlueprint.Name), resultItem);
                 if (ModSettings.CraftingTakesNoTime) {
-                    CraftItem(resultItem, upgradeItem);
+                    CraftingLogic.CraftItem(resultItem, upgradeItem);
                 } else {
                     var project = new CraftingProjectData(caster, requiredProgress, goldCost, casterLevel, resultItem, craftingData.Name, recipe?.Name,
                         recipe?.PrerequisiteSpells ?? new BlueprintAbility[0], recipe?.PrerequisiteFeats ?? Array.Empty<BlueprintFeature>(), recipe?.PrerequisitesMandatory ?? false,

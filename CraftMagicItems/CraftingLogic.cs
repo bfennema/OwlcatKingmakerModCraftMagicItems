@@ -12,6 +12,8 @@ using Kingmaker.Blueprints.Root;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
 using Kingmaker.Items;
+using Kingmaker.UI;
+using Kingmaker.UI.Common;
 using Kingmaker.UI.Log;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities;
@@ -280,7 +282,7 @@ namespace CraftMagicItems
                     else
                     {
                         Main.AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-crafting-complete", project.ResultItem.Name), project.ResultItem);
-                        Main.CraftItem(project.ResultItem, project.UpgradeItem);
+                        CraftItem(project.ResultItem, project.UpgradeItem);
                     }
                     timer.CraftingProjects.Remove(project);
                     if (project.UpgradeItem == null)
@@ -489,6 +491,77 @@ namespace CraftMagicItems
         public static bool IsMundaneCraftingData(ItemCraftingData craftingData)
         {
             return craftingData.FeatGuid == null;
+        }
+
+        public static void CraftItem(ItemEntity resultItem, ItemEntity upgradeItem = null)
+        {
+            var characters = UIUtility.GetGroup(true).Where(character => character.IsPlayerFaction && !character.Descriptor.IsPet);
+            foreach (var character in characters)
+            {
+                var bondedComponent = Main.GetBondedItemComponentForCaster(character.Descriptor);
+                if (bondedComponent && bondedComponent.ownerItem == upgradeItem)
+                {
+                    bondedComponent.ownerItem = resultItem;
+                }
+            }
+
+            using (new DisableBattleLog(!Main.ModSettings.CraftingTakesNoTime))
+            {
+                var holdingSlot = upgradeItem?.HoldingSlot;
+                var slotIndex = upgradeItem?.InventorySlotIndex;
+                var inventory = true;
+                if (upgradeItem != null)
+                {
+                    if (Game.Instance.Player.Inventory.Contains(upgradeItem))
+                    {
+                        Game.Instance.Player.Inventory.Remove(upgradeItem);
+                    }
+                    else
+                    {
+                        Game.Instance.Player.SharedStash.Remove(upgradeItem);
+                        inventory = false;
+                    }
+                }
+                if (holdingSlot == null)
+                {
+                    if (inventory)
+                    {
+                        Game.Instance.Player.Inventory.Add(resultItem);
+                    }
+                    else
+                    {
+                        Game.Instance.Player.SharedStash.Add(resultItem);
+                    }
+                    if (slotIndex is int value)
+                    {
+                        resultItem.SetSlotIndex(value);
+                    }
+                }
+                else
+                {
+                    holdingSlot.InsertItem(resultItem);
+                }
+            }
+
+            if (resultItem is ItemEntityUsable usable)
+            {
+                switch (usable.Blueprint.Type)
+                {
+                    case UsableItemType.Scroll:
+                        Game.Instance.UI.Common.UISound.Play(UISoundType.NewInformation);
+                        break;
+                    case UsableItemType.Potion:
+                        Game.Instance.UI.Common.UISound.PlayItemSound(SlotAction.Take, resultItem, false);
+                        break;
+                    default:
+                        Game.Instance.UI.Common.UISound.Play(UISoundType.SettlementBuildStart);
+                        break;
+                }
+            }
+            else
+            {
+                Game.Instance.UI.Common.UISound.Play(UISoundType.SettlementBuildStart);
+            }
         }
     }
 }
