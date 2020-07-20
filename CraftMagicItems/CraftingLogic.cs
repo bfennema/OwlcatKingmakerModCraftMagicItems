@@ -116,7 +116,7 @@ namespace CraftMagicItems
                     dc = 10 + project.Crafter.Stats.GetStat(craftingSkill).ModifiedValue;
                     progressRate = Main.ModSettings.MagicCraftingRate;
                 }
-                else if (Main.IsMundaneCraftingData(craftingData))
+                else if (IsMundaneCraftingData(craftingData))
                 {
                     craftingSkill = StatType.SkillKnowledgeWorld;
                     dc = Main.CalculateMundaneCraftingDC((RecipeBasedItemCraftingData)craftingData, project.ResultItem.Blueprint, caster);
@@ -484,6 +484,11 @@ namespace CraftMagicItems
             }
 
             return fromItem?.Ability?.Data;
+        }
+
+        public static bool IsMundaneCraftingData(ItemCraftingData craftingData)
+        {
+            return craftingData.FeatGuid == null;
         }
     }
 }

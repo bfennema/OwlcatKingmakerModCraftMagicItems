@@ -370,7 +370,7 @@ namespace CraftMagicItems
         private static RecipeBasedItemCraftingData GetBondedItemCraftingData(BondedItemComponent bondedComponent) {
             // Find crafting data relevant to the bonded item
             return LoadedData.ItemCraftingData.OfType<RecipeBasedItemCraftingData>()
-                .First(data => data.Slots.Contains(bondedComponent.ownerItem.Blueprint.ItemType) && !IsMundaneCraftingData(data));
+                .First(data => data.Slots.Contains(bondedComponent.ownerItem.Blueprint.ItemType) && !CraftingLogic.IsMundaneCraftingData(data));
         }
 
         private static void UnBondFromCurrentBondedItem(UnitEntityData caster) {
@@ -2187,7 +2187,7 @@ namespace CraftMagicItems
                 craftingSkill = StatType.SkillKnowledgeArcana;
                 dc = 10 + project.Crafter.Stats.GetStat(craftingSkill).ModifiedValue;
                 progressRate = ModSettings.MagicCraftingRate;
-            } else if (IsMundaneCraftingData(craftingData)) {
+            } else if (CraftingLogic.IsMundaneCraftingData(craftingData)) {
                 craftingSkill = StatType.SkillKnowledgeWorld;
                 var recipeBasedItemCraftingData = (RecipeBasedItemCraftingData) craftingData;
                 dc = CalculateMundaneCraftingDC(recipeBasedItemCraftingData, project.ResultItem.Blueprint, project.Crafter.Descriptor);
@@ -2314,10 +2314,6 @@ namespace CraftMagicItems
             }
         }
 
-        public static bool IsMundaneCraftingData(ItemCraftingData craftingData) {
-            return craftingData.FeatGuid == null;
-        }
-
         private static void RenderRecipeBasedCraftItemControl(UnitEntityData caster, ItemCraftingData craftingData, RecipeData recipe, int casterLevel,
             BlueprintItem itemBlueprint, ItemEntity upgradeItem = null) {
             int baseCost = (craftingData.Count != 0 ? craftingData.Count : 1) * itemBlueprint.Cost;
@@ -2325,7 +2321,7 @@ namespace CraftMagicItems
             int materialComponentCost = recipe?.MaterialComponentCost ?? 0;
             var requiredProgress = (baseCost - upgradeCost - materialComponentCost) / 4;
             var goldCost = materialComponentCost + (int)Mathf.Round(requiredProgress * ModSettings.CraftingPriceScale);
-            if (IsMundaneCraftingData(craftingData)) {
+            if (CraftingLogic.IsMundaneCraftingData(craftingData)) {
                 // For mundane crafting, the gold cost is less, and the cost of the recipes don't increase the required progress.
                 goldCost = Math.Max(1, (goldCost * 2 + 2) / 3);
                 var recipeCost = 0;
