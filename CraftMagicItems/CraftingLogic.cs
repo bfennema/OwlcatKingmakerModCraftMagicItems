@@ -4,15 +4,18 @@ using System.Linq;
 using CraftMagicItems.Constants;
 using CraftMagicItems.Localization;
 using Kingmaker;
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Spells;
 using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Root;
 using Kingmaker.EntitySystem.Stats;
+using Kingmaker.Enums;
 using Kingmaker.UI.Log;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.UnitLogic.Alignments;
 using Kingmaker.Utility;
 
 namespace CraftMagicItems
@@ -313,7 +316,7 @@ namespace CraftMagicItems
 
         private static int CheckCrafterPrerequisites(CraftingProjectData project, UnitDescriptor caster)
         {
-            var missing = Main.GetMissingCrafterPrerequisites(project.CrafterPrerequisites, caster);
+            var missing = GetMissingCrafterPrerequisites(project.CrafterPrerequisites, caster);
             foreach (var prerequisite in missing)
             {
                 Main.AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-crafter-prerequisite",
@@ -388,6 +391,24 @@ namespace CraftMagicItems
             }
 
             return anyPrerequisite ? Math.Min(1, missingSpells.Count) : missingSpells.Count;
+        }
+
+        public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster)
+        {
+            var missingCrafterPrerequisites = new List<CrafterPrerequisiteType>();
+            if (prerequisites != null)
+            {
+                missingCrafterPrerequisites.AddRange(prerequisites.Where(prerequisite =>
+                    prerequisite == CrafterPrerequisiteType.AlignmentLawful && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Lawful) == 0
+                    || prerequisite == CrafterPrerequisiteType.AlignmentGood && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Good) == 0
+                    || prerequisite == CrafterPrerequisiteType.AlignmentChaotic && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Chaotic) == 0
+                    || prerequisite == CrafterPrerequisiteType.AlignmentEvil && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Evil) == 0
+                    || prerequisite == CrafterPrerequisiteType.FeatureChannelEnergy &&
+                    caster.GetFeature(ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(Features.ChannelEnergyFeatureGuid)) == null
+                ));
+            }
+
+            return missingCrafterPrerequisites;
         }
     }
 }

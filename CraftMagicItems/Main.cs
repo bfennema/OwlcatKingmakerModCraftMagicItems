@@ -1594,7 +1594,7 @@ namespace CraftMagicItems
                 // ReSharper disable once UnusedVariable
                 out var spellsToCast);
             missing += CraftingLogic.CheckFeatPrerequisites(prerequisiteFeats, anyPrerequisite, crafter.Descriptor, out var missingFeats);
-            missing += GetMissingCrafterPrerequisites(crafterPrerequisites, crafter.Descriptor).Count;
+            missing += CraftingLogic.GetMissingCrafterPrerequisites(crafterPrerequisites, crafter.Descriptor).Count;
             var crafterCasterLevel = CharacterCasterLevel(crafter.Descriptor);
             var casterLevelShortfall = Math.Max(0, casterLevel - crafterCasterLevel);
             if (casterLevelShortfall > 0 && ModSettings.CasterLevelIsSinglePrerequisite) {
@@ -2727,22 +2727,6 @@ namespace CraftMagicItems
             }
 
             return fromItem?.Ability?.Data;
-        }
-
-        public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster) {
-            var missingCrafterPrerequisites = new List<CrafterPrerequisiteType>();
-            if (prerequisites != null) {
-                missingCrafterPrerequisites.AddRange(prerequisites.Where(prerequisite =>
-                    prerequisite == CrafterPrerequisiteType.AlignmentLawful && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Lawful) == 0
-                    || prerequisite == CrafterPrerequisiteType.AlignmentGood && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Good) == 0
-                    || prerequisite == CrafterPrerequisiteType.AlignmentChaotic && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Chaotic) == 0
-                    || prerequisite == CrafterPrerequisiteType.AlignmentEvil && (caster.Alignment.Value.ToMask() & AlignmentMaskType.Evil) == 0
-                    || prerequisite == CrafterPrerequisiteType.FeatureChannelEnergy &&
-                    caster.GetFeature(ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(Features.ChannelEnergyFeatureGuid)) == null
-                ));
-            }
-
-            return missingCrafterPrerequisites;
         }
 
         public static bool EquipmentEnchantmentValid(ItemEntityWeapon weapon, ItemEntity owner)
