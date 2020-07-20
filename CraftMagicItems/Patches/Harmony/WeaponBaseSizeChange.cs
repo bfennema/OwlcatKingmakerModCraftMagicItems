@@ -4,7 +4,8 @@ using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.RuleSystem;
 
-namespace CraftMagicItems {
+namespace CraftMagicItems.Patches.Harmony
+{
     [ComponentName("Weapon Base Size Change")]
     [AllowMultipleComponents]
     /**

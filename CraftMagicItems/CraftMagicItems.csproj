@@ -152,7 +152,7 @@
     <Compile Include="Patches\IkPatch.cs" />
     <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />
     <Compile Include="Patches\MethodPatch.cs" />
-    <Compile Include="QuiverAbility.cs" />
+	<Compile Include="Patches\Harmony\QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactory.cs" />
     <Compile Include="UI\BattleLog\IBattleLog.cs" />
@@ -166,7 +166,7 @@
     <Compile Include="UI\Sections\IFeatReassignmentSectionRenderer.cs" />
     <Compile Include="UI\UnityModManager\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
-    <Compile Include="WeaponBaseSizeChange.cs" />
+    <Compile Include="Patches\Harmony\WeaponBaseSizeChange.cs" />
     <Compile Include="CraftMagicItemsAccessors.cs" />
     <Compile Include="Patches\CraftMagicItemsBlueprintPatcher.cs" />
     <Compile Include="CraftingTimerComponent.cs" />
@@ -179,7 +179,7 @@
     <Compile Include="PrerequisiteCasterLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SustenanceEnchantment.cs" />
-    <Compile Include="WeaponSizeChange.cs" />
+    <Compile Include="Patches\Harmony\WeaponSizeChange.cs" />
     <Compile Include="WildEnchantment.cs" />
   </ItemGroup>
   <ItemGroup />

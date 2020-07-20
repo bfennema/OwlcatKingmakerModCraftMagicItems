@@ -19,7 +19,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 #endif
 
-namespace CraftMagicItems {
+namespace CraftMagicItems.Patches.Harmony {
     public class CreateQuiverAbility : ScriptableObject {
         private static bool initialised;
 

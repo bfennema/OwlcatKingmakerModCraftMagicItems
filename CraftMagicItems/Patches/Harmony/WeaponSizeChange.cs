@@ -4,7 +4,8 @@ using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 
-namespace CraftMagicItems {
+namespace CraftMagicItems.Patches.Harmony
+{
     [ComponentName("Weapon Size Change")]
     public class WeaponSizeChange : GameLogicComponent {
         public int SizeCategoryChange;
