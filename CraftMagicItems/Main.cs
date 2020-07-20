@@ -1593,7 +1593,7 @@ namespace CraftMagicItems
             var missing = CheckSpellPrerequisites(prerequisiteSpells, anyPrerequisite, crafter.Descriptor, false, out var missingSpells,
                 // ReSharper disable once UnusedVariable
                 out var spellsToCast);
-            missing += CheckFeatPrerequisites(prerequisiteFeats, anyPrerequisite, crafter.Descriptor, out var missingFeats);
+            missing += CraftingLogic.CheckFeatPrerequisites(prerequisiteFeats, anyPrerequisite, crafter.Descriptor, out var missingFeats);
             missing += GetMissingCrafterPrerequisites(crafterPrerequisites, crafter.Descriptor).Count;
             var crafterCasterLevel = CharacterCasterLevel(crafter.Descriptor);
             var casterLevelShortfall = Math.Max(0, casterLevel - crafterCasterLevel);
@@ -2754,30 +2754,6 @@ namespace CraftMagicItems
             }
 
             return anyPrerequisite ? Math.Min(1, missingSpells.Count) : missingSpells.Count;
-        }
-
-        public static int CheckFeatPrerequisites(CraftingProjectData project, UnitDescriptor caster, out List<BlueprintFeature> missingFeats) {
-            return CheckFeatPrerequisites(project.FeatPrerequisites, project.AnyPrerequisite, caster, out missingFeats);
-        }
-
-        private static int CheckFeatPrerequisites(BlueprintFeature[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
-            out List<BlueprintFeature> missingFeats) {
-            missingFeats = new List<BlueprintFeature>();
-            if (prerequisites != null) {
-                foreach (var featBlueprint in prerequisites) {
-                    var feat = caster.GetFeature(featBlueprint);
-                    if (feat != null) {
-                        if (anyPrerequisite) {
-                            missingFeats.Clear();
-                            return 0;
-                        }
-                    } else {
-                        missingFeats.Add(featBlueprint);
-                    }
-                }
-            }
-
-            return anyPrerequisite ? Math.Min(1, missingFeats.Count) : missingFeats.Count;
         }
 
         public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster) {

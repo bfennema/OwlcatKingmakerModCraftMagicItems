@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CraftMagicItems.Constants;
 using CraftMagicItems.Localization;
 using Kingmaker;
+using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Spells;
 using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Root;
@@ -140,7 +142,7 @@ namespace CraftMagicItems
                     Main.AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-spell", missingSpellNames,
                                             DifficultyClass.MissingPrerequisiteDCModifier * missing));
                 }
-                var missing2 = Main.CheckFeatPrerequisites(project, caster, out var missingFeats);
+                var missing2 = CheckFeatPrerequisites(project, caster, out var missingFeats);
                 if (missing2 > 0)
                 {
                     var missingFeatNames = missingFeats.Select(ability => ability.Name).BuildCommaList(project.AnyPrerequisite);
@@ -317,6 +319,38 @@ namespace CraftMagicItems
             }
 
             return missing.Count;
+        }
+
+        private static int CheckFeatPrerequisites(CraftingProjectData project, UnitDescriptor caster, out List<BlueprintFeature> missingFeats)
+        {
+            return CheckFeatPrerequisites(project.FeatPrerequisites, project.AnyPrerequisite, caster, out missingFeats);
+        }
+
+        public static int CheckFeatPrerequisites(BlueprintFeature[] prerequisites, bool anyPrerequisite, UnitDescriptor caster,
+            out List<BlueprintFeature> missingFeats)
+        {
+            missingFeats = new List<BlueprintFeature>();
+            if (prerequisites != null)
+            {
+                foreach (var featBlueprint in prerequisites)
+                {
+                    var feat = caster.GetFeature(featBlueprint);
+                    if (feat != null)
+                    {
+                        if (anyPrerequisite)
+                        {
+                            missingFeats.Clear();
+                            return 0;
+                        }
+                    }
+                    else
+                    {
+                        missingFeats.Add(featBlueprint);
+                    }
+                }
+            }
+
+            return anyPrerequisite ? Math.Min(1, missingFeats.Count) : missingFeats.Count;
         }
     }
 }
