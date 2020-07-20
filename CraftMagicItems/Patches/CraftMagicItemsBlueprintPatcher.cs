@@ -21,6 +21,7 @@ using Kingmaker.Enums.Damage;
 using Kingmaker.Localization;
 using Kingmaker.ResourceLinks;
 using Kingmaker.UI.Common;
+using Kingmaker.UI.Log;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
@@ -774,7 +775,7 @@ namespace CraftMagicItems.Patches
                 && (!DoesBlueprintShowEnchantments(blueprint) || enchantmentsForDescription.Count != skipped.Count || removed.Count > 0))
             {
                 accessors.SetBlueprintItemDescriptionText(blueprint) =
-                    Main.BuildCustomRecipeItemDescription(blueprint, enchantmentsForDescription, skipped, removed, replaceAbility, ability, casterLevel, perDay);
+                    BuildCustomRecipeItemDescription(blueprint, enchantmentsForDescription, skipped, removed, replaceAbility, ability, casterLevel, perDay);
                 accessors.SetBlueprintItemFlavorText(blueprint) = new L10NString("");
             }
 
@@ -1082,6 +1083,108 @@ namespace CraftMagicItems.Patches
                         throw new Exception($"Match of assetId {match.Value} didn't match blueprint type {blueprint.GetType()}");
                     }
             }
+        }
+
+        public static LocalizedString BuildCustomRecipeItemDescription(BlueprintItem blueprint, IList<BlueprintItemEnchantment> enchantments,
+            IList<BlueprintItemEnchantment> skipped, IList<BlueprintItemEnchantment> removed, bool replaceAbility, string ability, int casterLevel, int perDay)
+        {
+            var extraDescription = enchantments
+                .Select(enchantment => {
+                    var recipe = Main.FindSourceRecipe(enchantment.AssetGuid, blueprint);
+                    if (recipe == null)
+                    {
+                        if (skipped.Contains(enchantment))
+                        {
+                            return "";
+                        }
+                        else if (!string.IsNullOrEmpty(enchantment.Name))
+                        {
+                            return enchantment.Name;
+                        }
+                        else
+                        {
+                            return "Unknown";
+                        }
+                    }
+                    else if (recipe.Enchantments.Length <= 1)
+                    {
+                        if (skipped.Contains(enchantment))
+                        {
+                            return "";
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(enchantment.Name))
+                            {
+                                return enchantment.Name;
+                            }
+                            else
+                            {
+                                return recipe.NameId;
+                            }
+                        }
+                    }
+                    var newBonus = recipe.Enchantments.FindIndex(e => e == enchantment) + 1;
+                    var bonusString = Main.GetBonusString(newBonus, recipe);
+                    var bonusDescription = recipe.BonusTypeId != null
+                        ? LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus-to", new L10NString(recipe.BonusTypeId), recipe.NameId)
+                        : recipe.BonusToId != null
+                            ? LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus-to", recipe.NameId, new L10NString(recipe.BonusToId))
+                            : LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-bonus", recipe.NameId);
+                    var upgradeFrom = removed.FirstOrDefault(remove => Main.FindSourceRecipe(remove.AssetGuid, blueprint) == recipe);
+                    var oldBonus = int.MaxValue;
+                    if (upgradeFrom != null)
+                    {
+                        oldBonus = recipe.Enchantments.FindIndex(e => e == upgradeFrom) + 1;
+                    }
+                    if (oldBonus > newBonus)
+                    {
+                        if (skipped.Contains(enchantment))
+                        {
+                            return new L10NString("");
+                        }
+                        else
+                        {
+                            return LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-enchantment-template", bonusString, bonusDescription);
+                        }
+                    }
+                    else
+                    {
+                        removed.Remove(upgradeFrom);
+                    }
+                    return LocalizationHelper.FormatLocalizedString("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription,
+                        Main.GetBonusString(oldBonus, recipe), bonusString);
+                })
+                .OrderBy(enchantmentDescription => enchantmentDescription)
+                .Select(enchantmentDescription => string.IsNullOrEmpty(enchantmentDescription) ? "" : "\n* " + enchantmentDescription)
+                .Join("");
+            if (blueprint is BlueprintItemEquipment equipment && (ability != null && ability != "null" || casterLevel > -1 || perDay > -1))
+            {
+                GameLogContext.Count = equipment.Charges;
+                extraDescription += "\n* " + (equipment.Charges == 1 ? LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details-single", equipment.Ability.Name, equipment.CasterLevel) :
+                    LocalizationHelper.FormatLocalizedString("craftMagicItems-label-cast-spell-n-times-details-multiple", equipment.Ability.Name, equipment.CasterLevel, equipment.Charges));
+                GameLogContext.Clear();
+            }
+
+            string description;
+            if (removed.Count == 0 && !replaceAbility)
+            {
+                description = blueprint.Description;
+                if (extraDescription.Length > 0)
+                {
+                    description += new L10NString("craftMagicItems-custom-description-additional") + extraDescription;
+                }
+            }
+            else if (extraDescription.Length > 0)
+            {
+                description = new L10NString("craftMagicItems-custom-description-start") + extraDescription;
+            }
+            else
+            {
+                description = "";
+            }
+
+            return new FakeL10NString(description);
         }
     }
 }
