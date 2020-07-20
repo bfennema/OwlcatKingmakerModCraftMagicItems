@@ -171,7 +171,7 @@ namespace CraftMagicItems
                     dc += casterLevelPenalty;
                     Main.AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-low-caster-level", project.CasterLevel, casterLevelPenalty));
                 }
-                var oppositionSchool = Main.CheckForOppositionSchool(caster, project.SpellPrerequisites);
+                var oppositionSchool = CheckForOppositionSchool(caster, project.SpellPrerequisites);
                 if (oppositionSchool != SpellSchool.None)
                 {
                     dc += DifficultyClass.OppositionSchoolDCModifier;
@@ -394,6 +394,22 @@ namespace CraftMagicItems
             }
 
             return anyPrerequisite ? Math.Min(1, missingSpells.Count) : missingSpells.Count;
+        }
+
+        public static SpellSchool CheckForOppositionSchool(UnitDescriptor crafter, BlueprintAbility[] prerequisiteSpells)
+        {
+            if (prerequisiteSpells != null)
+            {
+                foreach (var spell in prerequisiteSpells)
+                {
+                    if (crafter.Spellbooks.Any(spellbook => spellbook.Blueprint.SpellList.Contains(spell)
+                                                            && spellbook.OppositionSchools.Contains(spell.School)))
+                    {
+                        return spell.School;
+                    }
+                }
+            }
+            return SpellSchool.None;
         }
 
         public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster)

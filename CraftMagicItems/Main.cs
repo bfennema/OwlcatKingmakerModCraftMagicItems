@@ -1570,18 +1570,6 @@ namespace CraftMagicItems
             return casterLevel;
         }
 
-        public static SpellSchool CheckForOppositionSchool(UnitDescriptor crafter, BlueprintAbility[] prerequisiteSpells) {
-            if (prerequisiteSpells != null) {
-                foreach (var spell in prerequisiteSpells) {
-                    if (crafter.Spellbooks.Any(spellbook => spellbook.Blueprint.SpellList.Contains(spell)
-                                                            && spellbook.OppositionSchools.Contains(spell.School))) {
-                        return spell.School;
-                    }
-                }
-            }
-            return SpellSchool.None;
-        }
-
         private static int RenderCraftingSkillInformation(UnitEntityData crafter, StatType skill, int dc, int casterLevel = 0,
             BlueprintAbility[] prerequisiteSpells = null, BlueprintFeature[] prerequisiteFeats = null, bool anyPrerequisite = false,
             CrafterPrerequisiteType[] crafterPrerequisites = null,
@@ -1611,7 +1599,7 @@ namespace CraftMagicItems
             // Rob's ruling... if you're below the prerequisite caster level, you're considered to be missing a prerequisite for each
             // level you fall short.
             dc += DifficultyClass.MissingPrerequisiteDCModifier * (missing + casterLevelShortfall);
-            var oppositionSchool = CheckForOppositionSchool(crafter.Descriptor, prerequisiteSpells);
+            var oppositionSchool = CraftingLogic.CheckForOppositionSchool(crafter.Descriptor, prerequisiteSpells);
             if (oppositionSchool != SpellSchool.None) {
                 dc += DifficultyClass.OppositionSchoolDCModifier;
                 if (render) {
