@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.Serialization;
 using CraftMagicItems.Constants;
+using CraftMagicItems.Enchantments;
 using CraftMagicItems.Localization;
 using Kingmaker;
 using Kingmaker.Blueprints;
