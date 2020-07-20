@@ -2780,17 +2780,7 @@ namespace CraftMagicItems
             return anyPrerequisite ? Math.Min(1, missingFeats.Count) : missingFeats.Count;
         }
 
-        public static int CheckCrafterPrerequisites(CraftingProjectData project, UnitDescriptor caster) {
-            var missing = GetMissingCrafterPrerequisites(project.CrafterPrerequisites, caster);
-            foreach (var prerequisite in missing) {
-                AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-crafter-prerequisite",
-                    new L10NString($"craftMagicItems-crafter-prerequisite-{prerequisite}"), DifficultyClass.MissingPrerequisiteDCModifier));
-            }
-
-            return missing.Count;
-        }
-
-        private static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster) {
+        public static List<CrafterPrerequisiteType> GetMissingCrafterPrerequisites(CrafterPrerequisiteType[] prerequisites, UnitDescriptor caster) {
             var missingCrafterPrerequisites = new List<CrafterPrerequisiteType>();
             if (prerequisites != null) {
                 missingCrafterPrerequisites.AddRange(prerequisites.Where(prerequisite =>

@@ -148,7 +148,7 @@ namespace CraftMagicItems
                         DifficultyClass.MissingPrerequisiteDCModifier * missing2));
                 }
                 missing += missing2;
-                missing += Main.CheckCrafterPrerequisites(project, caster);
+                missing += CheckCrafterPrerequisites(project, caster);
                 dc += DifficultyClass.MissingPrerequisiteDCModifier * missing;
                 var casterLevel = Main.CharacterCasterLevel(caster);
                 if (casterLevel < project.CasterLevel)
@@ -305,6 +305,18 @@ namespace CraftMagicItems
                 // They didn't use up all available days - reset the time they can start crafting to now.
                 timer.LastUpdated = Game.Instance.Player.GameTime;
             }
+        }
+
+        private static int CheckCrafterPrerequisites(CraftingProjectData project, UnitDescriptor caster)
+        {
+            var missing = Main.GetMissingCrafterPrerequisites(project.CrafterPrerequisites, caster);
+            foreach (var prerequisite in missing)
+            {
+                Main.AddBattleLogMessage(LocalizationHelper.FormatLocalizedString("craftMagicItems-logMessage-missing-crafter-prerequisite",
+                    new L10NString($"craftMagicItems-crafter-prerequisite-{prerequisite}"), DifficultyClass.MissingPrerequisiteDCModifier));
+            }
+
+            return missing.Count;
         }
     }
 }
