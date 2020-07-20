@@ -106,6 +106,7 @@
     <Compile Include="Constants\MechanicsBlueprints.cs" />
     <Compile Include="Constants\UnarmedStrikeEnchantment.cs" />
     <Compile Include="Constants\VisualAdjustmentPatches.cs" />
+    <Compile Include="CraftingLogic.cs" />
     <Compile Include="Localization\LocalizationHelper.cs" />
     <Compile Include="Patches\HarmonyPatcher.cs" />
     <Compile Include="Patches\Harmony\ActionBarManagerUpdatePatch.cs" />

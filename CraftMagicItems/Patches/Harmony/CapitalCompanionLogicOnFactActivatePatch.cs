@@ -15,7 +15,7 @@ namespace CraftMagicItems.Patches.Harmony
             {
                 if (companion.Value != null)
                 {
-                    Main.WorkOnProjects(companion.Value.Descriptor, true);
+                    CraftingLogic.WorkOnProjects(companion.Value.Descriptor, true);
                 }
             }
         }

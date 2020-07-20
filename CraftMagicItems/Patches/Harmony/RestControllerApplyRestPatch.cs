@@ -11,7 +11,7 @@ namespace CraftMagicItems.Patches.Harmony
         // ReSharper disable once UnusedMember.Local
         private static void Prefix(UnitDescriptor unit)
         {
-            Main.WorkOnProjects(unit, false);
+            CraftingLogic.WorkOnProjects(unit, false);
         }
     }
 }
