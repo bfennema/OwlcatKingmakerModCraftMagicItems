@@ -2087,15 +2087,6 @@ namespace CraftMagicItems
             }
         }
 
-        public static void AddRecipeForMaterial(PhysicalDamageMaterial material, RecipeData recipe) {
-            if (!LoadedData.MaterialToRecipe.ContainsKey(material)) {
-                LoadedData.MaterialToRecipe.Add(material, new List<RecipeData>());
-            }
-            if (!LoadedData.MaterialToRecipe[material].Contains(recipe)) {
-                LoadedData.MaterialToRecipe[material].Add(recipe);
-            }
-        }
-
         private static IEnumerable<BlueprintItemEquipment> FindItemBlueprintForEnchantmentId(string assetGuid) {
             return LoadedData.EnchantmentIdToItem.ContainsKey(assetGuid) ? LoadedData.EnchantmentIdToItem[assetGuid] : null;
         }

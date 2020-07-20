@@ -68,7 +68,7 @@ namespace CraftMagicItems.Patches.Harmony
                         recipe.Enchantments.ForEach(enchantment => Main.AddRecipeForEnchantment(enchantment.AssetGuid, recipe));
                         if (recipe.Material != 0)
                         {
-                            Main.AddRecipeForMaterial(recipe.Material, recipe);
+                            AddRecipeForMaterial(recipe.Material, recipe);
                         }
 
                         if (recipe.ParentNameId != null)
@@ -388,6 +388,18 @@ namespace CraftMagicItems.Patches.Harmony
             }
 
             return true;
+        }
+
+        public static void AddRecipeForMaterial(PhysicalDamageMaterial material, RecipeData recipe)
+        {
+            if (!Main.LoadedData.MaterialToRecipe.ContainsKey(material))
+            {
+                Main.LoadedData.MaterialToRecipe.Add(material, new List<RecipeData>());
+            }
+            if (!Main.LoadedData.MaterialToRecipe[material].Contains(recipe))
+            {
+                Main.LoadedData.MaterialToRecipe[material].Add(recipe);
+            }
         }
     }
 }
