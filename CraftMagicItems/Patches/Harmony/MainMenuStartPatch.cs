@@ -310,6 +310,8 @@ namespace CraftMagicItems.Patches.Harmony
                 return;
             }
 
+            HarmonyPatcher patcher = new HarmonyPatcher(Main.ModEntry.Logger.Error);
+
             if (!Main.modEnabled)
             {
                 // Reset everything InitialiseMod initialises
@@ -320,12 +322,12 @@ namespace CraftMagicItems.Patches.Harmony
                 Main.LoadedData.EnchantmentIdToItem.Clear();
                 Main.LoadedData.EnchantmentIdToCost.Clear();
                 Main.LoadedData.EnchantmentIdToRecipe.Clear();
-                Main.UnpatchAllExcept(Main.MethodPatchList);
+                patcher.UnpatchAllExcept(Main.MethodPatchList);
             }
             else if (mainMenuStarted)
             {
                 // If the mod is enabled and we're past the Start of main menu, (re-)initialise.
-                Main.PatchAllOrdered();
+                patcher.PatchAllOrdered();
                 InitialiseMod();
             }
             L10N.SetEnabled(Main.modEnabled);

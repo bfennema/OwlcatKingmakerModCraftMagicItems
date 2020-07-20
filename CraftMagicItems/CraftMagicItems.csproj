@@ -107,6 +107,7 @@
     <Compile Include="Constants\UnarmedStrikeEnchantment.cs" />
     <Compile Include="Constants\VisualAdjustmentPatches.cs" />
     <Compile Include="Localization\LocalizationHelper.cs" />
+    <Compile Include="Patches\HarmonyPatcher.cs" />
     <Compile Include="Patches\Harmony\ActionBarManagerUpdatePatch.cs" />
     <Compile Include="Patches\Harmony\ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch.cs" />
     <Compile Include="Patches\Harmony\AddInitiatorAttackRollTriggerCheckConditionsPatch.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Patches\Harmony\WeaponRealityOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\IkPatch.cs" />
     <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />
+    <Compile Include="Patches\MethodPatch.cs" />
     <Compile Include="QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactory.cs" />

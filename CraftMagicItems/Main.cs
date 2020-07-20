@@ -108,29 +108,6 @@ namespace CraftMagicItems {
             Stash
         }
 
-        public struct MethodPatch {
-            public MethodPatch(MethodBase original, HarmonyLib.HarmonyMethod prefix = null, HarmonyLib.HarmonyMethod postfix = null) {
-                m_original = original;
-                m_prefix = prefix;
-                m_postfix = postfix;
-            }
-            public MethodInfo Patch(HarmonyLib.Harmony instance) {
-                return instance.Patch(m_original, m_prefix, m_postfix);
-            }
-            public bool MatchOriginal(MethodBase method) {
-                return m_original != null & m_original == method;
-            }
-            public bool MatchPrefix(MethodBase method) {
-                return m_prefix != null && m_prefix.method == method;
-            }
-            public bool MatchPostfix(MethodBase method) {
-                return m_postfix != null && m_postfix.method == method;
-            }
-            MethodBase m_original;
-            HarmonyLib.HarmonyMethod m_prefix;
-            HarmonyLib.HarmonyMethod m_postfix;
-        }
-
         public static readonly MethodPatch[] MethodPatchList =
         {
             new MethodPatch(
@@ -165,7 +142,6 @@ namespace CraftMagicItems {
 #endif
 
         public static bool modEnabled = true;
-        private static HarmonyLib.Harmony harmonyInstance;
         private static CraftMagicItemsBlueprintPatcher blueprintPatcher;
 
         public static readonly Dictionary<ItemEntity, CraftingProjectData> ItemUpgradeProjects = new Dictionary<ItemEntity, CraftingProjectData>();
@@ -173,55 +149,12 @@ namespace CraftMagicItems {
 
         private static readonly Random RandomGenerator = new Random();
 
-
-        /**
-         * Patch all HarmonyPatch classes in the assembly, starting in the order of the methods named in methodNameOrder, and the rest after that.
-         */
-        public static void PatchAllOrdered(params MethodPatch[] orderedMethods) {
-            foreach (var method in orderedMethods) {
-                method.Patch(harmonyInstance);
-            }
-            harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
-        }
-
-        /**
-         * Unpatch all HarmonyPatch classes for harmonyInstance, except the ones whose method names match exceptMethodName
-         */
-        public static void UnpatchAllExcept(params MethodPatch[] exceptMethods) {
-            if (harmonyInstance != null) {
-                try {
-                    foreach (var method in harmonyInstance.GetPatchedMethods().ToArray()) {
-                        var patchInfo = HarmonyLib.Harmony.GetPatchInfo(method);
-                        if (patchInfo.Owners.Contains(harmonyInstance.Id)) {
-                            var methodPatches = exceptMethods.Where(m => m.MatchOriginal(method));
-                            if (methodPatches.Count() > 0) {
-                                foreach (var patch in patchInfo.Prefixes) {
-                                    if (!methodPatches.Any(m => m.MatchPrefix(patch.PatchMethod))) {
-                                        harmonyInstance.Unpatch(method, patch.PatchMethod);
-                                    }
-                                }
-                                foreach (var patch in patchInfo.Postfixes) {
-                                    if (!methodPatches.Any(m => m.MatchPostfix(patch.PatchMethod))) {
-                                        harmonyInstance.Unpatch(method, patch.PatchMethod);
-                                    }
-                                }
-                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.Finalizer, harmonyInstance.Id);
-                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.Transpiler, harmonyInstance.Id);
-                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.ReversePatch, harmonyInstance.Id);
-                            } else {
-                                harmonyInstance.Unpatch(method, HarmonyLib.HarmonyPatchType.All, harmonyInstance.Id);
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    ModEntry.Logger.Error($"Exception during Un-patching: {e}");
-                }
-            }
-        }
-
         // ReSharper disable once UnusedMember.Local
-        private static void Load(UnityModManager.ModEntry modEntry) {
-            try {
+        private static void Load(UnityModManager.ModEntry modEntry)
+        {
+            HarmonyPatcher patcher = new HarmonyPatcher(modEntry.Logger.Error);
+            try
+            {
                 Selections = new Selections();
                 ModEntry = modEntry;
                 ModSettings = UnityModManager.ModSettings.Load<Settings>(modEntry);
@@ -232,17 +165,17 @@ namespace CraftMagicItems {
                 modEntry.OnToggle = OnToggle;
                 modEntry.OnGUI = OnGui;
                 CustomBlueprintBuilder.InitialiseBlueprintRegex(CraftMagicItemsBlueprintPatcher.BlueprintRegex);
-                harmonyInstance = new HarmonyLib.Harmony("kingmaker.craftMagicItems");
-                // Patch the recovery methods first.
-                PatchAllOrdered(MethodPatchList);
+                patcher.PatchAllOrdered(MethodPatchList);   // Patch the recovery methods first.
                 Accessors = new CraftMagicItemsAccessors();
                 blueprintPatcher = new CraftMagicItemsBlueprintPatcher(Accessors, modEnabled);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 modEntry.Logger.Error($"Exception during Load: {e}");
                 modEnabled = false;
                 CustomBlueprintBuilder.Enabled = false;
                 // Unpatch everything except methods involved in recovering a save when mod is disabled.
-                UnpatchAllExcept(MethodPatchList);
+                patcher.UnpatchAllExcept(MethodPatchList);
                 throw;
             }
         }
