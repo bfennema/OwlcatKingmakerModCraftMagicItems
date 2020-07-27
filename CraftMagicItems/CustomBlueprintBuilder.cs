@@ -4,7 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Kingmaker.Blueprints;
+#if !PATCH21_BETA
 using Object = UnityEngine.Object;
+#endif
 
 namespace CraftMagicItems {
     public static class CustomBlueprintBuilder {
@@ -48,7 +50,7 @@ namespace CraftMagicItems {
                         var customBlueprint = ResourcesLibrary.LibraryObject.BlueprintsByAssetId?[assetId];
                         if (customBlueprint != null) {
                             ResourcesLibrary.LibraryObject.BlueprintsByAssetId.Remove(assetId);
-                            ResourcesLibrary.LibraryObject.GetAllBlueprints().Remove(customBlueprint);
+                            ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Remove(customBlueprint);
                         }
                     }
 
@@ -80,18 +82,31 @@ namespace CraftMagicItems {
 
             if (blueprint.AssetGuid.Length == VanillaAssetIdLength) {
                 // We have the original blueprint - clone it so we can make modifications which won't affect the original.
+#if PATCH21_BETA
+                var assetGuid = blueprint.AssetGuid;
+                blueprint = (BlueprintScriptableObject)SerializedScriptableObject.Instantiate(blueprint);
+                blueprint.AssetGuid = assetGuid;
+                blueprint.name = blueprint.name + "(Clone)";
+#else
                 blueprint = Object.Instantiate(blueprint);
+#endif
             }
 
             // Patch the blueprint
             var newAssetId = patchBlueprint(blueprint, match);
             if (newAssetId != null) {
+#if PATCH21_BETA
+                blueprint.OnEnable();
+                foreach (var component in blueprint.ComponentsArray) {
+                    component.OnEnable();
+                }
+#endif
                 // Insert patched blueprint into ResourcesLibrary under the new GUID.
                 Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, newAssetId);
                 if (ResourcesLibrary.LibraryObject.BlueprintsByAssetId != null) {
                     ResourcesLibrary.LibraryObject.BlueprintsByAssetId[newAssetId] = blueprint;
                 }
-                ResourcesLibrary.LibraryObject.GetAllBlueprints().Add(blueprint);
+                ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(blueprint);
                 // Also record the custom GUID so we can clean it up if the mod is later disabled.
                 CustomBlueprintIDs.Add(newAssetId);
             }

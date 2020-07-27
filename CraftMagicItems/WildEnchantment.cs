@@ -1,4 +1,7 @@
 using Kingmaker;
+#if PATCH21
+using Kingmaker.Assets.UI.Context;
+#endif
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Designers;
@@ -101,15 +104,15 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
         // ReSharper disable once UnusedMember.Local
-        private static class MainMenuStartPatch {
+        public static class MainMenuStartPatch {
             private static void AddBlueprint(string guid, BlueprintScriptableObject blueprint) {
                 Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, guid);
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(guid, blueprint);
-                ResourcesLibrary.LibraryObject.GetAllBlueprints().Add(blueprint);
+                ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(blueprint);
             }
 
             // ReSharper disable once UnusedMember.Local
-            private static void Postfix() {
+            public static void Postfix() {
                 if (!initialised) {
                     initialised = true;
                     var blueprintWildEnchantment = CreateInstance<WildEnchantment>();
@@ -122,5 +125,13 @@ namespace CraftMagicItems {
                 }
             }
         }
+#if PATCH21
+        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        private static class MainMenuUiContextInitializePatch {
+            private static void Postfix() {
+                MainMenuStartPatch.Postfix();
+            }
+        }
+#endif
     }
 }

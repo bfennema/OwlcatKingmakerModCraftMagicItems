@@ -23,8 +23,12 @@ using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.View.Animation;
 using Kingmaker.Utility;
+#if PATCH21_BETA
+using Kingmaker.Blueprints.DirectSerialization;
+#else
 using UnityEngine;
 using Object = UnityEngine.Object;
+#endif
 
 namespace CraftMagicItems {
     public class CraftMagicItemsBlueprintPatcher {
@@ -301,12 +305,21 @@ namespace CraftMagicItems {
         }
 
         private string ApplyTimerBlueprintPatch(BlueprintBuff blueprint) {
+#if PATCH21_BETA
+            ApplyBuffBlueprintPatch(blueprint, SerializedScriptableObject.CreateInstance<CraftingTimerComponent>(), "craftMagicItems-timer-buff-name");
+#else
             ApplyBuffBlueprintPatch(blueprint, ScriptableObject.CreateInstance<CraftingTimerComponent>(), "craftMagicItems-timer-buff-name");
+#endif
+
             return TimerBlueprintGuid;
         }
 
         private string ApplyBondedItemBlueprintPatch(BlueprintBuff blueprint) {
+#if PATCH21_BETA
+            ApplyBuffBlueprintPatch(blueprint, SerializedScriptableObject.CreateInstance<BondedItemComponent>(), "craftMagicItems-bondedItem-buff-name");
+#else
             ApplyBuffBlueprintPatch(blueprint, ScriptableObject.CreateInstance<BondedItemComponent>(), "craftMagicItems-bondedItem-buff-name");
+#endif
             return BondedItemBuffBlueprintGuid;
         }
 
@@ -316,7 +329,11 @@ namespace CraftMagicItems {
             accessors.SetBlueprintUnitFactDescription(blueprint, new L10NString($"craftMagicItems-feat-{feat}-description"));
             var icon = Image2Sprite.Create($"{Main.ModEntry.Path}/Icons/craft-{feat}.png");
             accessors.SetBlueprintUnitFactIcon(blueprint, icon);
+#if PATCH21_BETA
+            var prerequisite = SerializedScriptableObject.CreateInstance<PrerequisiteCasterLevel>();
+#else
             var prerequisite = ScriptableObject.CreateInstance<PrerequisiteCasterLevel>();
+#endif
             var featGuid = BuildCustomFeatGuid(blueprint.AssetGuid, feat);
             var itemData = Main.ItemCraftingData.First(data => data.FeatGuid == featGuid);
             prerequisite.SetPrerequisiteCasterLevel(itemData.MinimumCasterLevel);
@@ -374,7 +391,13 @@ namespace CraftMagicItems {
             var enchantmentIds = enchantmentsValue.Split(';').ToList();
 
             if (blueprint is BlueprintItemShield shield) {
+#if PATCH21_BETA
+                var armorComponentClone = (BlueprintItemArmor)SerializedScriptableObject.Instantiate(shield.ArmorComponent);
+                armorComponentClone.AssetGuid = shield.ArmorComponent.AssetGuid;
+                armorComponentClone.name = shield.ArmorComponent.name + "(Clone)";
+#else
                 var armorComponentClone = Object.Instantiate(shield.ArmorComponent);
+#endif
                 ApplyRecipeItemBlueprintPatch(armorComponentClone, match);
                 if (match.Groups["secondEnd"].Success) {
                     secondEndGuid = match.Groups["secondEnd"].Value;
@@ -648,12 +671,28 @@ namespace CraftMagicItems {
 
         private T CloneObject<T>(T originalObject) {
             var type = originalObject.GetType();
+#if PATCH21_BETA
+            if (typeof(BlueprintScriptableObject).IsAssignableFrom(type)) {
+                var srcBlueprint = originalObject as BlueprintScriptableObject;
+                var dstBlueprint = (BlueprintScriptableObject)SerializedScriptableObject.Instantiate(originalObject as BlueprintScriptableObject);
+                dstBlueprint.AssetGuid = srcBlueprint.AssetGuid;
+                dstBlueprint.name = srcBlueprint.name + "(Clone)";
+                return (T)(object)dstBlueprint;
+            } else if (typeof(SerializedScriptableObject).IsAssignableFrom(type)) {
+                return (T)(object)SerializedScriptableObject.Instantiate(originalObject as SerializedScriptableObject);
+            }
+#else
             if (typeof(ScriptableObject).IsAssignableFrom(type)) {
                 return (T) (object) Object.Instantiate(originalObject as Object);
             }
+#endif
 
             var clone = (T) Activator.CreateInstance(type);
+#if PATCH21_BETA
+            for (; type != null && type != typeof(IDirectlySerializable); type = type.BaseType) {
+#else
             for (; type != null && type != typeof(Object); type = type.BaseType) {
+#endif
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 foreach (var field in fields) {
                     field.SetValue(clone, field.GetValue(originalObject));
@@ -671,8 +710,13 @@ namespace CraftMagicItems {
                     throw new Exception($"Failed to create object with type {value}");
                 }
 
+#if PATCH21_BETA
+                var componentObject = typeof(SerializedScriptableObject).IsAssignableFrom(componentType)
+                    ? SerializedScriptableObject.CreateInstance(componentType)
+#else
                 var componentObject = typeof(ScriptableObject).IsAssignableFrom(componentType)
                     ? ScriptableObject.CreateInstance(componentType)
+#endif
                     : Activator.CreateInstance(componentType);
 
                 if (!(componentObject is T component)) {

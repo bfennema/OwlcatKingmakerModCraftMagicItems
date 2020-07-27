@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Kingmaker;
+#if PATCH21
+using Kingmaker.Assets.UI.Context;
+#endif
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Items.Ecnchantments;
 using Kingmaker.Controllers.Rest;
@@ -28,15 +31,15 @@ namespace CraftMagicItems {
         private static bool initialised;
 
         [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
-        private static class MainMenuStartPatch {
+        public static class MainMenuStartPatch {
             private static void AddBlueprint(string guid, BlueprintScriptableObject blueprint) {
                 Main.Accessors.SetBlueprintScriptableObjectAssetGuid(blueprint, guid);
                 ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(guid, blueprint);
-                ResourcesLibrary.LibraryObject.GetAllBlueprints().Add(blueprint);
+                ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(blueprint);
             }
 
             // ReSharper disable once UnusedMember.Local
-            private static void Postfix() {
+            public static void Postfix() {
                 if (!initialised) {
                     initialised = true;
                     AddBlueprint(SustenanceEnchantmentGuid, BlueprintSustenanceEnchantment);
@@ -64,6 +67,15 @@ namespace CraftMagicItems {
                 }
             }
         }
+
+#if PATCH21
+        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        private static class MainMenuUiContextInitializePatch {
+            private static void Postfix() {
+                MainMenuStartPatch.Postfix();
+            }
+        }
+#endif
 
         private static bool UnitHasSustenance(UnitEntityData unit) {
             return unit?.Descriptor.GetFact(BlueprintSustenanceFact) != null;
@@ -135,6 +147,15 @@ namespace CraftMagicItems {
                 foreach (var unit in Game.Instance.Player.Party) {
                     if (CountRoles(unit) > 1 && !UnitHasSustenance(unit)) {
                         // Need to drop one role - prefer roles that others are doing.
+#if PATCH21
+                        var roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Builders.ToList(), null);
+                        roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Hunters.ToList(), roleToDrop);
+                        roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Cookers.ToList(), roleToDrop);
+                        roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Special.ToList(), roleToDrop);
+                        foreach (var guardShift in Game.Instance.Player.Camping.Guards) {
+                            roleToDrop = FindBestRoleToDrop(unit, guardShift.ToList(), roleToDrop);
+                        }
+#else
                         var roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Builders, null);
                         roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Hunters, roleToDrop);
                         roleToDrop = FindBestRoleToDrop(unit, Game.Instance.Player.Camping.Cookers, roleToDrop);
@@ -142,6 +163,7 @@ namespace CraftMagicItems {
                         foreach (var guardShift in Game.Instance.Player.Camping.Guards) {
                             roleToDrop = FindBestRoleToDrop(unit, guardShift, roleToDrop);
                         }
+#endif
 
                         roleToDrop.Remove(unit);
                     }

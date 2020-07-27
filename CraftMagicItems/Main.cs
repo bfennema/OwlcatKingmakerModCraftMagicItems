@@ -7,6 +7,9 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Kingmaker;
+#if PATCH21
+using Kingmaker.Assets.UI.Context;
+#endif
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
@@ -237,7 +240,12 @@ namespace CraftMagicItems {
         private static readonly Dictionary<string, List<RecipeData>> EnchantmentIdToRecipe = new Dictionary<string, List<RecipeData>>();
         private static readonly Dictionary<PhysicalDamageMaterial, List<RecipeData>> MaterialToRecipe = new Dictionary<PhysicalDamageMaterial, List<RecipeData>>();
         private static readonly Dictionary<string, int> EnchantmentIdToCost = new Dictionary<string, int>();
+#if PATCH21
+        private static readonly List<LogItemData> PendingLogItems = new List<LogItemData>();
+#else
         private static readonly List<LogDataManager.LogItemData> PendingLogItems = new List<LogDataManager.LogItemData>();
+
+#endif
         private static readonly Dictionary<ItemEntity, CraftingProjectData> ItemUpgradeProjects = new Dictionary<ItemEntity, CraftingProjectData>();
         private static readonly List<CraftingProjectData> ItemCreationProjects = new List<CraftingProjectData>();
 
@@ -991,8 +999,9 @@ namespace CraftMagicItems {
 
         private static bool ItemMatchesRestrictions(BlueprintItem blueprint, IEnumerable<ItemRestrictions> restrictions) {
             if (restrictions != null) {
-                var weapon = (blueprint as BlueprintItemShield)?.WeaponComponent ?? blueprint as BlueprintItemWeapon;
-                var armor = (blueprint as BlueprintItemShield)?.ArmorComponent ?? blueprint as BlueprintItemArmor;
+                var shield = blueprint as BlueprintItemShield;
+                var weapon = shield?.WeaponComponent ?? blueprint as BlueprintItemWeapon;
+                var armor = shield?.ArmorComponent ?? blueprint as BlueprintItemArmor;
                 foreach (var restriction in restrictions) {
                     switch (restriction) {
                         case ItemRestrictions.Weapon when weapon == null:
@@ -1679,7 +1688,11 @@ namespace CraftMagicItems {
             var booksToCheck = forSpellbook == null ? character.Spellbooks : Enumerable.Repeat(forSpellbook, 1);
             foreach (var spellbook in booksToCheck) {
                 if (spellbook.CasterLevel > 0) {
+#if PATCH21_BETA
+                    var blueprintAbility = SerializedScriptableObject.CreateInstance<BlueprintAbility>();
+#else
                     var blueprintAbility = ScriptableObject.CreateInstance<BlueprintAbility>();
+#endif
                     var rule = new RuleCalculateAbilityParams(character.Unit, blueprintAbility, spellbook);
                     RulebookEventBus.OnEventAboutToTrigger(rule);
                     rule.OnTrigger(null);
@@ -2303,7 +2316,11 @@ namespace CraftMagicItems {
 
         public static List<BlueprintItemEquipment> FindItemBlueprintsForSpell(BlueprintScriptableObject spell, UsableItemType itemType) {
             if (!SpellIdToItem.ContainsKey(itemType)) {
+#if PATCH21_BETA
+                var allUsableItems = ResourcesLibrary.GetBlueprints<BlueprintItemEquipmentUsable>();
+#else
                 var allUsableItems = Resources.FindObjectsOfTypeAll<BlueprintItemEquipmentUsable>();
+#endif
                 foreach (var item in allUsableItems) {
                     if (item.Type == itemType) {
                         AddItemBlueprintForSpell(itemType, item);
@@ -2736,7 +2753,8 @@ namespace CraftMagicItems {
                 .Join("");
             if (blueprint is BlueprintItemEquipment equipment && (ability != null && ability != "null" || casterLevel > -1 || perDay > -1)) {
                 GameLogContext.Count = equipment.Charges;
-                extraDescription += "\n* " + L10NFormat("craftMagicItems-label-cast-spell-n-times-details", equipment.Ability.Name, equipment.CasterLevel);
+                extraDescription += "\n* " + (equipment.Charges == 1 ? L10NFormat("craftMagicItems-label-cast-spell-n-times-details-single", equipment.Ability.Name, equipment.CasterLevel) :
+                    L10NFormat("craftMagicItems-label-cast-spell-n-times-details-multiple", equipment.Ability.Name, equipment.CasterLevel, equipment.Charges));
                 GameLogContext.Clear();
             }
 
@@ -3075,12 +3093,12 @@ namespace CraftMagicItems {
                     }
                 }
 
-                var allUsableItems = Resources.FindObjectsOfTypeAll<BlueprintItemEquipment>();
+                var allUsableItems = ResourcesLibrary.GetBlueprints<BlueprintItemEquipment>();
                 foreach (var item in allUsableItems) {
                     AddItemIdForEnchantment(item);
                 }
 
-                var allNonRecipeEnchantmentsInItems = Resources.FindObjectsOfTypeAll<BlueprintEquipmentEnchantment>()
+                var allNonRecipeEnchantmentsInItems = ResourcesLibrary.GetBlueprints<BlueprintEquipmentEnchantment>()
                     .Where(enchantment => !EnchantmentIdToRecipe.ContainsKey(enchantment.AssetGuid) && EnchantmentIdToItem.ContainsKey(enchantment.AssetGuid))
                     .ToArray();
                 // BlueprintEnchantment.EnchantmentCost seems to be full of nonsense values - attempt to set cost of each enchantment by using the prices of
@@ -3293,7 +3311,11 @@ namespace CraftMagicItems {
                 if (longshankBane.ComponentsArray.Length >= 2 && longshankBane.ComponentsArray[1] is WeaponConditionalDamageDice conditional) {
                     for (int i = 0; i < conditional.Conditions.Conditions.Length; i++) {
                         if (conditional.Conditions.Conditions[i] is Kingmaker.Designers.EventConditionActionSystem.Conditions.HasFact condition) {
+#if PATCH21_BETA
+                            var replace = SerializedScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
+#else
                             var replace = ScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
+#endif
                             replace.Fact = condition.Fact;
                             replace.name = condition.name.Replace("HasFact", "ContextConditionHasFact");
                             conditional.Conditions.Conditions[i] = replace;
@@ -3327,8 +3349,7 @@ namespace CraftMagicItems {
             }
 
             [Harmony12.HarmonyPriority(Harmony12.Priority.Last)]
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix() {
+            public static void Postfix() {
                 if (!mainMenuStarted) {
                     mainMenuStarted = true;
                     InitialiseMod();
@@ -3336,6 +3357,14 @@ namespace CraftMagicItems {
             }
 
             public static void ModEnabledChanged() {
+                if (!mainMenuStarted && ResourcesLibrary.LibraryObject != null) {
+                    mainMenuStarted = true;
+                    L10n.SetEnabled(true);
+                    SustenanceEnchantment.MainMenuStartPatch.Postfix();
+                    WildEnchantment.MainMenuStartPatch.Postfix();
+                    CreateQuiverAbility.MainMenuStartPatch.Postfix();
+                }
+
                 if (!modEnabled) {
                     // Reset everything InitialiseMod initialises
                     ItemCraftingData = null;
@@ -3353,11 +3382,20 @@ namespace CraftMagicItems {
             }
         }
 
+#if PATCH21
+        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        private static class MainMenuUiContextInitializePatch {
+            [Harmony12.HarmonyPriority(Harmony12.Priority.Last)]
+            private static void Postfix() {
+                MainMenuStartPatch.Postfix();
+            }
+        }
+#endif
+
+#if !PATCH21
         // Fix issue in Owlcat's UI - ActionBarManager.Update does not refresh the Groups (spells/Actions/Belt)
         [Harmony12.HarmonyPatch(typeof(ActionBarManager), "Update")]
-        // ReSharper disable once UnusedMember.Local
         private static class ActionBarManagerUpdatePatch {
-            // ReSharper disable once UnusedMember.Local
             private static void Prefix(ActionBarManager __instance) {
                 var mNeedReset = Accessors.GetActionBarManagerNeedReset(__instance);
                 if (mNeedReset) {
@@ -3366,6 +3404,7 @@ namespace CraftMagicItems {
                 }
             }
         }
+#endif
 
         [Harmony12.HarmonyPatch(typeof(BlueprintItemEquipmentUsable), "Cost", Harmony12.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
@@ -3430,7 +3469,11 @@ namespace CraftMagicItems {
         }
 
         public static void AddBattleLogMessage(string message, object tooltip = null, Color? color = null) {
+#if PATCH21
+            var data = new LogItemData(message, color ?? GameLogStrings.Instance.DefaultColor, tooltip, PrefixIcon.None, new List<LogChannel> { LogChannel.Combat });
+#else
             var data = new LogDataManager.LogItemData(message, color ?? GameLogStrings.Instance.DefaultColor, tooltip, PrefixIcon.None);
+#endif
             if (Game.Instance.UI.BattleLogManager) {
                 Game.Instance.UI.BattleLogManager.LogView.AddLogEntry(data);
             } else {
@@ -3438,8 +3481,8 @@ namespace CraftMagicItems {
             }
         }
 
+#if !PATCH21
         [Harmony12.HarmonyPatch(typeof(LogDataManager.LogItemData), "UpdateSize")]
-        // ReSharper disable once UnusedMember.Local
         private static class LogItemDataUpdateSizePatch {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix() {
@@ -3447,6 +3490,7 @@ namespace CraftMagicItems {
                 return Game.Instance.UI.BattleLogManager != null;
             }
         }
+#endif
 
         // Add "pending" log items when the battle log becomes available again, so crafting messages sent when e.g. camping
         // in the overland map are still shown eventually.
@@ -3891,7 +3935,11 @@ namespace CraftMagicItems {
                     } else if (!unitLoot.ComponentsArray.Any(component => component is LootItemsPackFixed pack && pack.Item.Item == blueprint)) {
                         var lootItem = new LootItem();
                         Accessors.SetLootItemItem(lootItem, blueprint);
+#if PATCH21_BETA
+                        var lootComponent = SerializedScriptableObject.CreateInstance<LootItemsPackFixed>();
+#else
                         var lootComponent = ScriptableObject.CreateInstance<LootItemsPackFixed>();
+#endif
                         Accessors.SetLootItemsPackFixedItem(lootComponent, lootItem);
                         blueprintPatcher.EnsureComponentNameUnique(lootComponent, unitLoot.ComponentsArray);
                         var components = unitLoot.ComponentsArray.ToList();
@@ -3994,7 +4042,12 @@ namespace CraftMagicItems {
             private static void Postfix() {
                 if (CustomBlueprintBuilder.DidDowngrade) {
                     UIUtility.ShowMessageBox("Craft Magic Items is disabled.  All your custom enchanted items and crafting feats have been replaced with " +
+#if PATCH21
+                                             "vanilla versions.", DialogMessageBoxBase.BoxType.Message, null);
+#else
                                              "vanilla versions.", DialogMessageBox.BoxType.Message, null);
+#endif
+
                     CustomBlueprintBuilder.Reset();
                 }
             }
@@ -4216,10 +4269,22 @@ namespace CraftMagicItems {
             // ReSharper disable once UnusedMember.Local
             private static bool Prefix(ItemEntity __instance, ref string __result) {
                 // If the "vendor" is a party member, return that the item was crafted rather than from a merchant
+#if PATCH21
+                if (__instance.VendorBlueprint != null && __instance.VendorBlueprint.IsCompanion) {
+                    foreach (var companion in UIUtility.GetGroup(true)) {
+                        if (companion.Blueprint == __instance.VendorBlueprint) {
+                            __result = L10NFormat("craftMagicItems-crafted-source-description", companion.CharacterName);
+                            break;
+                        }
+                    }
+                    return false;
+                }
+#else
                 if (__instance.Vendor != null && __instance.Vendor.IsPlayerFaction) {
                     __result = L10NFormat("craftMagicItems-crafted-source-description", __instance.Vendor.CharacterName);
                     return false;
                 }
+#endif
                 return true;
             }
         }

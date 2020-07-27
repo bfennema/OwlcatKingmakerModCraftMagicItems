@@ -104,6 +104,14 @@
     "Value": "Cast {0} (caster level {1}) {count} {count_form|time|times} a day"
   },
   {
+    "Key": "craftMagicItems-label-cast-spell-n-times-details-single",
+    "Value": "Cast {0} (caster level {1}) 1 time a day"
+  },
+  {
+    "Key": "craftMagicItems-label-cast-spell-n-times-details-multiple",
+    "Value": "Cast {0} (caster level {1}) {2} times a day"
+  },
+  {
     "Key": "craftMagicItems-label-cost-free",
     "Value": "nothing (cheating)"
   },

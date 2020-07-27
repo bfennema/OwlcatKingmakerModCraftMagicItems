@@ -4,6 +4,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Harmony12;
 using Kingmaker;
+#if PATCH21
+using Kingmaker.Assets.UI.Context;
+#endif
 using Kingmaker.Blueprints;
 using Kingmaker.Enums.Damage;
 using Kingmaker.Items;
@@ -12,7 +15,9 @@ using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
 using UnityEngine;
+#if !PATCH21_BETA
 using Object = UnityEngine.Object;
+#endif
 
 namespace CraftMagicItems {
     public class CreateQuiverAbility : ScriptableObject {
@@ -20,31 +25,63 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
         // ReSharper disable once UnusedMember.Local
-        private static class MainMenuStartPatch {
+        public static class MainMenuStartPatch {
             private static void AddQuiver(BlueprintActivatableAbility ability, BlueprintBuff buff, string guid, PhysicalDamageMaterial material) {
+#if PATCH21_BETA
+                var component = SerializedScriptableObject.CreateInstance<AddOutgoingPhysicalDamageProperty>();
+#else
                 var component = ScriptableObject.CreateInstance<AddOutgoingPhysicalDamageProperty>();
+
+#endif
                 component.AddMaterial = true;
                 component.Material = material;
 
+#if PATCH21_BETA
+                var quiverBuff = (BlueprintBuff)SerializedScriptableObject.Instantiate(buff);
+#else
                 var quiverBuff = Object.Instantiate(buff);
+
+#endif
                 quiverBuff.ComponentsArray = new BlueprintComponent[] { component };
                 Main.Accessors.SetBlueprintUnitFactDisplayName(quiverBuff, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name"));
                 Main.Accessors.SetBlueprintUnitFactDescription(quiverBuff, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description"));
+#if PATCH21_BETA
+                quiverBuff.OnEnable();
+                foreach (var c in quiverBuff.ComponentsArray) {
+                    c.OnEnable();
+                }
+#endif
 
+                var buffGuid = $"{guid}#CraftMagicItems({material.ToString()}QuiverBuff)";
+
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverBuff, buffGuid);
+                ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(buffGuid, quiverBuff);
+                ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(quiverBuff);
+
+#if PATCH21_BETA
+                var quiverAbility = (BlueprintActivatableAbility)SerializedScriptableObject.Instantiate(ability);
+#else
                 var quiverAbility = Object.Instantiate(ability);
+
+#endif
                 quiverAbility.Buff = quiverBuff;
                 Main.Accessors.SetBlueprintUnitFactDisplayName(quiverAbility, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-name"));
                 Main.Accessors.SetBlueprintUnitFactDescription(quiverAbility, new L10NString($"craftMagicItems-mundane-{material.ToString().ToLower()}-quiver-description"));
+#if PATCH21_BETA
+                quiverBuff.OnEnable();
+                foreach (var c in quiverAbility.ComponentsArray) {
+                    c.OnEnable();
+                }
+#endif
 
-                var newGuid = $"{guid}#CraftMagicItems({material.ToString()}QuiverAbility)";
+                var abilityGuid = $"{guid}#CraftMagicItems({material.ToString()}QuiverAbility)";
 
-                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverAbility, newGuid);
-                ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(newGuid, quiverAbility);
-                ResourcesLibrary.LibraryObject.GetAllBlueprints().Add(quiverAbility);
+                Main.Accessors.SetBlueprintScriptableObjectAssetGuid(quiverAbility, abilityGuid);
+                ResourcesLibrary.LibraryObject.BlueprintsByAssetId?.Add(abilityGuid, quiverAbility);
+                ResourcesLibrary.LibraryObject.GetAllBlueprints()?.Add(quiverAbility);
             }
 
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix() {
+            public static void Postfix() {
                 if (!initialised) {
                     initialised = true;
 
@@ -58,6 +95,15 @@ namespace CraftMagicItems {
                 }
             }
         }
+
+#if PATCH21
+        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        private static class MainMenuUiContextInitializePatch {
+            private static void Postfix() {
+                MainMenuStartPatch.Postfix();
+            }
+        }
+#endif
 
         [Harmony12.HarmonyPatch(typeof(ItemSlot), "InsertItem")]
         // ReSharper disable once UnusedMember.Local

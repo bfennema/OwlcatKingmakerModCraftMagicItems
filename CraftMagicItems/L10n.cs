@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Kingmaker;
+#if PATCH21
+using Kingmaker.Assets.UI.Context;
+#endif
 using Kingmaker.Localization;
 using Newtonsoft.Json;
 
@@ -50,12 +54,17 @@ namespace CraftMagicItems {
         }
 
         public static void SetEnabled(bool newEnabled) {
-            if (LocalizationManager.CurrentPack != null && enabled != newEnabled) {
-                enabled = newEnabled;
-                foreach (var pair in ModifiedL10NStrings) {
-                    var swap = ModifiedL10NStrings[pair.Key];
-                    ModifiedL10NStrings[pair.Key] = LocalizationManager.CurrentPack.Strings[pair.Key];
-                    LocalizationManager.CurrentPack.Strings[pair.Key] = swap;
+            if (LocalizationManager.CurrentPack != null) {
+                if (!initialLoad) {
+                    LoadL10NStrings();
+                }
+                if (enabled != newEnabled) {
+                    enabled = newEnabled;
+                    foreach (var key in ModifiedL10NStrings.Keys.ToArray()) {
+                        var swap = ModifiedL10NStrings[key];
+                        ModifiedL10NStrings[key] = LocalizationManager.CurrentPack.Strings[key];
+                        LocalizationManager.CurrentPack.Strings[key] = swap;
+                    }
                 }
             }
         }
@@ -71,7 +80,6 @@ namespace CraftMagicItems {
 
         [Harmony12.HarmonyPatch(typeof(MainMenu), "Start")]
         private static class MainMenuStartPatch {
-            // ReSharper disable once UnusedMember.Local
             private static void Prefix() {
                 // Kingmaker Mod Loader doesn't appear to patch the game before LocalizationManager.CurrentLocale has been set.
                 if (!initialLoad) {
@@ -79,5 +87,17 @@ namespace CraftMagicItems {
                 }
             }
         }
+
+#if PATCH21
+        [Harmony12.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
+        private static class MainMenuUiContextInitializePatch {
+            private static void Prefix() {
+                // Kingmaker Mod Loader doesn't appear to patch the game before LocalizationManager.CurrentLocale has been set.
+                if (!initialLoad) {
+                    LoadL10NStrings();
+                }
+            }
+        }
+#endif
     }
 }

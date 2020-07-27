@@ -1,7 +1,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
+#if PATCH21_BETA
+using Kingmaker.Blueprints;
+#else
 using UnityEngine;
+#endif
 
 namespace CraftMagicItems {
     public delegate object FastGetter(object source);
@@ -197,8 +201,13 @@ namespace CraftMagicItems {
             return (arg1, arg2, arg3) => (TResult) invoker.Invoke(arg1, arg2, arg3);
         }
 
+#if PATCH21_BETA
+        public static T Create<T>(Action<T> init = null) where T : SerializedScriptableObject, new() {
+            var result = SerializedScriptableObject.CreateInstance<T>();
+#else
         public static T Create<T>(Action<T> init = null) where T : ScriptableObject {
             var result = ScriptableObject.CreateInstance<T>();
+#endif
             init?.Invoke(result);
             return result;
         }
