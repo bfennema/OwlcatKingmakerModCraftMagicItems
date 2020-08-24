@@ -73,10 +73,78 @@ namespace CraftMagicItems {
         public CraftMagicItemsBlueprintPatcher(CraftMagicItemsAccessors accessors, bool modEnabled) {
             this.accessors = accessors;
             CustomBlueprintBuilder.Initialise(ApplyBlueprintPatch, modEnabled,
-                "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
-                "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponBaseSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
-                "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armour)",
-                "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armor)");
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
+                    newGuid = "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[1]=CraftMagicItems.WeaponBaseSizeChange#CraftMagicItems,Component[1].SizeCategoryChange=1)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armour)",
+                    newGuid = "7f2b282626862e345935bbea5e66424b#CraftMagicItems(feat=arms-armor)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "09e0be00530efec4693a913d6a7efe23#CraftMagicItems(Component[0].Feature.Components[0].Value.Value=20,nameId=55a76098-e043-4c15-93f4-8022e50f8224,descriptionId=693fb20a-3529-4ae9-b09a-cb796470ca82)",
+                    newGuid = "09e0be00530efec4693a913d6a7efe23#CraftMagicItems(Component[0].Feature=07b49ab29db1b244a82bc81e7d4cd626#CraftMagicItems(Component[0].Value.Value=20),nameId=55a76098-e043-4c15-93f4-8022e50f8224,descriptionId=693fb20a-3529-4ae9-b09a-cb796470ca82)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "581c22e55f03e4e4f9f9ea619d89af5f#CraftMagicItems(Component[0].Feature.Components[0].Value.Value=20,nameId=9559197f-bd23-4584-87fa-ad192d4a2737,descriptionId=b6eb5b0d-369e-473c-b798-55cea6cadfdb)",
+                    newGuid = "581c22e55f03e4e4f9f9ea619d89af5f#CraftMagicItems(Component[0].Feature=22a324c3f7fdf774f84b59a16698b5ca#CraftMagicItems(Component[0].Value.Value=20),nameId=9559197f-bd23-4584-87fa-ad192d4a2737,descriptionId=b6eb5b0d-369e-473c-b798-55cea6cadfdb)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "85c2f44721922e4409130791f913d4b4#CraftMagicItems(Component[0].Feature.Components[0].Value.Value=20,nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb,descriptionId=341afa17-d11f-40b6-a071-0ddc5469843f)",
+                    newGuid = "85c2f44721922e4409130791f913d4b4#CraftMagicItems(Component[0].Feature=f17583f835d45c341a931379bffa75e8#CraftMagicItems(Component[0].Value.Value=20),nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb,descriptionId=341afa17-d11f-40b6-a071-0ddc5469843f)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=6f88299b-7090-4980-822f-d78ecf6a79eb,descriptionId=e55b5c25-ed09-4424-b737-cc5845a95abf)",
+                    newGuid = "1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature=36a734ce54346b146bae9ab16e9aee75#CraftMagicItems(Component[0].Type=Sonic),nameId=6f88299b-7090-4980-822f-d78ecf6a79eb,descriptionId=e55b5c25-ed09-4424-b737-cc5845a95abf)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981,descriptionId=eb90d5af-40c8-4e25-80c3-c7522b84a607)",
+                    newGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Sonic),nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981,descriptionId=eb90d5af-40c8-4e25-80c3-c7522b84a607)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e,descriptionId=9023e8cc-a2ca-46cd-ab6d-499d9d62a76c)",
+                    newGuid = "26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature=612d2a7d77b78124ab8d7ec6440b023e#CraftMagicItems(Component[0].Type=Sonic),nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e,descriptionId=9023e8cc-a2ca-46cd-ab6d-499d9d62a76c)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967,Component[0].Feature.m_DisplayName=craftMagicItems-enchantment-light-fortification-name,Component[0].Feature.m_Description=craftMagicItems-enchantment-light-fortification-description,Component[0].Feature.Components[0].Bonus=25,nameId=craftMagicItems-enchantment-light-fortification-name,descriptionId=craftMagicItems-enchantment-light-fortification-description)",
+                    newGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967#CraftMagicItems(Component[0].Bonus=25,nameId=craftMagicItems-enchantment-light-fortification-name,descriptionId=craftMagicItems-enchantment-light-fortification-description),nameId=craftMagicItems-enchantment-light-fortification-name,descriptionId=craftMagicItems-enchantment-light-fortification-description)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967,Component[0].Feature.m_DisplayName=craftMagicItems-enchantment-medium-fortification-name,Component[0].Feature.m_Description=craftMagicItems-enchantment-medium-fortification-description,nameId=craftMagicItems-enchantment-medium-fortification-name,descriptionId=craftMagicItems-enchantment-medium-fortification-description)",
+                    newGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967#CraftMagicItems(nameId=craftMagicItems-enchantment-medium-fortification-name,descriptionId=craftMagicItems-enchantment-medium-fortification-description),nameId=craftMagicItems-enchantment-medium-fortification-name,descriptionId=craftMagicItems-enchantment-medium-fortification-description)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967,Component[0].Feature.m_DisplayName=craftMagicItems-enchantment-heavy-fortification-name,Component[0].Feature.m_Description=craftMagicItems-enchantment-heavy-fortification-description,Component[0].Feature.Components[0].Bonus=75,nameId=craftMagicItems-enchantment-heavy-fortification-name,descriptionId=craftMagicItems-enchantment-heavy-fortification-description)",
+                    newGuid = "dd0e096412423d646929d9b945fd6d4c#CraftMagicItems(Component[0].Feature=3acd292384279f34e859992011344967#CraftMagicItems(Component[0].Bonus=75,nameId=craftMagicItems-enchantment-heavy-fortification-name,descriptionId=craftMagicItems-enchantment-heavy-fortification-description),nameId=craftMagicItems-enchantment-heavy-fortification-name,descriptionId=craftMagicItems-enchantment-heavy-fortification-description)"
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Acid,nameId=55a76098-e043-4c15-93f4-8022e50f8224)",
+                    newGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Acid),nameId=55a76098-e043-4c15-93f4-8022e50f8224)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Cold,nameId=9559197f-bd23-4584-87fa-ad192d4a2737)",
+                    newGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Cold),nameId=9559197f-bd23-4584-87fa-ad192d4a2737)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Fire,nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb)",
+                    newGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Fire),nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=6f88299b-7090-4980-822f-d78ecf6a79eb)",
+                    newGuid = "1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature=36a734ce54346b146bae9ab16e9aee75#CraftMagicItems(Component[0].Type=Sonic),nameId=6f88299b-7090-4980-822f-d78ecf6a79eb)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981)",
+                    newGuid = "fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Sonic),nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e)",
+                    newGuid = "26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature=612d2a7d77b78124ab8d7ec6440b023e#CraftMagicItems(Component[0].Type=Sonic),nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e)",
+                },
+                new CustomBlueprintBuilder.Substitution {
+                    oldGuid = "8eb9d1c94b1e4894a88c228aa71b79e5#CraftMagicItems(Component[0].Blueprint=318ce88da1832744c87fd15be5010dc0,Component[0].Blueprint.m_Description=fc2e359c-9395-433d-ae6e-73d641bf6480,Component[0].Blueprint.Components[0].Buff.m_DisplayName=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/,Component[0].Blueprint.Components[0].Buff.Components[0].Heal=1,nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/)",
+                    newGuid = "8eb9d1c94b1e4894a88c228aa71b79e5#CraftMagicItems(Component[0].Blueprint=318ce88da1832744c87fd15be5010dc0#CraftMagicItems(Component[0].Buff=37a5e51e9e3a23049a77ba70b4e7b2d2#CraftMagicItems(Component[0].Heal=1,nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/),descriptionId=cbfd59fd-525a-4853-b3a3-5523d2db85ec),nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/)"
+                });
         }
 
         public string BuildCustomSpellItemGuid(string originalGuid, int casterLevel, int spellLevel = -1, string spellId = null) {
@@ -675,12 +743,8 @@ namespace CraftMagicItems {
                     }
 
                     // TODO if I use fieldAccess.GetValue<object[]>().ToArray() to make this universally applicable, the SetValue fails saying it can't
-                    // convert object[] to e.g. BlueprintComponent[].  Hard-code to only support BlueprintComponent for array for now.
-                    if (fieldAccess.GetValueType() == typeof(BlueprintComponent[])) {
-                        var arrayClone = fieldAccess.GetValue<BlueprintComponent[]>().ToArray();
-                        arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
-                        fieldAccess.SetValue(arrayClone);
-                    } else if (fieldAccess.GetValueType() == typeof(Condition[])) {
+                    // convert object[] to e.g. Condition[].  Hard-code to only support Condition for array for now.
+                    if (fieldAccess.GetValueType() == typeof(Condition[])) {
                         var arrayClone = fieldAccess.GetValue<Condition[]>().ToArray();
                         arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
                         fieldAccess.SetValue(arrayClone);
@@ -731,6 +795,7 @@ namespace CraftMagicItems {
             blueprint.ComponentsArray = componentsCopy;
             var enchantment = blueprint as BlueprintItemEnchantment;
             var feature = blueprint as BlueprintFeature;
+            var buff = blueprint as BlueprintBuff;
             string nameId = null;
             if (match.Groups["nameId"].Success) {
                 nameId = match.Groups["nameId"].Value;
@@ -738,6 +803,8 @@ namespace CraftMagicItems {
                     accessors.SetBlueprintItemEnchantmentEnchantName(enchantment, new L10NString(nameId));
                 } else if (feature != null) {
                     accessors.SetBlueprintUnitFactDisplayName(feature, new L10NString(nameId));
+                } else if (buff != null) {
+                    accessors.SetBlueprintUnitFactDisplayName(buff, new L10NString(nameId));
                 }
             }
 
@@ -748,6 +815,8 @@ namespace CraftMagicItems {
                     accessors.SetBlueprintItemEnchantmentDescription(enchantment, new L10NString(descriptionId));
                 } else if (feature != null) {
                     accessors.SetBlueprintUnitFactDescription(feature, new L10NString(descriptionId));
+                } else if (buff != null) {
+                    accessors.SetBlueprintUnitFactDescription(buff, new L10NString(descriptionId));
                 }
             }
 
@@ -773,6 +842,8 @@ namespace CraftMagicItems {
                     return ApplyItemEnchantmentBlueprintPatch(enchantment, match);
                 case BlueprintFeature feature when match.Groups["components"].Success:
                     return ApplyItemEnchantmentBlueprintPatch(feature, match);
+                case BlueprintBuff buff when match.Groups["components"].Success:
+                    return ApplyItemEnchantmentBlueprintPatch(buff, match);
                 default: {
                     throw new Exception($"Match of assetId {match.Value} didn't match blueprint type {blueprint.GetType()}");
                 }

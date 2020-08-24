@@ -49,7 +49,7 @@
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
       ["dd0e096412423d646929d9b945fd6d4c"],
-      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Acid,nameId=55a76098-e043-4c15-93f4-8022e50f8224)"],
+      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Acid),nameId=55a76098-e043-4c15-93f4-8022e50f8224)"],
       ["e6fa2f59c7f1bb14ebfc429f17d0a4c6"]
     ],
     "CasterLevelStart": 3,
@@ -65,7 +65,7 @@
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
       ["c872314ecfab32949ad2e0eebd834919"],
-      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Cold,nameId=9559197f-bd23-4584-87fa-ad192d4a2737)"],
+      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Cold),nameId=9559197f-bd23-4584-87fa-ad192d4a2737)"],
       ["7ef70c319ca74fe4cb5eddea792bb353"]
     ],
     "CasterLevelStart": 3,
@@ -97,7 +97,7 @@
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
       ["47f45701cc9545049b3745ef949d7446"],
-      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Fire,nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb)"],
+      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Fire),nameId=e8da229b-4149-44d2-8089-86a3bc6f82cb)"],
       ["0e98403449de8ce4c846361c6df30d1f"]
     ],
     "CasterLevelStart": 3,
@@ -112,9 +112,9 @@
     "NameId": "6f88299b-7090-4980-822f-d78ecf6a79eb/ 10//10//",
     "ParentNameId": "13a0271b-84d9-4dc2-9304-6b5c36f7131e",
     "Enchantments": [
-      ["1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=6f88299b-7090-4980-822f-d78ecf6a79eb)"],
-      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981)"],
-      ["26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature.Components[0].Type=Sonic,nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e)"]
+      ["1e4dcaf8ffa56c24788e392dae886166#CraftMagicItems(Component[0].Feature=36a734ce54346b146bae9ab16e9aee75#CraftMagicItems(Component[0].Type=Sonic),nameId=6f88299b-7090-4980-822f-d78ecf6a79eb)"],
+      ["fcfd9515adbd07a43b490280c06203f9#CraftMagicItems(Component[0].Feature=dd1bbce538a44a44ba3726b2bab76da5#CraftMagicItems(Component[0].Type=Sonic),nameId=e8dc05e9-8031-4a31-beff-162ac0b5e981)"],
+      ["26b91513989a653458986fabce24ba95#CraftMagicItems(Component[0].Feature=612d2a7d77b78124ab8d7ec6440b023e#CraftMagicItems(Component[0].Type=Sonic),nameId=0355a0ec-4776-4230-8d03-ff2db2346d0e)"]
     ],
     "CasterLevelStart": 3,
     "CasterLevelMultiplier": 4,
@@ -127,7 +127,7 @@
     "Name": "Regeneration",
     "NameId": "ccae5edb-c94b-4144-9397-1b1f762a0b19",
     "Enchantments": [
-      ["8eb9d1c94b1e4894a88c228aa71b79e5#CraftMagicItems(Component[0].Blueprint=318ce88da1832744c87fd15be5010dc0,Component[0].Blueprint.m_Description=fc2e359c-9395-433d-ae6e-73d641bf6480,Component[0].Blueprint.Components[0].Buff.m_DisplayName=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/,Component[0].Blueprint.Components[0].Buff.Components[0].Heal=1,nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/)"]
+      ["8eb9d1c94b1e4894a88c228aa71b79e5#CraftMagicItems(Component[0].Blueprint=318ce88da1832744c87fd15be5010dc0#CraftMagicItems(Component[0].Buff=37a5e51e9e3a23049a77ba70b4e7b2d2#CraftMagicItems(Component[0].Heal=1,nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/),descriptionId=cbfd59fd-525a-4853-b3a3-5523d2db85ec),nameId=a259cc67-ac04-43f4-ac0b-fda0f3170a50/5/1/)"]
     ],
     "CasterLevelStart": 15,
     "CasterLevelMultiplier": 0,

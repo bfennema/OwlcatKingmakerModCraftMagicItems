@@ -13,7 +13,14 @@ namespace CraftMagicItems {
         private static bool enabled;
         private static Regex blueprintRegex;
         private static Func<BlueprintScriptableObject, Match, string> patchBlueprint;
-        private static string[] substitutions;
+
+        public struct Substitution
+        {
+            public string oldGuid;
+            public string newGuid;
+        }
+
+        private static Substitution[] substitutions;
 
         public static List<string> CustomBlueprintIDs { get; } = new List<string>();
 
@@ -24,7 +31,7 @@ namespace CraftMagicItems {
             blueprintRegex = initBlueprintRegex;
         }
 
-        public static void Initialise(Func<BlueprintScriptableObject, Match, string> initPatchBlueprint, bool initEnabled, params string[] initSubstitutions) {
+        public static void Initialise(Func<BlueprintScriptableObject, Match, string> initPatchBlueprint, bool initEnabled, params Substitution[] initSubstitutions) {
             patchBlueprint = initPatchBlueprint;
             enabled = initEnabled;
             substitutions = initSubstitutions;
@@ -140,8 +147,8 @@ namespace CraftMagicItems {
             // ReSharper disable once UnusedMember.Local
             private static void Prefix(ref string assetId) {
                 // Perform any backward compatibility substitutions
-                for (var index = 0; index < substitutions.Length; index += 2) {
-                    assetId = assetId.Replace(substitutions[index], substitutions[index + 1]);
+                for (var index = 0; index < substitutions.Length; index ++) {
+                    assetId = assetId.Replace(substitutions[index].oldGuid, substitutions[index].newGuid);
                 }
             }
 
