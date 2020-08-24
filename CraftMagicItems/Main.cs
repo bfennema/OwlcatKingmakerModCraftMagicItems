@@ -942,7 +942,7 @@ namespace CraftMagicItems {
         }
 
         private static bool IsOversized(BlueprintItem blueprint) {
-            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(OversizedGuid));
+            return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(OversizedGuid) && !enchantment.GetComponent<WeaponSizeChange>());
         }
 
         // Use instead of UIUtility.IsMagicItem.
