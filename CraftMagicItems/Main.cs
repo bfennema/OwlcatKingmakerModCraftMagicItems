@@ -1225,7 +1225,7 @@ namespace CraftMagicItems {
                 } else {
                     upgradeItemDoubleWeapon = null;
                 }
-                if (upgradeItemShield != null) {
+                if (upgradeItemShieldWeapon != null) {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label($"{upgradeItem.Name} is a shield; enchanting ", GUILayout.ExpandWidth(false));
                     var label = selectedShieldWeapon ? "Shield Bash" : "Shield";
@@ -1238,6 +1238,8 @@ namespace CraftMagicItems {
                         upgradeItem = upgradeItemShieldArmor;
                     }
                     GUILayout.EndHorizontal();
+                } else {
+                    selectedShieldWeapon = false;
                 }
                 if (upgradeItemShield != null) {
                     RenderLabel(BuildItemDescription(upgradeItemShield));
@@ -2726,8 +2728,8 @@ namespace CraftMagicItems {
                     } else {
                         removed.Remove(upgradeFrom);
                     }
-                    return L10NFormat("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription, oldBonus,
-                        bonusString);
+                    return L10NFormat("craftMagicItems-custom-description-enchantment-upgrade-template", bonusDescription,
+                        GetBonusString(oldBonus, recipe), bonusString);
                 })
                 .OrderBy(enchantmentDescription => enchantmentDescription)
                 .Select(enchantmentDescription => string.IsNullOrEmpty(enchantmentDescription) ? "" : "\n* " + enchantmentDescription)
