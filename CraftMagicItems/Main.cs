@@ -1002,6 +1002,16 @@ namespace CraftMagicItems {
                    || armorType.ProficiencyGroup == ArmorProficiencyGroup.Heavy;
         }
 
+        private static bool IsActuallyTwoHanded(BlueprintItemWeapon weapon) {
+            if (weapon.Category == WeaponCategory.BastardSword
+             || weapon.Category == WeaponCategory.DwarvenWaraxe
+             || weapon.Category == WeaponCategory.Estoc
+             || weapon.Category == WeaponCategory.DuelingSword) {
+                return false;
+            }
+            return weapon.IsTwoHanded;
+        }
+
         private static bool ItemMatchesRestrictions(BlueprintItem blueprint, IEnumerable<ItemRestrictions> restrictions) {
             if (restrictions != null) {
                 var shield = blueprint as BlueprintItemShield;
@@ -1025,8 +1035,8 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponMetal when weapon == null || !weapon.Category.HasSubCategory(WeaponSubCategory.Metal):
                         case ItemRestrictions.WeaponUseAmmunition when weapon == null || !AmmunitionWeaponCategories.Contains(weapon.Category):
                         case ItemRestrictions.WeaponNotUseAmmunition when weapon == null || AmmunitionWeaponCategories.Contains(weapon.Category):
-                        case ItemRestrictions.WeaponTwoHanded when weapon == null || !(weapon.IsTwoHanded || weapon.IsOneHandedWhichCanBeUsedWithTwoHands):
-                        case ItemRestrictions.WeaponOneHanded when weapon == null || weapon.IsTwoHanded || weapon.Double:
+                        case ItemRestrictions.WeaponTwoHanded when weapon == null || !(IsActuallyTwoHanded(weapon) || weapon.IsOneHandedWhichCanBeUsedWithTwoHands):
+                        case ItemRestrictions.WeaponOneHanded when weapon == null || IsActuallyTwoHanded(weapon) || weapon.Double:
                         case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
                         case ItemRestrictions.WeaponNotOversized when weapon == null || IsOversized(weapon):
                         case ItemRestrictions.WeaponDouble when weapon == null || !weapon.Double:
