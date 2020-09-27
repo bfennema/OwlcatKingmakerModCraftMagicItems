@@ -2603,8 +2603,9 @@ namespace CraftMagicItems {
             BlueprintItem itemBlueprint, ItemEntity upgradeItem = null) {
             int baseCost = (craftingData.Count != 0 ? craftingData.Count : 1) * itemBlueprint.Cost;
             int upgradeCost = (craftingData.Count != 0 ? craftingData.Count : 1) * (upgradeItem?.Blueprint.Cost ?? 0);
-            var requiredProgress = (baseCost - upgradeCost) / 4;
-            var goldCost = (int) Mathf.Round(requiredProgress * ModSettings.CraftingPriceScale);
+            int materialComponentCost = recipe?.MaterialComponentCost ?? 0;
+            var requiredProgress = (baseCost - upgradeCost - materialComponentCost) / 4;
+            var goldCost = materialComponentCost + (int)Mathf.Round(requiredProgress * ModSettings.CraftingPriceScale);
             if (IsMundaneCraftingData(craftingData)) {
                 // For mundane crafting, the gold cost is less, and the cost of the recipes don't increase the required progress.
                 goldCost = Math.Max(1, (goldCost * 2 + 2) / 3);

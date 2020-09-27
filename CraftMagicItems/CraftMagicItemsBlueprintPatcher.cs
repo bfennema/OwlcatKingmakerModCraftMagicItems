@@ -23,6 +23,7 @@ using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.View.Animation;
 using Kingmaker.Utility;
+using Kingmaker.UnitLogic.Abilities.Components;
 #if PATCH21_BETA
 using Kingmaker.Blueprints.DirectSerialization;
 #else
@@ -43,7 +44,7 @@ namespace CraftMagicItems {
                       + @"CL=(?<casterLevel>\d+)(?<spellLevelMatch>,SL=(?<spellLevel>\d+))?(?<spellIdMatch>,spellId=\((?<spellId>" + MatchedParensComma +
                       @")\))?"
                       + @"|enchantments=\((?<enchantments>|" + MatchedParensComma + @")\)(,remove=(?<remove>[0-9a-f;]+))?(,name=(?<name>[^✔]+)✔)?"
-                      + @"(,ability=(?<ability>null|[0-9a-f]+))?"
+                      + $"(,ability=(?<ability>null|{MatchedParensComma}))?"
                       + $"(,activatableAbility=(?<activatableAbility>{MatchedParensComma}))?(,charges=(?<charges>[0-9]+))?(,weight=(?<weight>[0-9]+))?"
                       + @"(,material=(?<material>[a-zA-Z]+))?(,visual=(?<visual>null|[0-9a-f]+))?"
                       + @"(,animation=(?<animation>null|[a-zA-Z]+))?(,priceAdjust=(?<priceAdjust>[-0-9]+))?"
@@ -792,6 +793,10 @@ namespace CraftMagicItems {
                         var arrayClone = fieldAccess.GetValue<Condition[]>().ToArray();
                         arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
                         fieldAccess.SetValue(arrayClone);
+                    } else if (fieldAccess.GetValueType() == typeof(GameAction[])) {
+                        var arrayClone = fieldAccess.GetValue<GameAction[]>().ToArray();
+                        arrayClone[index] = TraverseCloneAndSetField(arrayClone[index], remainingFields, value);
+                        fieldAccess.SetValue(arrayClone);
                     } else {
                         throw new Exception(
                             $"Field {thisField} is of unsupported array type {fieldAccess.GetValueType().FullName} ({field})");
@@ -840,6 +845,7 @@ namespace CraftMagicItems {
             var enchantment = blueprint as BlueprintItemEnchantment;
             var feature = blueprint as BlueprintFeature;
             var buff = blueprint as BlueprintBuff;
+            var ability = blueprint as BlueprintAbility;
             string nameId = null;
             if (match.Groups["nameId"].Success) {
                 nameId = match.Groups["nameId"].Value;
@@ -861,6 +867,8 @@ namespace CraftMagicItems {
                     accessors.SetBlueprintUnitFactDescription(feature, new L10NString(descriptionId));
                 } else if (buff != null) {
                     accessors.SetBlueprintUnitFactDescription(buff, new L10NString(descriptionId));
+                } else if (ability != null) {
+                    accessors.SetBlueprintUnitFactDescription(ability, new L10NString(descriptionId));
                 }
             }
 
@@ -888,6 +896,8 @@ namespace CraftMagicItems {
                     return ApplyItemEnchantmentBlueprintPatch(feature, match);
                 case BlueprintBuff buff when match.Groups["components"].Success:
                     return ApplyItemEnchantmentBlueprintPatch(buff, match);
+                case BlueprintAbility ability when match.Groups["components"].Success:
+                    return ApplyItemEnchantmentBlueprintPatch(ability, match);
                 default: {
                     throw new Exception($"Match of assetId {match.Value} didn't match blueprint type {blueprint.GetType()}");
                 }
