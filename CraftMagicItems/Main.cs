@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Kingmaker;
@@ -36,7 +37,9 @@ using Kingmaker.Enums;
 using Kingmaker.Enums.Damage;
 using Kingmaker.GameModes;
 using Kingmaker.Items;
+#if !PATCH21
 using Kingmaker.Items.Slots;
+#endif
 using Kingmaker.Kingdom;
 using Kingmaker.Localization;
 using Kingmaker.PubSubSystem;
@@ -52,7 +55,9 @@ using Kingmaker.UI.Tooltip;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+#if !PATCH21
 using Kingmaker.UnitLogic.ActivatableAbilities;
+#endif
 using Kingmaker.UnitLogic.Alignments;
 using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
@@ -3192,42 +3197,57 @@ namespace CraftMagicItems {
                 }
             }
 
-            [AllowMultipleComponents]
-            public class TwoWeaponFightingAttackPenaltyPatch : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>, IInitiatorRulebookHandler<RuleAttackWithWeapon> {
-                public BlueprintFeature shieldMaster;
-                public BlueprintFeature prodigiousTwoWeaponFighting;
-                private int penalty = 0;
+            [Harmony12.HarmonyPatch(typeof(TwoWeaponFightingAttackPenalty), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonusWithoutTarget) })]
+            private static class TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch {
+                static public BlueprintFeature ShieldMaster;
+                static MethodInfo methodToFind;
+                private static bool Prepare() {
+                    try {
+                        methodToFind = Harmony12.AccessTools.Property(typeof(ItemEntityWeapon), nameof(ItemEntityWeapon.IsShield)).GetGetMethod();
+                    } catch (Exception ex) {
+                        Main.ModEntry.Logger.Log($"Error Preparing: {ex.Message}");
+                        return false;
+                    }
+                    return true;
+                }
+                private static IEnumerable<Harmony12.CodeInstruction> Transpiler(IEnumerable<Harmony12.CodeInstruction> instructions, ILGenerator il) {
+                    Label start = il.DefineLabel();
+                    yield return new Harmony12.CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new Harmony12.CodeInstruction(OpCodes.Ldarg_1);
+                    yield return new Harmony12.CodeInstruction(OpCodes.Call, new Func<TwoWeaponFightingAttackPenalty, RuleCalculateAttackBonusWithoutTarget, bool>(CheckShieldMaster).Method);
+                    yield return new Harmony12.CodeInstruction(OpCodes.Brfalse_S, start);
+                    yield return new Harmony12.CodeInstruction(OpCodes.Ret);
+                    var skip = 0;
+                    Harmony12.CodeInstruction prev = instructions.First();
+                    prev.labels.Add(start);
+                    foreach (var inst in instructions.Skip(1)) {
+                        if (prev.opcode == OpCodes.Ldloc_1 && inst.opcode == OpCodes.Callvirt && inst.operand as MethodInfo == methodToFind) {
+                            // ldloc.1
+                            // callvirt instance bool Kingmaker.Items.ItemEntityWeapon::get_IsShield()
+                            // brtrue.s IL_0152
+                            skip = 3;
+                        }
+                        if (skip > 0) {
+                            skip--;
+                        } else {
+                            yield return prev;
+                        }
+                        prev = inst;
+                    }
+                    if (skip == 0) {
+                        yield return prev;
+                    }
+                }
 
-                public override void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt) {
-                    penalty = 0;
-                    ItemEntityWeapon maybeWeapon = evt.Initiator.Body.PrimaryHand.MaybeWeapon;
+                private static bool CheckShieldMaster(TwoWeaponFightingAttackPenalty component, RuleCalculateAttackBonusWithoutTarget evt) {
                     ItemEntityWeapon maybeWeapon2 = evt.Initiator.Body.SecondaryHand.MaybeWeapon;
-                    bool flag = maybeWeapon2 != null && evt.Weapon == maybeWeapon2 && maybeWeapon2.IsShield && base.Owner.Progression.Features.HasFact(shieldMaster);
-                    if (evt.Weapon == null || maybeWeapon == null || maybeWeapon2 == null || maybeWeapon.Blueprint.IsNatural || maybeWeapon2.Blueprint.IsNatural ||
-                        maybeWeapon == evt.Initiator.Body.EmptyHandWeapon || maybeWeapon2 == evt.Initiator.Body.EmptyHandWeapon ||
-                        (maybeWeapon != evt.Weapon && maybeWeapon2 != evt.Weapon) || flag) {
-                        return;
-                    }
-                    int rank = base.Fact.GetRank();
-                    int num = (rank <= 1) ? -4 : -2;
-                    int num2 = (rank <= 1) ? -8 : -2;
-                    penalty = (evt.Weapon != maybeWeapon) ? num2 : num;
-                    UnitPartWeaponTraining unitPartWeaponTraining = base.Owner.Get<UnitPartWeaponTraining>();
-                    bool flag2 = (base.Owner.State.Features.EffortlessDualWielding && unitPartWeaponTraining != null && unitPartWeaponTraining.IsSuitableWeapon(maybeWeapon2))
-                        || (prodigiousTwoWeaponFighting != null && base.Owner.Progression.Features.HasFact(prodigiousTwoWeaponFighting));
-                    if (!maybeWeapon2.Blueprint.IsLight && !maybeWeapon.Blueprint.Double && !flag2) {
-                        penalty += -2;
-                    }
-                    evt.AddBonus(penalty, base.Fact);
+#if !PATCH21
+                    RuleAttackWithWeapon ruleAttackWithWeapon = evt.Reason.Rule as RuleAttackWithWeapon;
+                    if (ruleAttackWithWeapon != null && !ruleAttackWithWeapon.IsFullAttack)
+                        return true;
+#endif
+                    return maybeWeapon2 != null && evt.Weapon == maybeWeapon2 && maybeWeapon2.IsShield && component.Owner.Progression.Features.HasFact(ShieldMaster);
                 }
-                public override void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt) { }
-
-                public void OnEventAboutToTrigger(RuleAttackWithWeapon evt) {
-                    if (!evt.IsFullAttack && penalty != 0) {
-                        evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(-penalty, this, ModifierDescriptor.UntypedStackable));
-                    }
-                }
-                public void OnEventDidTrigger(RuleAttackWithWeapon evt) { }
             }
 
             [AllowMultipleComponents]
@@ -3238,6 +3258,9 @@ namespace CraftMagicItems {
                     }
                     var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
                     var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
+                    if (weaponEnhancementBonus == 0 && evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent.Blueprint.IsMasterwork) {
+                        weaponEnhancementBonus = 1;
+                    }
                     var itemEnhancementBonus = armorEnhancementBonus - weaponEnhancementBonus;
                     PhysicalDamage physicalDamage = evt.DamageBundle.WeaponDamage as PhysicalDamage;
                     if (physicalDamage != null && itemEnhancementBonus > 0) {
@@ -3277,16 +3300,8 @@ namespace CraftMagicItems {
             private static void PatchBlueprints() {
                 var shieldMaster = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ShieldMasterGuid);
                 var twoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(TwoWeaponFightingBasicMechanicsGuid);
-                for (int i = 0; i < twoWeaponFighting.ComponentsArray.Length; i++) {
-                    if (twoWeaponFighting.ComponentsArray[i] is TwoWeaponFightingAttackPenalty component) {
-                        twoWeaponFighting.ComponentsArray[i] = CraftMagicItems.Accessors.Create<TwoWeaponFightingAttackPenaltyPatch>(a => {
-                            a.name = component.name.Replace("TwoWeaponFightingAttackPenalty", "TwoWeaponFightingAttackPenaltyPatch");
-                            a.shieldMaster = shieldMaster;
-                            a.prodigiousTwoWeaponFighting = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>(ProdigiousTwoWeaponFightingGuid);
-                        });
-                    }
-                    Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
-                }
+                TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.ShieldMaster = shieldMaster;
+                Accessors.SetBlueprintUnitFactDisplayName(twoWeaponFighting, new L10NString("e32ce256-78dc-4fd0-bf15-21f9ebdf9921"));
 
                 for (int i = 0; i < shieldMaster.ComponentsArray.Length; i++) {
                     if (shieldMaster.ComponentsArray[i] is ShieldMaster component) {
@@ -4583,6 +4598,7 @@ namespace CraftMagicItems {
             }
         }
 
+#if !PATCH21
         [Harmony12.HarmonyPatch(typeof(RuleCalculateAttacksCount), "OnTrigger")]
         private static class RuleCalculateAttacksCountOnTriggerPatch {
             private static void Postfix(RuleCalculateAttacksCount __instance) {
@@ -4621,6 +4637,7 @@ namespace CraftMagicItems {
                 }
             }
         }
+#endif
 
         [Harmony12.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
         private static class DescriptionTemplatesItemItemEnergyPatch {
@@ -4671,6 +4688,7 @@ namespace CraftMagicItems {
             }
         }
 
+#if !PATCH21
         [Harmony12.HarmonyPatch(typeof(ActivatableAbility), "OnEventDidTrigger", new Type[] { typeof(RuleAttackWithWeaponResolve) })]
         private static class ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch {
             private static bool Prefix(ActivatableAbility __instance, RuleAttackWithWeaponResolve evt) {
@@ -4681,5 +4699,6 @@ namespace CraftMagicItems {
                 }
             }
         }
+#endif
     }
 }
