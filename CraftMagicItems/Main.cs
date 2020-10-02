@@ -2729,9 +2729,17 @@ namespace CraftMagicItems {
             var extraDescription = enchantments
                 .Select(enchantment => {
                     var recipe = FindSourceRecipe(enchantment.AssetGuid, blueprint);
-                    if (recipe.Enchantments.Length <= 1) {
+                    if (recipe == null) {
                         if (skipped.Contains(enchantment)) {
-                            return new L10NString("");
+                            return "";
+                        } else if (!string.IsNullOrEmpty(enchantment.Name)) {
+                            return enchantment.Name;
+                        } else {
+                            return "Unknown";
+                        }
+                    } else if (recipe.Enchantments.Length <= 1) {
+                        if (skipped.Contains(enchantment)) {
+                            return "";
                         } else {
                             if (!string.IsNullOrEmpty(enchantment.Name)) {
                                 return enchantment.Name;
