@@ -2,7 +2,6 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.RuleSystem;
-using Object = UnityEngine.Object;
 
 namespace CraftMagicItems {
     [ComponentName("Weapon Base Size Change")]
@@ -14,7 +13,6 @@ namespace CraftMagicItems {
         public int SizeCategoryChange;
 
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "BaseDamage", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponBaseDamage {
             private static void Postfix(BlueprintItemWeapon __instance, ref DiceFormula __result) {
                 foreach (var enchantment in __instance.Enchantments) {
@@ -28,7 +26,6 @@ namespace CraftMagicItems {
         }
 
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "AttackBonusStat", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponAttackBonusStat {
             private static void Postfix(BlueprintItemWeapon __instance, ref StatType __result) {
                 foreach (var enchantment in __instance.Enchantments) {
@@ -43,9 +40,7 @@ namespace CraftMagicItems {
             }
         }
 
-
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "IsTwoHanded", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponIsTwoHanded {
             private static void Postfix(BlueprintItemWeapon __instance, ref bool __result) {
                 foreach (var enchantment in __instance.Enchantments) {
@@ -63,7 +58,6 @@ namespace CraftMagicItems {
         }
 
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "IsLight", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponIsLight {
             private static void Postfix(BlueprintItemWeapon __instance, ref bool __result) {
                 foreach (var enchantment in __instance.Enchantments) {
@@ -80,8 +74,28 @@ namespace CraftMagicItems {
             }
         }
 
+        [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "IsOneHandedWhichCanBeUsedWithTwoHands", HarmonyLib.MethodType.Getter)]
+        private static class BlueprintItemWeaponIsOneHandedWhichCanBeUsedWithTwoHands {
+            private static void Postfix(BlueprintItemWeapon __instance, ref bool __result) {
+                if (__instance.Type.AttackType == AttackType.Melee && !__instance.Type.IsNatural && !__instance.Type.IsUnarmed) {
+                    foreach (var enchantment in __instance.Enchantments) {
+                        var component = enchantment.GetComponent<WeaponBaseSizeChange>();
+                        if (component != null) {
+                            if (component.SizeCategoryChange == 1 && __instance.Type.IsLight) {
+                                __result = true;
+                            } else if ((component.SizeCategoryChange == -1 && __instance.Type.IsTwoHanded)) {
+                                __result = true;
+                            } else {
+                                __result = false;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemWeapon), "SubtypeName", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemWeaponSubtypeName {
             private static void Postfix(BlueprintItemWeapon __instance, ref string __result) {
                 foreach (var enchantment in __instance.Enchantments) {
