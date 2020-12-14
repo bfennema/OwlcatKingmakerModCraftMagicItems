@@ -3342,27 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(MissAgainstFactOwner), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class MissAgainstFactOwnerOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(MissAgainstFactOwner __instance, RuleAttackRoll evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (EquipmentEnchantmentValid(evt.Weapon, logic.Owner)) {
-                        foreach (BlueprintUnitFact blueprint in __instance.Facts) {
-                            if (evt.Target.Descriptor.HasFact(blueprint)) {
-                                evt.AutoMiss = true;
-                                return false;
-                            }
-                        }
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(WeaponReality), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponRealityOnEventAboutToTriggerPatch {

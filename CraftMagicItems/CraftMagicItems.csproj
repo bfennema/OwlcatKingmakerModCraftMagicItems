@@ -120,6 +120,7 @@
     <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
+    <Compile Include="Patches\Harmony\MissAgainstFactOwnerOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\PlayerPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\RestControllerApplyRestPatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
