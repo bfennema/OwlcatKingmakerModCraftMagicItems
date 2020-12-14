@@ -3342,22 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(BrilliantEnergy), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class BrilliantEnergyOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(BrilliantEnergy __instance, RuleCalculateAC evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (evt.Reason.Item is ItemEntityWeapon weapon && EquipmentEnchantmentValid(weapon, logic.Owner)) {
-                        evt.BrilliantEnergy = logic.Fact;
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(MissAgainstFactOwner), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class MissAgainstFactOwnerOnEventAboutToTriggerPatch {
