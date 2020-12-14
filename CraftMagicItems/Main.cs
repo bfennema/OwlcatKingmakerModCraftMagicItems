@@ -3342,17 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
-        private static class DescriptionTemplatesItemItemEnergyPatch {
-            private static void Postfix(TooltipData data, bool __result) {
-                if (__result) {
-                    if (data.Energy.Count > 0) {
-                        data.Energy.Clear();
-                    }
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnhancement")]
         private static class DescriptionTemplatesItemItemEnhancementPatch {
             private static void Postfix(TooltipData data) {

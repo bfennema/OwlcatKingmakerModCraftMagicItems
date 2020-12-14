@@ -116,6 +116,7 @@
     <Compile Include="Patches\Harmony\BrilliantEnergyOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\CapitalCompanionLogicOnFactActivatePatch.cs" />
     <Compile Include="Patches\Harmony\DamageGraceOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\DescriptionTemplatesItemItemEnergyPatch.cs" />
     <Compile Include="Patches\Harmony\GameOnAreaLoadedPatch.cs" />
     <Compile Include="Patches\Harmony\ItemEntityVendorDescriptionPatch.cs" />
     <Compile Include="Patches\Harmony\ItemEntityWeaponHoldInTwoHandsPatch.cs" />
