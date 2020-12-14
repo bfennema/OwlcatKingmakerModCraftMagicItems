@@ -3342,25 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnhancement")]
-        private static class DescriptionTemplatesItemItemEnhancementPatch {
-            private static void Postfix(TooltipData data) {
-                if (data.Texts.ContainsKey(Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1)) {
-                    data.Texts[TooltipElement.Enhancement] = data.Texts[Enum.GetValues(typeof(TooltipElement)).Cast<TooltipElement>().Max() + 1];
-                } else if (data.Texts.ContainsKey(TooltipElement.Enhancement)) {
-                    data.Texts.Remove(TooltipElement.Enhancement);
-                }
-            }
-        }
-
-        [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergyResisit")]
-        private static class DescriptionTemplatesItemItemEnergyResisitPatch {
-            private static bool Prefix(ref bool __result) {
-                __result = false;
-                return false;
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", HarmonyLib.MethodType.Getter)]
         private static class UnitViewHandSlotDataWeaponScalePatch {
             private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
