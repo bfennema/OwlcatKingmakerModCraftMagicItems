@@ -3333,32 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(ItemEntity), "VendorDescription", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
-        private static class ItemEntityVendorDescriptionPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(ItemEntity __instance, ref string __result) {
-                // If the "vendor" is a party member, return that the item was crafted rather than from a merchant
-#if PATCH21
-                if (__instance.VendorBlueprint != null && __instance.VendorBlueprint.IsCompanion) {
-                    foreach (var companion in UIUtility.GetGroup(true)) {
-                        if (companion.Blueprint == __instance.VendorBlueprint) {
-                            __result = LocalizationHelper.FormatLocalizedString("craftMagicItems-crafted-source-description", companion.CharacterName);
-                            break;
-                        }
-                    }
-                    return false;
-                }
-#else
-                if (__instance.Vendor != null && __instance.Vendor.IsPlayerFaction) {
-                    __result = LocalizationHelper.FormatLocalizedString("craftMagicItems-crafted-source-description", __instance.Vendor.CharacterName);
-                    return false;
-                }
-#endif
-                return true;
-            }
-        }
-
         // Owlcat's code doesn't filter out undamaged characters, so it will always return someone.  This meant that with the "auto-cast healing" camping
         // option enabled on, healers would burn all their spell slots healing undamaged characters when they started resting, leaving them no spells to cast
         // when crafting.  Change it so it returns null if the most damaged character is undamaged.
