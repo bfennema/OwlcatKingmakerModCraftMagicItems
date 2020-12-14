@@ -112,6 +112,7 @@
     <Compile Include="Patches\Harmony\BlueprintAbilityIsInSpellListPatch.cs" />
     <Compile Include="Patches\Harmony\BlueprintItemEquipmentUsableCostPatch.cs" />
     <Compile Include="Patches\Harmony\CapitalCompanionLogicOnFactActivatePatch.cs" />
+    <Compile Include="Patches\Harmony\GameOnAreaLoadedPatch.cs" />
     <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />

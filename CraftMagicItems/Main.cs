@@ -3333,21 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        public static class GameOnAreaLoadedPatch {
-            private static void Postfix() {
-                if (CustomBlueprintBuilder.DidDowngrade) {
-                    UIUtility.ShowMessageBox("Craft Magic Items is disabled.  All your custom enchanted items and crafting feats have been replaced with " +
-#if PATCH21
-                                             "vanilla versions.", DialogMessageBoxBase.BoxType.Message, null);
-#else
-                                             "vanilla versions.", DialogMessageBox.BoxType.Message, null);
-#endif
-
-                    CustomBlueprintBuilder.Reset();
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch {
