@@ -3342,31 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(WeaponDamageAgainstAlignment), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponDamageAgainstAlignmentOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(WeaponDamageAgainstAlignment __instance, RulePrepareDamage evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (evt.DamageBundle.WeaponDamage == null) {
-                        return false;
-                    }
-                    evt.DamageBundle.WeaponDamage.AddAlignment(__instance.WeaponAlignment);
-
-                    if (evt.Target.Descriptor.Alignment.Value.HasComponent(__instance.EnemyAlignment) && EquipmentEnchantmentValid(evt.DamageBundle.Weapon, logic.Owner)) {
-                        int rollsCount = __instance.Value.DiceCountValue.Calculate(logic.Context);
-                        int bonusDamage = __instance.Value.BonusValue.Calculate(logic.Context);
-                        EnergyDamage energyDamage = new EnergyDamage(new DiceFormula(rollsCount, __instance.Value.DiceType), __instance.DamageType);
-                        energyDamage.AddBonusTargetRelated(bonusDamage);
-                        evt.DamageBundle.Add(energyDamage);
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateWeaponStatsPatch {
