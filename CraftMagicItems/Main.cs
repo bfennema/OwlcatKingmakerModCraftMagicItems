@@ -3333,37 +3333,12 @@ namespace CraftMagicItems {
             }
         }
 
-        private static bool EquipmentEnchantmentValid(ItemEntityWeapon weapon, ItemEntity owner) {
+        public static bool EquipmentEnchantmentValid(ItemEntityWeapon weapon, ItemEntity owner) {
             if ((weapon == owner) ||
                 (weapon != null && (weapon.Blueprint.IsNatural || weapon.Blueprint.IsUnarmed))) {
                 return true;
             } else {
                 return false;
-            }
-        }
-
-        [HarmonyLib.HarmonyPatch(typeof(WeaponEnergyDamageDice), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponEnergyDamageDiceOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(WeaponEnergyDamageDice __instance, RuleCalculateWeaponStats evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (EquipmentEnchantmentValid(evt.Weapon, logic.Owner)) {
-                        DamageDescription item = new DamageDescription
-                        {
-                            TypeDescription = new DamageTypeDescription
-                            {
-                                Type = DamageType.Energy,
-                                Energy = __instance.Element
-                            },
-                            Dice = __instance.EnergyDamageDice
-                        };
-                        evt.DamageDescription.Add(item);
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
             }
         }
 
