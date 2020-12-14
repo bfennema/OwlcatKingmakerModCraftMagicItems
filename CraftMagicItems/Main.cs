@@ -2889,16 +2889,6 @@ namespace CraftMagicItems {
             return true;
         }
 
-#if PATCH21
-        [HarmonyLib.HarmonyPatch(typeof(MainMenuUiContext), "Initialize")]
-        private static class MainMenuUiContextInitializePatch {
-            [HarmonyLib.HarmonyPriority(HarmonyLib.Priority.Last)]
-            private static void Postfix() {
-                MainMenuStartPatch.Postfix();
-            }
-        }
-#endif
-
 #if !PATCH21
         // Fix issue in Owlcat's UI - ActionBarManager.Update does not refresh the Groups (spells/Actions/Belt)
         [HarmonyLib.HarmonyPatch(typeof(ActionBarManager), "Update")]

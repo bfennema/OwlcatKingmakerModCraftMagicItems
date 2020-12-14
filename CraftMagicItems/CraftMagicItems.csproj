@@ -108,6 +108,7 @@
     <Compile Include="Constants\VisualAdjustmentPatches.cs" />
     <Compile Include="Localization\LocalizationHelper.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
+    <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\IkPatch.cs" />
