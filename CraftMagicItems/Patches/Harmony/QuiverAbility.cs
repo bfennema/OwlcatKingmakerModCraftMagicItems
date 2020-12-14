@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using CraftMagicItems.Localization;
 using Kingmaker;
 #if PATCH21
 using Kingmaker.Assets.UI.Context;
@@ -18,7 +19,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 #endif
 
-namespace CraftMagicItems {
+namespace CraftMagicItems.Patches.Harmony {
     public class CreateQuiverAbility : ScriptableObject {
         private static bool initialised;
 

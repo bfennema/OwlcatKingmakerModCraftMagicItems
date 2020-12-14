@@ -29,7 +29,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.CraftingCostsNoGold);
@@ -43,7 +43,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.CraftingCostsNoGold);
@@ -65,7 +65,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostsNoGold(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(initial, settings.CraftingPriceScale);
@@ -86,7 +86,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel);
 
                 //validation
                 Assert.AreEqual(false, invokedWarning);
@@ -107,7 +107,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Callback(setInvoked);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel);
 
                 //validation
                 Assert.AreEqual(true, invokedWarning);
@@ -127,7 +127,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CustomCraftingCostSlider(It.IsAny<float>())).Returns(4000);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(4000, settings.CraftingPriceScale);
@@ -149,7 +149,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(1);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(2, settings.CraftingPriceScale);
@@ -164,7 +164,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingCostSelection(It.IsAny<string>(), It.IsAny<string[]>())).Returns(0);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(1, settings.CraftingPriceScale);
@@ -186,7 +186,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.RenderOnly_WarningAboutCustomItemVanillaItemCostDisparity()).Callback(setInvoked);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, new Settings(), priceLabel);
 
                 //validation
                 Assert.AreEqual(true, invokedWarning);
@@ -207,7 +207,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.IgnoreCraftingFeats);
@@ -221,7 +221,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnoreCraftingFeats(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.IgnoreCraftingFeats);
@@ -242,7 +242,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.CraftingTakesNoTime);
@@ -256,7 +256,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.CraftingTakesNoTime);
@@ -282,7 +282,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftingTakesNoTime(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(initialMagicCraftRate, settings.MagicCraftingRate);
@@ -306,7 +306,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.CustomCraftRate);
@@ -321,7 +321,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.CustomCraftRate);
@@ -341,7 +341,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_MagicCraftingRateSlider(It.IsAny<int>())).Returns(7);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(7, settings.MagicCraftingRate);
@@ -361,7 +361,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_MundaneCraftingRateSlider(It.IsAny<int>())).Returns(12);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(12, settings.MundaneCraftingRate);
@@ -380,7 +380,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(Settings.MagicCraftingProgressPerDay, settings.MagicCraftingRate);
@@ -399,7 +399,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CustomCraftRate(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(Settings.MundaneCraftingProgressPerDay, settings.MundaneCraftingRate);
@@ -420,7 +420,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.CasterLevelIsSinglePrerequisite);
@@ -434,7 +434,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CasterLevelIsSinglePrerequisite(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.CasterLevelIsSinglePrerequisite);
@@ -455,7 +455,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.CraftAtFullSpeedWhileAdventuring);
@@ -469,7 +469,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_CraftAtFullSpeedWhileAdventuring(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.CraftAtFullSpeedWhileAdventuring);
@@ -490,7 +490,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.IgnorePlusTenItemMaximum);
@@ -504,7 +504,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnorePlusTenItemMaximum(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.IgnorePlusTenItemMaximum);
@@ -525,7 +525,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(true);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(true, settings.IgnoreFeatCasterLevelRestriction);
@@ -539,7 +539,7 @@ namespace CraftMagicItemsTests.UI
                 renderer.Setup(r => r.Evaluate_IgnoreFeatCasterLevelRestriction(It.IsAny<bool>())).Returns(false);
 
                 //invocation
-                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel, priceOptions);
+                UserInterfaceEventHandlingLogic.RenderCheatsSectionAndUpdateSettings(renderer.Object, settings, priceLabel);
 
                 //validation
                 Assert.AreEqual(false, settings.IgnoreFeatCasterLevelRestriction);

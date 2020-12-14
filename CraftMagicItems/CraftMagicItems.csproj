@@ -93,10 +93,67 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="BondedItemComponent.cs" />
+    <Compile Include="Config\DictionaryData.cs" />
+    <Compile Include="Config\Selections.cs" />
+    <Compile Include="Constants\Areas.cs" />
+    <Compile Include="Constants\ClassBlueprints.cs" />
+    <Compile Include="Constants\DefaultCosts.cs" />
+    <Compile Include="Constants\DifficultyClass.cs" />
     <Compile Include="Constants\EnchantmentBlueprints.cs" />
+    <Compile Include="Constants\Features.cs" />
     <Compile Include="Constants\ItemQualityBlueprints.cs" />
+    <Compile Include="Constants\LocalizedStringBlueprints.cs" />
+    <Compile Include="Constants\MechanicsBlueprints.cs" />
     <Compile Include="Constants\UnarmedStrikeEnchantment.cs" />
-    <Compile Include="QuiverAbility.cs" />
+    <Compile Include="Constants\VisualAdjustmentPatches.cs" />
+    <Compile Include="CraftingLogic.cs" />
+    <Compile Include="Localization\LocalizationHelper.cs" />
+    <Compile Include="Patches\HarmonyPatcher.cs" />
+    <Compile Include="Patches\Harmony\ActionBarManagerUpdatePatch.cs" />
+    <Compile Include="Patches\Harmony\ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch.cs" />
+    <Compile Include="Patches\Harmony\AddInitiatorAttackRollTriggerCheckConditionsPatch.cs" />
+    <Compile Include="Patches\Harmony\AttackStatReplacementOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\BattleLogManagerInitializePatch.cs" />
+    <Compile Include="Patches\Harmony\BlueprintAbilityIsInSpellListPatch.cs" />
+    <Compile Include="Patches\Harmony\BlueprintItemEquipmentUsableCostPatch.cs" />
+    <Compile Include="Patches\Harmony\BrilliantEnergyOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\CapitalCompanionLogicOnFactActivatePatch.cs" />
+    <Compile Include="Patches\Harmony\DamageGraceOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\DescriptionTemplatesItemItemEnergyPatch.cs" />
+    <Compile Include="Patches\Harmony\DescriptionTemplatesItemItemEnhancementPatch.cs" />
+    <Compile Include="Patches\Harmony\GameOnAreaLoadedPatch.cs" />
+    <Compile Include="Patches\Harmony\ItemEntityVendorDescriptionPatch.cs" />
+    <Compile Include="Patches\Harmony\ItemEntityWeaponHoldInTwoHandsPatch.cs" />
+    <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
+    <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
+    <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
+    <Compile Include="Patches\Harmony\MissAgainstFactOwnerOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\PlayerPostLoadPatch.cs" />
+    <Compile Include="Patches\Harmony\RestControllerApplyRestPatch.cs" />
+    <Compile Include="Patches\Harmony\RuleCalculateAttacksCountOnTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
+    <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
+    <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\UIUtilityIsMagicItem.cs" />
+    <Compile Include="Patches\Harmony\UIUtilityItemFillArmorEnchantmentsPatch.cs" />
+    <Compile Include="Patches\Harmony\UIUtilityItemFillEnchantmentDescriptionPatch.cs" />
+    <Compile Include="Patches\Harmony\UIUtilityItemGetQualitiesPatch.cs" />
+    <Compile Include="Patches\Harmony\UnitUseSpellsOnRestGetUnitWithMaxDamagePatch.cs" />
+    <Compile Include="Patches\Harmony\UnitViewHandSlotDataWeaponScalePatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponConditionalDamageDiceOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateAttackBonusPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateWeaponStatsPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponDamageAgainstAlignmentOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponEnergyBurstOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponEnergyDamageDiceOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponExtraAttackOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponParametersAttackBonusOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponParametersDamageBonusOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponRealityOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\IkPatch.cs" />
+    <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />
+    <Compile Include="Patches\MethodPatch.cs" />
+	<Compile Include="Patches\Harmony\QuiverAbility.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BattleLog\BattleLogFactory.cs" />
     <Compile Include="UI\BattleLog\IBattleLog.cs" />
@@ -110,24 +167,48 @@
     <Compile Include="UI\Sections\IFeatReassignmentSectionRenderer.cs" />
     <Compile Include="UI\UnityModManager\UmmUiRenderer.cs" />
     <Compile Include="UI\UserInterfaceEventHandlingLogic.cs" />
-    <Compile Include="WeaponBaseSizeChange.cs" />
+    <Compile Include="Patches\Harmony\WeaponBaseSizeChange.cs" />
     <Compile Include="CraftMagicItemsAccessors.cs" />
-    <Compile Include="CraftMagicItemsBlueprintPatcher.cs" />
+    <Compile Include="Patches\CraftMagicItemsBlueprintPatcher.cs" />
     <Compile Include="CraftingTimerComponent.cs" />
     <Compile Include="CraftingTypes.cs" />
     <Compile Include="CustomBlueprintBuilder.cs" />
     <Compile Include="Image2Sprite.cs" />
-    <Compile Include="L10n.cs" />
-    <Compile Include="L10NString.cs" />
+    <Compile Include="Localization\L10N.cs" />
+    <Compile Include="Localization\L10NString.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="PrerequisiteCasterLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SustenanceEnchantment.cs" />
-    <Compile Include="WeaponSizeChange.cs" />
+    <Compile Include="Patches\Harmony\WeaponSizeChange.cs" />
     <Compile Include="WildEnchantment.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Content Include="Data\ArmsArmorRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\CommonRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\ItemTypes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\LootItems.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\MundaneRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\RingRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\RodRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\WondrousRecipes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
