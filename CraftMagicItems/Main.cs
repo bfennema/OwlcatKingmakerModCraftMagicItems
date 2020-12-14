@@ -3333,19 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(WeaponParametersDamageBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponParametersDamageBonusOnEventAboutToTriggerPatch {
-            private static bool Prefix(WeaponParametersDamageBonus __instance, RuleCalculateWeaponStats evt) {
-                if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
-                    IsOversized(evt.Weapon.Blueprint)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(AttackStatReplacement), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class AttackStatReplacementOnEventAboutToTriggerPatch {
