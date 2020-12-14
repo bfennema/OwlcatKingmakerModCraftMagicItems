@@ -3343,33 +3343,6 @@ namespace CraftMagicItems {
         }
 
 #if !PATCH21
-        [HarmonyLib.HarmonyPatch(typeof(RuleCalculateAttacksCount), "OnTrigger")]
-        private static class RuleCalculateAttacksCountOnTriggerPatch {
-            private static void Postfix(RuleCalculateAttacksCount __instance) {
-                int num = __instance.Initiator.Stats.BaseAttackBonus;
-                int val = Math.Min(Math.Max(0, num / 5 - ((num % 5 != 0) ? 0 : 1)), 3);
-                HandSlot primaryHand = __instance.Initiator.Body.PrimaryHand;
-                HandSlot secondaryHand = __instance.Initiator.Body.SecondaryHand;
-                ItemEntityWeapon maybeWeapon = primaryHand.MaybeWeapon;
-                BlueprintItemWeapon blueprintItemWeapon = (maybeWeapon != null) ? maybeWeapon.Blueprint : null;
-                BlueprintItemWeapon blueprintItemWeapon2;
-                if (secondaryHand.MaybeShield != null) {
-                    if (__instance.Initiator.Descriptor.State.Features.ShieldBash) {
-                        ItemEntityWeapon weaponComponent = secondaryHand.MaybeShield.WeaponComponent;
-                        blueprintItemWeapon2 = ((weaponComponent != null) ? weaponComponent.Blueprint : null);
-                    } else {
-                        blueprintItemWeapon2 = null;
-                    }
-                } else {
-                    ItemEntityWeapon maybeWeapon2 = secondaryHand.MaybeWeapon;
-                    blueprintItemWeapon2 = ((maybeWeapon2 != null) ? maybeWeapon2.Blueprint : null);
-                }
-                if ((primaryHand.MaybeWeapon == null || !primaryHand.MaybeWeapon.HoldInTwoHands) && (blueprintItemWeapon == null || blueprintItemWeapon.IsUnarmed) && blueprintItemWeapon2 && !blueprintItemWeapon2.IsUnarmed) {
-                    __instance.SecondaryHand.PenalizedAttacks += Math.Max(0, val);
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(ItemEntityWeapon), "HoldInTwoHands", MethodType.Getter)]
         private static class ItemEntityWeaponHoldInTwoHandsPatch {
             private static void Postfix(ItemEntityWeapon __instance, ref bool __result) {

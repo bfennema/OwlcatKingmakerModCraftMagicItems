@@ -124,6 +124,7 @@
     <Compile Include="Patches\Harmony\MissAgainstFactOwnerOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\PlayerPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\RestControllerApplyRestPatch.cs" />
+    <Compile Include="Patches\Harmony\RuleCalculateAttacksCountOnTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
     <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
