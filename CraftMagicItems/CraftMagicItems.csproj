@@ -108,6 +108,7 @@
     <Compile Include="Constants\VisualAdjustmentPatches.cs" />
     <Compile Include="Localization\LocalizationHelper.cs" />
     <Compile Include="Patches\Harmony\ActionBarManagerUpdatePatch.cs" />
+    <Compile Include="Patches\Harmony\BattleLogManagerInitializePatch.cs" />
     <Compile Include="Patches\Harmony\BlueprintAbilityIsInSpellListPatch.cs" />
     <Compile Include="Patches\Harmony\BlueprintItemEquipmentUsableCostPatch.cs" />
     <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />

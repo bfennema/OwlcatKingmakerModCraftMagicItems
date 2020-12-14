@@ -2902,24 +2902,6 @@ namespace CraftMagicItems {
             }
         }
 
-        // Add "pending" log items when the battle log becomes available again, so crafting messages sent when e.g. camping
-        // in the overland map are still shown eventually.
-        [HarmonyLib.HarmonyPatch(typeof(BattleLogManager), "Initialize")]
-        // ReSharper disable once UnusedMember.Local
-        private static class BattleLogManagerInitializePatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix() {
-                if (Enumerable.Any(PendingLogItems)) {
-                    foreach (var item in PendingLogItems) {
-                        item.UpdateSize();
-                        Game.Instance.UI.BattleLogManager.LogView.AddLogEntry(item);
-                    }
-
-                    PendingLogItems.Clear();
-                }
-            }
-        }
-
         private static AbilityData FindCasterSpell(UnitDescriptor caster, BlueprintAbility spellBlueprint, bool mustHavePrepared,
             IReadOnlyCollection<AbilityData> spellsToCast) {
             foreach (var spellbook in caster.Spellbooks) {
