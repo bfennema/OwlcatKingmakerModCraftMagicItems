@@ -3333,28 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
-        // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityItemGetQualitiesPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(ItemEntity item, ref string __result) {
-                if (!item.IsIdentified) {
-                    return;
-                }
-                ItemEntityWeapon itemEntityWeapon = item as ItemEntityWeapon;
-                if (itemEntityWeapon == null) {
-                    return;
-                }
-                WeaponCategory category = itemEntityWeapon.Blueprint.Category;
-                if (category.HasSubCategory(WeaponSubCategory.Finessable) && IsOversized(itemEntityWeapon.Blueprint)) {
-                    __result = __result.Replace(LocalizedTexts.Instance.WeaponSubCategories.GetText(WeaponSubCategory.Finessable), "");
-                    __result = __result.Replace(",  ,", ",");
-                    char[] charsToTrim = { ',', ' ' };
-                    __result = __result.Trim(charsToTrim);
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "FillArmorEnchantments")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemFillArmorEnchantmentsPatch {
