@@ -3342,25 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(WeaponReality), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponRealityOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(WeaponReality __instance, RulePrepareDamage evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (evt.DamageBundle.WeaponDamage == null) {
-                        return false;
-                    }
-                    if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, logic.Owner)) {
-                        evt.DamageBundle.WeaponDamage.Reality |= __instance.Reality;
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(AddInitiatorAttackRollTrigger), "CheckConditions")]
         // ReSharper disable once UnusedMember.Local
         private static class AddInitiatorAttackRollTriggerCheckConditionsPatch {
