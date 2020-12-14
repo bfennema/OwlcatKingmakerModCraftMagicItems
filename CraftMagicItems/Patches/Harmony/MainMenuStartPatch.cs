@@ -4,8 +4,6 @@ using System.Runtime.Serialization;
 using CraftMagicItems.Constants;
 using CraftMagicItems.Localization;
 using Kingmaker;
-#if PATCH21
-#endif
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
@@ -14,13 +12,7 @@ using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Enums.Damage;
-#if !PATCH21
-using Kingmaker.Items.Slots;
-#endif
 using Kingmaker.RuleSystem;
-#if !PATCH21
-using Kingmaker.UnitLogic.ActivatableAbilities;
-#endif
 using Kingmaker.UnitLogic.Mechanics.Components;
 using Kingmaker.Utility;
 using UnityEngine;
@@ -272,7 +264,7 @@ namespace CraftMagicItems.Patches.Harmony
                     if (conditional.Conditions.Conditions[i] is Kingmaker.Designers.EventConditionActionSystem.Conditions.HasFact condition)
                     {
 #if PATCH21_BETA
-                            var replace = SerializedScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
+                        var replace = SerializedScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
 #else
                         var replace = ScriptableObject.CreateInstance<Kingmaker.UnitLogic.Mechanics.Conditions.ContextConditionHasFact>();
 #endif
