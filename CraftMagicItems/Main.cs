@@ -168,8 +168,8 @@ namespace CraftMagicItems {
         private static HarmonyLib.Harmony harmonyInstance;
         private static CraftMagicItemsBlueprintPatcher blueprintPatcher;
 
-        private static readonly Dictionary<ItemEntity, CraftingProjectData> ItemUpgradeProjects = new Dictionary<ItemEntity, CraftingProjectData>();
-        private static readonly List<CraftingProjectData> ItemCreationProjects = new List<CraftingProjectData>();
+        public static readonly Dictionary<ItemEntity, CraftingProjectData> ItemUpgradeProjects = new Dictionary<ItemEntity, CraftingProjectData>();
+        public static readonly List<CraftingProjectData> ItemCreationProjects = new List<CraftingProjectData>();
 
         private static readonly Random RandomGenerator = new Random();
 
@@ -338,7 +338,7 @@ namespace CraftMagicItems {
             }
         }
 
-        private static CraftingTimerComponent GetCraftingTimerComponentForCaster(UnitDescriptor caster, bool create = false) {
+        public static CraftingTimerComponent GetCraftingTimerComponentForCaster(UnitDescriptor caster, bool create = false) {
             // Manually search caster.Buffs rather than using GetFact, because we don't want to TryGetBlueprint if the mod is disabled.
             var timerBuff = caster.Buffs.Enumerable.FirstOrDefault(fact => fact.Blueprint.AssetGuid == CraftMagicItemsBlueprintPatcher.TimerBlueprintGuid);
             if (timerBuff == null) {
@@ -1016,7 +1016,7 @@ namespace CraftMagicItems {
                 ;
         }
 
-        private static ItemEntity BuildItemEntity(BlueprintItem blueprint, ItemCraftingData craftingData, UnitEntityData crafter) {
+        public static ItemEntity BuildItemEntity(BlueprintItem blueprint, ItemCraftingData craftingData, UnitEntityData crafter) {
             var item = blueprint.CreateEntity();
             item.Identify();
             item.SetVendorIfNull(crafter);
@@ -3321,7 +3321,7 @@ namespace CraftMagicItems {
             }
         }
 
-        private static void UpgradeSave(Version version) {
+        public static void UpgradeSave(Version version) {
             foreach (var lootItem in LoadedData.CustomLootItems) {
                 var firstTime = (version == null || version.CompareTo(lootItem.AddInVersion) < 0);
                 var item = ResourcesLibrary.TryGetBlueprint<BlueprintItem>(lootItem.AssetGuid);
@@ -3329,72 +3329,6 @@ namespace CraftMagicItems {
                     HarmonyLib.FileLog.Log($"!!! Loot item not created: {lootItem.AssetGuid}");
                 } else {
                     AddToLootTables(item, lootItem.LootTables, firstTime);
-                }
-            }
-        }
-
-        public static class PlayerPostLoadPatch {
-            private static void Postfix() {
-                ItemUpgradeProjects.Clear();
-                ItemCreationProjects.Clear();
-
-                var characterList = UIUtility.GetGroup(true);
-                foreach (var character in characterList) {
-                    // If the mod is disabled, this will clean up crafting timer "buff" from all casters.
-                    var timer = GetCraftingTimerComponentForCaster(character.Descriptor, character.IsMainCharacter);
-                    var bondedItemComponent = GetBondedItemComponentForCaster(character.Descriptor);
-
-                    if (!modEnabled) {
-                        continue;
-                    }
-
-                    if (timer != null) {
-                        foreach (var project in timer.CraftingProjects) {
-                            if (project.ItemBlueprint != null) {
-                                // Migrate all projects using ItemBlueprint to use ResultItem
-                                var craftingData = LoadedData.ItemCraftingData.First(data => data.Name == project.ItemType);
-                                project.ResultItem = BuildItemEntity(project.ItemBlueprint, craftingData, character);
-                                project.ItemBlueprint = null;
-                            }
-
-                            project.Crafter = character;
-                            if (!project.ResultItem.HasUniqueVendor) {
-                                // Set "vendor" of item if it's already in progress
-                                project.ResultItem.SetVendorIfNull(character);
-                            }
-                            project.ResultItem.PostLoad();
-                            if (project.UpgradeItem == null) {
-                                ItemCreationProjects.Add(project);
-                            } else {
-                                ItemUpgradeProjects[project.UpgradeItem] = project;
-                                project.UpgradeItem.PostLoad();
-                            }
-                        }
-
-                        if (character.IsMainCharacter) {
-                            UpgradeSave(string.IsNullOrEmpty(timer.Version) ? null : Version.Parse(timer.Version));
-                            timer.Version = ModEntry.Version.ToString();
-                        }
-                    }
-
-                    if (bondedItemComponent != null) {
-                        bondedItemComponent.ownerItem?.PostLoad();
-                        bondedItemComponent.everyoneElseItem?.PostLoad();
-                    }
-
-                    // Retroactively give character any crafting feats in their past progression data which they don't actually have
-                    // (e.g. Alchemists getting Brew Potion)
-                    foreach (var characterClass in character.Descriptor.Progression.Classes) {
-                        foreach (var levelData in characterClass.CharacterClass.Progression.LevelEntries) {
-                            if (levelData.Level <= characterClass.Level) {
-                                foreach (var feature in levelData.Features.OfType<BlueprintFeature>()) {
-                                    if (feature.AssetGuid.Contains("#CraftMagicItems(feat=") && !CharacterHasFeat(character, feature.AssetGuid)) {
-                                        character.Descriptor.Progression.Features.AddFeature(feature);
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
