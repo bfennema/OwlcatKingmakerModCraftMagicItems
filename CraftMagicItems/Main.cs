@@ -3342,20 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-#if !PATCH21
-        [HarmonyLib.HarmonyPatch(typeof(ItemEntityWeapon), "HoldInTwoHands", MethodType.Getter)]
-        private static class ItemEntityWeaponHoldInTwoHandsPatch {
-            private static void Postfix(ItemEntityWeapon __instance, ref bool __result) {
-                if (!__result) {
-                    if (__instance.IsShield && __instance.Blueprint.IsOneHandedWhichCanBeUsedWithTwoHands && __instance.Wielder != null) {
-                        HandSlot handSlot = __instance.Wielder.Body.PrimaryHand;
-                        __result = handSlot != null && !handSlot.HasItem;
-                    }
-                }
-            }
-        }
-#endif
-
         [HarmonyLib.HarmonyPatch(typeof(DescriptionTemplatesItem), "ItemEnergy")]
         private static class DescriptionTemplatesItemItemEnergyPatch {
             private static void Postfix(TooltipData data, bool __result) {

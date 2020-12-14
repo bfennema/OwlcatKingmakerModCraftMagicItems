@@ -118,6 +118,7 @@
     <Compile Include="Patches\Harmony\DamageGraceOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\GameOnAreaLoadedPatch.cs" />
     <Compile Include="Patches\Harmony\ItemEntityVendorDescriptionPatch.cs" />
+    <Compile Include="Patches\Harmony\ItemEntityWeaponHoldInTwoHandsPatch.cs" />
     <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
