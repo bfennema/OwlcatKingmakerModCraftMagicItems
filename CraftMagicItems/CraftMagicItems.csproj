@@ -121,6 +121,7 @@
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
     <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponParametersAttackBonusOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\IkPatch.cs" />
     <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />
     <Compile Include="QuiverAbility.cs" />

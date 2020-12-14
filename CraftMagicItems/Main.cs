@@ -886,7 +886,7 @@ namespace CraftMagicItems {
             return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid == ItemQualityBlueprints.MasterworkGuid);
         }
 
-        private static bool IsOversized(BlueprintItem blueprint) {
+        public static bool IsOversized(BlueprintItem blueprint) {
             return GetEnchantments(blueprint).Any(enchantment => enchantment.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid) && !enchantment.GetComponent<WeaponSizeChange>());
         }
 
@@ -3329,19 +3329,6 @@ namespace CraftMagicItems {
                     HarmonyLib.FileLog.Log($"!!! Loot item not created: {lootItem.AssetGuid}");
                 } else {
                     AddToLootTables(item, lootItem.LootTables, firstTime);
-                }
-            }
-        }
-
-        [HarmonyLib.HarmonyPatch(typeof(WeaponParametersAttackBonus), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponParametersAttackBonusOnEventAboutToTriggerPatch {
-            private static bool Prefix(WeaponParametersAttackBonus __instance, RuleCalculateAttackBonusWithoutTarget evt) {
-                if (evt.Weapon != null && __instance.OnlyFinessable && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
-                    IsOversized(evt.Weapon.Blueprint)) {
-                    return false;
-                } else {
-                    return true;
                 }
             }
         }
