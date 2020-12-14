@@ -3333,17 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(UIUtility), "IsMagicItem")]
-        // ReSharper disable once UnusedMember.Local
-        private static class UIUtilityIsMagicItem {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(ItemEntity item, ref bool __result) {
-                if (__result == false && item != null && item.IsIdentified && item is ItemEntityShield shield && shield.WeaponComponent != null) {
-                    __result = ItemPlusEquivalent(shield.WeaponComponent.Blueprint) > 0;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(ItemEntity), "VendorDescription", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class ItemEntityVendorDescriptionPatch {
