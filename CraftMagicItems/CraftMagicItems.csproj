@@ -112,6 +112,7 @@
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
+    <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\IkPatch.cs" />
     <Compile Include="Patches\LeftHandVisualDisplayPatcher.cs" />

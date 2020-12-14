@@ -2889,30 +2889,6 @@ namespace CraftMagicItems {
             return true;
         }
 
-        // Load Variant spells into m_KnownSpellLevels
-        [HarmonyLib.HarmonyPatch(typeof(Spellbook), "PostLoad")]
-        // ReSharper disable once UnusedMember.Local
-        private static class SpellbookPostLoadPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(Spellbook __instance) {
-                if (!modEnabled) {
-                    return;
-                }
-
-                var mKnownSpells = Accessors.GetSpellbookKnownSpells(__instance);
-                var mKnownSpellLevels = Accessors.GetSpellbookKnownSpellLevels(__instance);
-                for (var level = 0; level < mKnownSpells.Length; ++level) {
-                    foreach (var spell in mKnownSpells[level]) {
-                        if (spell.Blueprint.Variants != null) {
-                            foreach (var variant in spell.Blueprint.Variants) {
-                                mKnownSpellLevels[variant] = level;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         // Owlcat's code doesn't correctly detect that a variant spell is in a spellList when its parent spell is.
         [HarmonyLib.HarmonyPatch(typeof(BlueprintAbility), "IsInSpellList")]
         // ReSharper disable once UnusedMember.Global
