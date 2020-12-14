@@ -124,6 +124,7 @@
     <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\UIUtilityItemFillArmorEnchantmentsPatch.cs" />
+    <Compile Include="Patches\Harmony\UIUtilityItemFillEnchantmentDescriptionPatch.cs" />
     <Compile Include="Patches\Harmony\UIUtilityItemGetQualitiesPatch.cs" />
     <Compile Include="Patches\Harmony\WeaponParametersAttackBonusOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\WeaponParametersDamageBonusOnEventAboutToTriggerPatch.cs" />
