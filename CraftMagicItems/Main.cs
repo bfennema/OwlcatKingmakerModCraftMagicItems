@@ -3040,7 +3040,7 @@ namespace CraftMagicItems {
             return missingCrafterPrerequisites;
         }
 
-        private static void WorkOnProjects(UnitDescriptor caster, bool returningToCapital) {
+        public static void WorkOnProjects(UnitDescriptor caster, bool returningToCapital) {
             if (!caster.IsPlayerFaction || caster.State.IsDead || caster.State.IsFinallyDead) {
                 return;
             }
@@ -3277,20 +3277,6 @@ namespace CraftMagicItems {
             if (daysAvailableToCraft > 0) {
                 // They didn't use up all available days - reset the time they can start crafting to now.
                 timer.LastUpdated = Game.Instance.Player.GameTime;
-            }
-        }
-
-        [HarmonyLib.HarmonyPatch(typeof(CapitalCompanionLogic), "OnFactActivate")]
-        // ReSharper disable once UnusedMember.Local
-        private static class CapitalCompanionLogicOnFactActivatePatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Prefix() {
-                // Trigger project work on companions left behind in the capital, with a flag saying the party wasn't around while they were working.
-                foreach (var companion in Game.Instance.Player.RemoteCompanions) {
-                    if (companion.Value != null) {
-                        WorkOnProjects(companion.Value.Descriptor, true);
-                    }
-                }
             }
         }
 
