@@ -2902,17 +2902,6 @@ namespace CraftMagicItems {
             }
         }
 
-#if !PATCH21
-        [HarmonyLib.HarmonyPatch(typeof(LogDataManager.LogItemData), "UpdateSize")]
-        private static class LogItemDataUpdateSizePatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix() {
-                // Avoid null pointer exception when BattleLogManager not set.
-                return Game.Instance.UI.BattleLogManager != null;
-            }
-        }
-#endif
-
         // Add "pending" log items when the battle log becomes available again, so crafting messages sent when e.g. camping
         // in the overland map are still shown eventually.
         [HarmonyLib.HarmonyPatch(typeof(BattleLogManager), "Initialize")]

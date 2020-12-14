@@ -110,6 +110,7 @@
     <Compile Include="Patches\Harmony\ActionBarManagerUpdatePatch.cs" />
     <Compile Include="Patches\Harmony\BlueprintAbilityIsInSpellListPatch.cs" />
     <Compile Include="Patches\Harmony\BlueprintItemEquipmentUsableCostPatch.cs" />
+    <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
