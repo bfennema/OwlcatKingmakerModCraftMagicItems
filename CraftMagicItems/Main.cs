@@ -3341,18 +3341,5 @@ namespace CraftMagicItems {
                 return false;
             }
         }
-
-#if !PATCH21
-        [HarmonyLib.HarmonyPatch(typeof(ActivatableAbility), "OnEventDidTrigger", new Type[] { typeof(RuleAttackWithWeaponResolve) })]
-        private static class ActivatableAbilityOnEventDidTriggerRuleAttackWithWeaponResolvePatch {
-            private static bool Prefix(ActivatableAbility __instance, RuleAttackWithWeaponResolve evt) {
-                if (evt.Damage != null && evt.AttackRoll.IsHit) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-#endif
     }
 }
