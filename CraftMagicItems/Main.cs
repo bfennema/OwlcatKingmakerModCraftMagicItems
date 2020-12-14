@@ -2889,20 +2889,6 @@ namespace CraftMagicItems {
             return true;
         }
 
-#if !PATCH21
-        // Fix issue in Owlcat's UI - ActionBarManager.Update does not refresh the Groups (spells/Actions/Belt)
-        [HarmonyLib.HarmonyPatch(typeof(ActionBarManager), "Update")]
-        private static class ActionBarManagerUpdatePatch {
-            private static void Prefix(ActionBarManager __instance) {
-                var mNeedReset = Accessors.GetActionBarManagerNeedReset(__instance);
-                if (mNeedReset) {
-                    var mSelected = Accessors.GetActionBarManagerSelected(__instance);
-                    __instance.Group.Set(mSelected);
-                }
-            }
-        }
-#endif
-
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemEquipmentUsable), "Cost", HarmonyLib.MethodType.Getter)]
         // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemEquipmentUsableCostPatch {
