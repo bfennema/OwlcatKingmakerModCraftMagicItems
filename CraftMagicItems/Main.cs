@@ -3342,41 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateWeaponStats) })]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateWeaponStatsPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(WeaponConditionalEnhancementBonus __instance, RuleCalculateWeaponStats evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (__instance.IsBane) {
-                        if (logic.Owner.Enchantments.Any((ItemEnchantment e) => e.Get<SuppressBane>())) {
-                            return false;
-                        }
-                    }
-                    if (__instance.CheckWielder) {
-                        using (logic.Enchantment.Context.GetDataScope(evt.Initiator)) {
-                            if (EquipmentEnchantmentValid(evt.Weapon, logic.Owner) && __instance.Conditions.Check(null)) {
-                                evt.AddBonusDamage(__instance.EnhancementBonus);
-                                evt.Enhancement += __instance.EnhancementBonus;
-                                evt.EnhancementTotal += __instance.EnhancementBonus;
-                            }
-                        }
-                    } else if (evt.AttackWithWeapon != null) {
-                        using (logic.Enchantment.Context.GetDataScope(evt.AttackWithWeapon.Target)) {
-                            if (EquipmentEnchantmentValid(evt.Weapon, logic.Owner) && __instance.Conditions.Check(null)) {
-                                evt.AddBonusDamage(__instance.EnhancementBonus);
-                                evt.Enhancement += __instance.EnhancementBonus;
-                                evt.EnhancementTotal += __instance.EnhancementBonus;
-                            }
-                        }
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalEnhancementBonus), "OnEventAboutToTrigger", new Type[] { typeof(RuleCalculateAttackBonus) })]
         // ReSharper disable once UnusedMember.Local
         private static class WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateAttackBonusPatch {

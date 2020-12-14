@@ -129,6 +129,7 @@
     <Compile Include="Patches\Harmony\UIUtilityItemFillEnchantmentDescriptionPatch.cs" />
     <Compile Include="Patches\Harmony\UIUtilityItemGetQualitiesPatch.cs" />
     <Compile Include="Patches\Harmony\UnitUseSpellsOnRestGetUnitWithMaxDamagePatch.cs" />
+    <Compile Include="Patches\Harmony\WeaponConditionalEnhancementBonusOnEventAboutToTriggerRuleCalculateWeaponStatsPatch.cs" />
     <Compile Include="Patches\Harmony\WeaponDamageAgainstAlignmentOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\WeaponEnergyBurstOnEventAboutToTriggerPatch.cs" />
     <Compile Include="Patches\Harmony\WeaponEnergyDamageDiceOnEventAboutToTriggerPatch.cs" />
