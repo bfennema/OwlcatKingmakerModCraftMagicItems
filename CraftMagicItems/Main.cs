@@ -3280,16 +3280,6 @@ namespace CraftMagicItems {
             }
         }
 
-        // Make characters in the party work on their crafting projects when they rest.
-        [HarmonyLib.HarmonyPatch(typeof(RestController), "ApplyRest")]
-        // ReSharper disable once UnusedMember.Local
-        private static class RestControllerApplyRestPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Prefix(UnitDescriptor unit) {
-                WorkOnProjects(unit, false);
-            }
-        }
-
         private static void AddToLootTables(BlueprintItem blueprint, string[] tableNames, bool firstTime) {
             var tableCount = tableNames.Length;
             foreach (var loot in ResourcesLibrary.GetBlueprints<BlueprintLoot>()) {

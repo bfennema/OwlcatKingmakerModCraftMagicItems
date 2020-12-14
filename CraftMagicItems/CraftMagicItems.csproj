@@ -115,6 +115,7 @@
     <Compile Include="Patches\Harmony\LogItemDataUpdateSizePatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuStartPatch.cs" />
     <Compile Include="Patches\Harmony\MainMenuUiContextInitializePatch.cs" />
+    <Compile Include="Patches\Harmony\RestControllerApplyRestPatch.cs" />
     <Compile Include="Patches\Harmony\ShieldMasterPatch.cs" />
     <Compile Include="Patches\Harmony\SpellbookPostLoadPatch.cs" />
     <Compile Include="Patches\Harmony\TwoWeaponFightingAttackPenaltyOnEventAboutToTriggerPatch.cs" />
