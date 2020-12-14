@@ -3333,19 +3333,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(DamageGrace), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class DamageGraceOnEventAboutToTriggerPatch {
-            private static bool Prefix(DamageGrace __instance, RuleCalculateWeaponStats evt) {
-                if (evt.Weapon != null && evt.Weapon.Blueprint.Type.Category.HasSubCategory(WeaponSubCategory.Finessable) &&
-                    IsOversized(evt.Weapon.Blueprint)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "GetQualities")]
         // ReSharper disable once UnusedMember.Local
         private static class UIUtilityItemGetQualitiesPatch {
