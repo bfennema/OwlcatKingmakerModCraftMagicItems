@@ -707,7 +707,7 @@ namespace CraftMagicItems {
             }
         }
 
-        private static IEnumerable<BlueprintItemEnchantment> GetEnchantments(BlueprintItem blueprint, RecipeData sourceRecipe = null) {
+        public static IEnumerable<BlueprintItemEnchantment> GetEnchantments(BlueprintItem blueprint, RecipeData sourceRecipe = null) {
             if (blueprint is BlueprintItemShield shield) {
                 // A shield can be treated as armor or as a weapon... assume armor unless being used by a recipe which applies to weapons.
                 var weaponRecipe = sourceRecipe?.OnlyForSlots?.Contains(ItemsFilter.ItemType.Weapon) ?? false;
@@ -3339,25 +3339,6 @@ namespace CraftMagicItems {
                 return true;
             } else {
                 return false;
-            }
-        }
-
-        [HarmonyLib.HarmonyPatch(typeof(UnitViewHandSlotData), "OwnerWeaponScale", HarmonyLib.MethodType.Getter)]
-        private static class UnitViewHandSlotDataWeaponScalePatch {
-            private static void Postfix(UnitViewHandSlotData __instance, ref float __result) {
-                if (__instance.VisibleItem is ItemEntityWeapon weapon && !weapon.Blueprint.AssetGuid.Contains(",visual=")) {
-                    var enchantment = GetEnchantments(weapon.Blueprint).FirstOrDefault(e => e.AssetGuid.StartsWith(ItemQualityBlueprints.OversizedGuid));
-                    if (enchantment != null) {
-                        var component = enchantment.GetComponent<WeaponBaseSizeChange>();
-                        if (component != null) {
-                            if (component.SizeCategoryChange > 0) {
-                                __result *= 4.0f / 3.0f;
-                            } else if (component.SizeCategoryChange < 0) {
-                                __result *= 0.75f;
-                            }
-                        }
-                    }
-                }
             }
         }
 
