@@ -2889,18 +2889,6 @@ namespace CraftMagicItems {
             return true;
         }
 
-        // Owlcat's code doesn't correctly detect that a variant spell is in a spellList when its parent spell is.
-        [HarmonyLib.HarmonyPatch(typeof(BlueprintAbility), "IsInSpellList")]
-        // ReSharper disable once UnusedMember.Global
-        public static class BlueprintAbilityIsInSpellListPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static void Postfix(BlueprintAbility __instance, BlueprintSpellList spellList, ref bool __result) {
-                if (!__result && __instance.Parent != null && __instance.Parent != __instance) {
-                    __result = __instance.Parent.IsInSpellList(spellList);
-                }
-            }
-        }
-
         public static void AddBattleLogMessage(string message, object tooltip = null, Color? color = null) {
 #if PATCH21
             var data = new LogItemData(message, color ?? GameLogStrings.Instance.DefaultColor, tooltip, PrefixIcon.None, new List<LogChannel> { LogChannel.Combat });
