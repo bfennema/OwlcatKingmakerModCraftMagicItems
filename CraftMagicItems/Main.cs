@@ -3342,42 +3342,6 @@ namespace CraftMagicItems {
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(WeaponConditionalDamageDice), "OnEventAboutToTrigger")]
-        // ReSharper disable once UnusedMember.Local
-        private static class WeaponConditionalDamageDiceOnEventAboutToTriggerPatch {
-            // ReSharper disable once UnusedMember.Local
-            private static bool Prefix(WeaponConditionalDamageDice __instance, RulePrepareDamage evt) {
-                if (__instance is ItemEnchantmentLogic logic) {
-                    if (evt.DamageBundle.WeaponDamage == null) {
-                        return false;
-                    }
-                    if (__instance.IsBane) {
-                        if (logic.Owner.Enchantments.Any((ItemEnchantment e) => e.Get<SuppressBane>())) {
-                            return false;
-                        }
-                    }
-                    if (__instance.CheckWielder) {
-                        using (logic.Enchantment.Context.GetDataScope(logic.Owner.Wielder.Unit)) {
-                            if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, logic.Owner) && __instance.Conditions.Check(null)) {
-                                BaseDamage damage = __instance.Damage.CreateDamage();
-                                evt.DamageBundle.Add(damage);
-                            }
-                        }
-                    } else {
-                        using (logic.Enchantment.Context.GetDataScope(evt.Target)) {
-                            if (EquipmentEnchantmentValid(evt.DamageBundle.Weapon, logic.Owner) && __instance.Conditions.Check(null)) {
-                                BaseDamage damage2 = __instance.Damage.CreateDamage();
-                                evt.DamageBundle.Add(damage2);
-                            }
-                        }
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-
         [HarmonyLib.HarmonyPatch(typeof(BrilliantEnergy), "OnEventAboutToTrigger")]
         // ReSharper disable once UnusedMember.Local
         private static class BrilliantEnergyOnEventAboutToTriggerPatch {
