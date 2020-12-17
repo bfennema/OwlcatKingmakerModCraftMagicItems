@@ -1612,6 +1612,9 @@ namespace CraftMagicItems {
                 } else if (equipment.Ability != null && !equipment.Ability.IsSpell) {
                     UmmUiRenderer.RenderLabelRow($"{equipment.Ability.Name} is not a spell, so cannot be upgraded.");
                     return;
+                } else if (equipment.ActivatableAbility != null) {
+                    UmmUiRenderer.RenderLabelRow($"{equipment.ActivatableAbility.Name} cannot be upgraded.");
+                    return;
                 }
             }
 
@@ -1676,11 +1679,11 @@ namespace CraftMagicItems {
             }
 
             // Choose a caster level
-            var minCasterLevel = Math.Max(equipment == null ? 0 : equipment.CasterLevel, Math.Max(1, 2 * spellLevel - 1));
+            var minCasterLevel = Math.Max(equipment?.Ability == null ? 0 : equipment.CasterLevel, Math.Max(1, 2 * spellLevel - 1));
             selectedCasterLevel = UmmUiRenderer.RenderIntSlider("Caster level: ", selectedCasterLevel, minCasterLevel, 20);
             // Choose number of times per day
-            var maxCastsPerDay = equipment == null ? 10 : ((equipment.Charges + 10) / 10) * 10;
-            selectedCastsPerDay = UmmUiRenderer.RenderIntSlider("Casts per day: ", selectedCastsPerDay, equipment == null ? 1 : equipment.Charges, maxCastsPerDay);
+            var maxCastsPerDay = equipment?.Ability == null ? 10 : ((equipment.Charges + 10) / 10) * 10;
+            selectedCastsPerDay = UmmUiRenderer.RenderIntSlider("Casts per day: ", selectedCastsPerDay, equipment?.Ability == null ? 1 : equipment.Charges, maxCastsPerDay);
             if (equipment != null && ability == equipment.Ability && selectedCasterLevel == equipment.CasterLevel && selectedCastsPerDay == equipment.Charges) {
                 UmmUiRenderer.RenderLabelRow($"No changes made to {equipment.Name}");
                 return;
@@ -3371,9 +3374,7 @@ namespace CraftMagicItems {
 #endif
 
         [HarmonyLib.HarmonyPatch(typeof(BlueprintItemEquipmentUsable), "Cost", HarmonyLib.MethodType.Getter)]
-        // ReSharper disable once UnusedMember.Local
         private static class BlueprintItemEquipmentUsableCostPatch {
-            // ReSharper disable once UnusedMember.Local
             private static void Postfix(BlueprintItemEquipmentUsable __instance, ref int __result) {
                 if (__result == 0 && __instance.SpellLevel == 0) {
                     // Owlcat's cost calculation doesn't handle level 0 spells properly.
@@ -3392,6 +3393,22 @@ namespace CraftMagicItems {
                             return;
                     }
                     __result = __instance.CasterLevel * chargeCost * __instance.Charges / 2;
+                }
+            }
+        }
+
+        [HarmonyLib.HarmonyPatch(typeof(ItemEntity), "Cost", HarmonyLib.MethodType.Getter)]
+        private static class ItemEntityCost {
+            private static void Postfix(ItemEntity __instance, ref int __result) {
+                if (__result == 0 && __instance.Blueprint is BlueprintItemEquipmentUsable usable && !usable.GainAbility) {
+                    switch (usable.Type) {
+                        case UsableItemType.Other:
+                        case UsableItemType.Utility:
+                            __result = usable.Cost;
+                            break;
+                        default:
+                            return;
+                    }
                 }
             }
         }
@@ -4205,6 +4222,18 @@ namespace CraftMagicItems {
                 }
                 if (data.Texts.ContainsKey(TooltipElement.Qualities)) {
                     data.Texts[TooltipElement.Qualities] = data.Texts[TooltipElement.Qualities].Replace(" ,", ",");
+                }
+            }
+        }
+
+        [HarmonyLib.HarmonyPatch(typeof(UIUtilityItem), "FillTooltipData")]
+        private static class UIUtilityFillTooltipData {
+            private static void Postfix(ItemEntity item, TooltipData data) {
+                if (item is ItemEntityUsable usable) {
+                    if (usable.Blueprint.Ability) {
+                        data.Texts[TooltipElement.LongDescription] += usable.Description;
+                        data.Texts[TooltipElement.ShortDescription] += usable.Description;
+                    }
                 }
             }
         }
