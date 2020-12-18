@@ -105,7 +105,7 @@
   },
   {
     "Key": "craftMagicItems-label-cast-spell-n-times-details-single",
-    "Value": "Cast {0} (caster level {1}) 1 time a day"
+    "Value": "Cast {0} (caster level {1}) once a day"
   },
   {
     "Key": "craftMagicItems-label-cast-spell-n-times-details-multiple",

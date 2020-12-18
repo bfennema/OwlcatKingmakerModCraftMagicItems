@@ -2705,10 +2705,8 @@ namespace CraftMagicItems {
                 .Select(enchantmentDescription => string.IsNullOrEmpty(enchantmentDescription) ? "" : "\n* " + enchantmentDescription)
                 .Join("");
             if (blueprint is BlueprintItemEquipment equipment && (ability != null && ability != "null" || casterLevel > -1 || perDay > -1)) {
-                GameLogContext.Count = equipment.Charges;
                 extraDescription += "\n* " + (equipment.Charges == 1 ? L10NFormat("craftMagicItems-label-cast-spell-n-times-details-single", equipment.Ability.Name, equipment.CasterLevel) :
                     L10NFormat("craftMagicItems-label-cast-spell-n-times-details-multiple", equipment.Ability.Name, equipment.CasterLevel, equipment.Charges));
-                GameLogContext.Clear();
             }
 
             string description;
