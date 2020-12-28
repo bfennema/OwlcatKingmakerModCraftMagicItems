@@ -122,14 +122,10 @@ namespace CraftMagicItems {
         private static readonly LocalizedString ShieldBashLocalized = new L10NString("314ff56d-e93b-4915-8ca4-24a7670ad436");
         private static readonly LocalizedString QualitiesLocalized = new L10NString("0f84fde9-14ca-4e2f-9c82-b2522039dbff");
 
-        private static readonly WeaponCategory[] AmmunitionWeaponCategories = {
-            WeaponCategory.Longbow,
-            WeaponCategory.Shortbow,
-            WeaponCategory.LightCrossbow,
-            WeaponCategory.HeavyCrossbow,
-            WeaponCategory.HandCrossbow,
-            WeaponCategory.LightRepeatingCrossbow,
-            WeaponCategory.HeavyRepeatingCrossbow
+        private static readonly WeaponFighterGroup[] AmmunitionWeaponFighterGroups =
+        {
+            WeaponFighterGroup.Bows,
+            WeaponFighterGroup.Crossbows,
         };
 
         private static readonly ItemsFilter.ItemType[] BondedItemSlots = {
@@ -1056,8 +1052,8 @@ namespace CraftMagicItems {
                         case ItemRestrictions.WeaponLight when weapon == null || !weapon.IsLight:
                         case ItemRestrictions.WeaponNotLight when weapon == null || weapon.IsLight:
                         case ItemRestrictions.WeaponMetal when weapon == null || !weapon.Category.HasSubCategory(WeaponSubCategory.Metal):
-                        case ItemRestrictions.WeaponUseAmmunition when weapon == null || !AmmunitionWeaponCategories.Contains(weapon.Category):
-                        case ItemRestrictions.WeaponNotUseAmmunition when weapon == null || AmmunitionWeaponCategories.Contains(weapon.Category):
+                        case ItemRestrictions.WeaponUseAmmunition when weapon == null || !AmmunitionWeaponFighterGroups.Contains(weapon.FighterGroup):
+                        case ItemRestrictions.WeaponNotUseAmmunition when weapon == null || AmmunitionWeaponFighterGroups.Contains(weapon.FighterGroup):
                         case ItemRestrictions.WeaponTwoHanded when weapon == null || !(IsActuallyTwoHanded(weapon) || weapon.IsOneHandedWhichCanBeUsedWithTwoHands):
                         case ItemRestrictions.WeaponOneHanded when weapon == null || IsActuallyTwoHanded(weapon) || weapon.Double:
                         case ItemRestrictions.WeaponOversized when weapon == null || !IsOversized(weapon):
@@ -3203,9 +3199,6 @@ namespace CraftMagicItems {
                     }
                     var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
                     var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
-                    if (weaponEnhancementBonus == 0 && evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent.Blueprint.IsMasterwork) {
-                        weaponEnhancementBonus = 1;
-                    }
                     var itemEnhancementBonus = armorEnhancementBonus - weaponEnhancementBonus;
                     PhysicalDamage physicalDamage = evt.DamageBundle.WeaponDamage as PhysicalDamage;
                     if (physicalDamage != null && itemEnhancementBonus > 0) {
@@ -3234,6 +3227,9 @@ namespace CraftMagicItems {
                     }
                     var armorEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.ArmorComponent);
                     var weaponEnhancementBonus = GameHelper.GetItemEnhancementBonus(evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent);
+                    if (weaponEnhancementBonus == 0 && evt.Initiator.Body.SecondaryHand.Shield.WeaponComponent.Blueprint.IsMasterwork) {
+                            weaponEnhancementBonus = 1;
+                    }
                     var num = armorEnhancementBonus - weaponEnhancementBonus;
                     if (num > 0) {
                         evt.AddBonus(num, base.Fact);

@@ -63,6 +63,9 @@ namespace CraftMagicItems {
         public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemWeapon, DamageTypeDescription> SetBlueprintItemWeaponDamageType =
             Accessors.CreateFieldRef<BlueprintItemWeapon, DamageTypeDescription>("m_DamageType");
 
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemWeapon, BlueprintWeaponEnchantment[]> SetBlueprintItemWeaponEnchantments =
+            Accessors.CreateFieldRef<BlueprintItemWeapon, BlueprintWeaponEnchantment[]>("m_Enchantments");
+
         public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemWeapon, bool> SetBlueprintItemWeaponOverrideDamageType =
             Accessors.CreateFieldRef<BlueprintItemWeapon, bool>("m_OverrideDamageType");
 
@@ -82,6 +85,9 @@ namespace CraftMagicItems {
 
         public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemArmor, ArmorVisualParameters> SetBlueprintItemArmorVisualParameters =
             Accessors.CreateFieldRef<BlueprintItemArmor, ArmorVisualParameters>("m_VisualParameters");
+
+        public readonly HarmonyLib.AccessTools.FieldRef<BlueprintItemArmor, BlueprintEquipmentEnchantment[]> SetBlueprintItemArmorEnchantments =
+            Accessors.CreateFieldRef<BlueprintItemArmor, BlueprintEquipmentEnchantment[]>("m_Enchantments");
 
         //public readonly SetterHandler<BlueprintBuff, int> SetBlueprintBuffFlags = Accessors.CreateSetter<BlueprintBuff, int>("m_Flags");
         public void SetBlueprintBuffFlags(BlueprintBuff buff, int flags) {

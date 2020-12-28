@@ -666,6 +666,13 @@ namespace CraftMagicItems {
                 accessors.SetBlueprintItemFlavorText(blueprint) = new L10NString("");
             }
 
+            // Properly handle IsMagic and IsMasterwork
+            if (blueprint is BlueprintItemWeapon weap) {
+                accessors.SetBlueprintItemWeaponEnchantments(weap) = enchantmentsCopy.Where(e => e is BlueprintWeaponEnchantment).Select(e => e as BlueprintWeaponEnchantment).ToArray();
+            } else if (blueprint is BlueprintItemArmor armor) {
+                accessors.SetBlueprintItemArmorEnchantments(armor) = enchantmentsCopy.Where(e => e is BlueprintEquipmentEnchantment).Select(e => e as BlueprintEquipmentEnchantment).ToArray();
+            }
+
             accessors.SetBlueprintItemCost(blueprint) = Main.RulesRecipeItemCost(blueprint) + priceDelta;
             return BuildCustomRecipeItemGuid(blueprint.AssetGuid, enchantmentIds, removedIds.Count > 0 ? removedIds.ToArray() : null, name, ability,
                 activatableAbility, charges, weight, material, visual, animation, casterLevel, spellLevel, perDay, nameId, descriptionId, secondEndGuid, priceAdjust);

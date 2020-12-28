@@ -161,6 +161,20 @@
     "CanApplyToMundaneItem": true
   },
   {
+    "Name": "ShieldBashing",
+    "NameId": "3178bb0c-f6ed-4e56-9877-e5edc03fbb5d",
+    "Enchantments": [
+      ["c39f0128372d43c39224c7b3af58e0db"],
+    ],
+    "CasterLevelStart": 3,
+    "CasterLevelMultiplier": 3,
+    "PrerequisiteSpells": ["4c3d08935262b6544ae97599b3a9556d"],
+    "CostType": "EnhancementLevelSquared",
+    "CostFactor": 1,
+    "OnlyForSlots": ["Shield"],
+    "Restrictions": ["ShieldArmor"],
+  },
+  {
     "Name": "WeaponEnhancementBonus",
     "NameId": "696d7c0e-f960-4b92-a703-01d8ff9c0674",
     "Enchantments": [
@@ -702,14 +716,14 @@
     "Name": "WeaponImpact",
     "NameId": "craftMagicItems-enchantment-impact-name",
     "Enchantments": [
-      ["d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[0]=CraftMagicItems.WeaponSizeChange#CraftMagicItems,Component[0].SizeCategoryChange=1,nameId=craftMagicItems-enchantment-impact-name,descriptionId=craftMagicItems-enchantment-impact-description)"]
+      ["cd60444c55544e6299cf13839d33fb18", "d8e1ebc1062d8cc42abff78783856b0d#CraftMagicItems(Component[0]=CraftMagicItems.WeaponSizeChange#CraftMagicItems,Component[0].SizeCategoryChange=1,nameId=craftMagicItems-enchantment-impact-name,descriptionId=craftMagicItems-enchantment-impact-description)"]
     ],
     "CasterLevelStart": 9,
     "CasterLevelMultiplier": 0,
     "PrerequisiteSpells": ["779179912e6c6fe458fa4cfb90d96e10"],
     "CostType": "EnhancementLevelSquared",
     "CostFactor": 2,
-    "OnlyForSlots": ["Weapon"],
+    "OnlyForSlots": ["Weapon", "Shield"],
     "Restrictions": ["WeaponMelee", "WeaponNotLight"]
   },
   {

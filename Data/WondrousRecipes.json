@@ -715,6 +715,18 @@
     "CostFactor": 4000
   },
   {
+    "Name": "Irongrip",
+    "NameId": "2845c74a-a0aa-473b-87f0-7eedc71f6786",
+    "Enchantments": [
+      ["db07984caaaf42c6bdeddf555e0d9b71"],
+    ],
+    "CasterLevelStart": 3,
+    "CasterLevelMultiplier": 3,
+    "PrerequisiteSpells": ["4c3d08935262b6544ae97599b3a9556d", "c60969e7f264e6d4b84a1499fdcf9039"],
+    "CostType": "Flat",
+    "CostFactor": 4000
+  },
+  {
     "Name": "BagOfHolding",
     "NameId": "e63755a2-b628-4582-bc06-e6735ea99674",
     "ResultItem": ["9ba294466c6090e4dac1c7dfbc158a03"],
