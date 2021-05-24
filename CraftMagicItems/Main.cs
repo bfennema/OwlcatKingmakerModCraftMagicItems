@@ -397,15 +397,20 @@ namespace CraftMagicItems {
 
         public static string L10NFormat(UnitEntityData sourceUnit, string key, params object[] args) {
             // Set GameLogContext so the caster will be used when generating localized strings.
-            GameLogContext.SourceUnit = sourceUnit;
+            GameLogContext.Instance.SourceUnit = sourceUnit;
             var template = new L10NString(key);
             var result = string.Format(template.ToString(), args);
-            GameLogContext.Clear();
             return result;
         }
 
         private static string L10NFormat(string key, params object[] args) {
-            return L10NFormat(currentCaster ?? GetSelectedCrafter(false), key, args);
+            if (GameLogContext.Instance == null) {
+                using (GameLogContext.Setup()) {
+                    return L10NFormat(currentCaster ?? GetSelectedCrafter(false), key, args);
+                }
+            } else {
+                return L10NFormat(currentCaster ?? GetSelectedCrafter(false), key, args);
+            }
         }
 
         public static T ReadJsonFile<T>(string fileName, params JsonConverter[] converters) {
@@ -1669,9 +1674,10 @@ namespace CraftMagicItems {
             } else {
                 ability = equipment.Ability;
                 spellLevel = equipment.SpellLevel;
-                GameLogContext.Count = equipment.Charges;
-                UmmUiRenderer.RenderLabelRow($"Current: {L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
-                GameLogContext.Clear();
+                using (GameLogContext.Setup()) {
+                    GameLogContext.Instance.Count = equipment.Charges;
+                    UmmUiRenderer.RenderLabelRow($"Current: {L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, equipment.CasterLevel)}");
+                }
             }
 
             // Choose a caster level
@@ -1713,9 +1719,10 @@ namespace CraftMagicItems {
             var itemToCraft = ResourcesLibrary.TryGetBlueprint<BlueprintItemEquipment>(itemGuid);
 
             // Render craft button
-            GameLogContext.Count = selectedCastsPerDay;
-            UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
-            GameLogContext.Clear();
+            using (GameLogContext.Setup()) {
+                GameLogContext.Instance.Count = selectedCastsPerDay;
+                UmmUiRenderer.RenderLabelRow(L10NFormat("craftMagicItems-label-cast-spell-n-times-details", ability.Name, selectedCasterLevel));
+            }
             var recipe = new RecipeData {
                 PrerequisiteSpells = new[] {ability},
                 PrerequisitesMandatory = true
@@ -2422,17 +2429,18 @@ namespace CraftMagicItems {
             var skillMargin = RenderCraftingSkillInformation(project.Crafter, craftingSkill, dc, project.CasterLevel, project.SpellPrerequisites,
                 project.FeatPrerequisites, project.AnyPrerequisite, project.CrafterPrerequisites, false);
             var progressPerDayCapital = (int) (progressRate * (1 + (float) skillMargin / 5));
-            GameLogContext.Count = (project.TargetCost + progressPerDayCapital - 1) / progressPerDayCapital;
-            if (ModSettings.CraftAtFullSpeedWhileAdventuring) {
-                project.AddMessage(new L10NString("craftMagicItems-time-estimate-single-rate"));
-            } else {
-                var progressPerDayAdventuring = (int) (progressRate * (1 + (float) skillMargin / 5) / AdventuringProgressPenalty);
-                var adventuringDayCount = (project.TargetCost + progressPerDayAdventuring - 1) / progressPerDayAdventuring;
-                project.AddMessage(adventuringDayCount == 1
-                    ? new L10NString("craftMagicItems-time-estimate-one-day")
-                    : L10NFormat("craftMagicItems-time-estimate-adventuring-capital", adventuringDayCount));
+            using (GameLogContext.Setup()) {
+                GameLogContext.Instance.Count = (project.TargetCost + progressPerDayCapital - 1) / progressPerDayCapital;
+                if (ModSettings.CraftAtFullSpeedWhileAdventuring) {
+                    project.AddMessage(new L10NString("craftMagicItems-time-estimate-single-rate"));
+                } else {
+                    var progressPerDayAdventuring = (int)(progressRate * (1 + (float)skillMargin / 5) / AdventuringProgressPenalty);
+                    var adventuringDayCount = (project.TargetCost + progressPerDayAdventuring - 1) / progressPerDayAdventuring;
+                    project.AddMessage(adventuringDayCount == 1
+                        ? new L10NString("craftMagicItems-time-estimate-one-day")
+                        : L10NFormat("craftMagicItems-time-estimate-adventuring-capital", adventuringDayCount));
+                }
             }
-            GameLogContext.Clear();
 
             AddBattleLogMessage(project.LastMessage);
         }
@@ -3805,10 +3813,11 @@ namespace CraftMagicItems {
                                     break;
                                 }
 
-                                GameLogContext.SourceUnit = caster.Unit;
-                                GameLogContext.Text = itemSpell.SourceItem.Name;
-                                AddBattleLogMessage(CharacterUsedItemLocalized);
-                                GameLogContext.Clear();
+                                using (GameLogContext.Setup()) {
+                                    GameLogContext.Instance.SourceUnit = caster.Unit;
+                                    GameLogContext.Instance.Text = itemSpell.SourceItem.Name;
+                                    AddBattleLogMessage(CharacterUsedItemLocalized);
+                                }
                                 itemSpell.SourceItem.SpendCharges(caster);
                             }
                         }
